@@ -277,8 +277,8 @@ public class Steps
     /// <returns></returns>
     private IWebElement GetSelectRailway(RailwayInput input)
     {
-        //Thread currentThread = Thread.CurrentThread;
-        //int countScreenshot = 0;
+        Thread currentThread = Thread.CurrentThread;
+        int countScreenshot = 0;
         try
         {
             if (_page.currentUrl == _page.startUrl) throw new Exception("Не получили ссылку со списком маршрутов");
@@ -293,7 +293,8 @@ public class Steps
                 selectRailwayElement = SelectTrueRailWay(_page.timeRailwayListElements, input.CurrentTime);
                 //debug
                 //_driver.TakeScreenshot().SaveAsFile($"screen{currentThread.ManagedThreadId}-{countScreenshot}.png", ScreenshotImageFormat.Png);
-                //countScreenshot++;
+                Console.WriteLine($"время {DateTime.Today.ToString()} поток номер {currentThread.ManagedThreadId} чек номер {countScreenshot}");
+                countScreenshot++;
 
             } while (selectRailwayElement == null); // как только поездка(а значит и билеты) появится в списке - выйдет из цикла
 

@@ -1,4 +1,5 @@
 ﻿using RzdHack_Robot.Core;
+using System.Globalization;
 
 namespace RzdHack_Robot.App
 {
@@ -25,9 +26,10 @@ namespace RzdHack_Robot.App
                     {
                         if (item != null)
                         {
-                            var itemDateFromDateTime = DateTime.Parse(item.DateFrom + " " + item.TimeFrom);
+                            var itemDateFromDateTime = DateTime.ParseExact(item.DateFrom + " " + item.TimeFrom, "dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture);
                             if (itemDateFromDateTime < currentDate) 
                                 item.IsActual = false;
+                                db.NotificationTasks.Update(item);
                         }
                     }
                     db.SaveChanges();

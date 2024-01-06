@@ -3,6 +3,7 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Chrome.ChromeDriverExtensions;
 using OpenQA.Selenium.DevTools;
+using OpenQA.Selenium.DevTools.V116.Debugger;
 using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.Interactions;
 using System.Net;
@@ -53,12 +54,37 @@ public class BrowserDriver : IDisposable
     /// <returns></returns>
     private IWebDriver CreateChromeWebDriver()
     {
+        //Инициализируем начальные значения
+        Random rnd = new Random();
+        string currentHost= "46.3.196.72";
+        int currentPort=9541;
+
+        var dice = rnd.Next(1, 3);
+        if (dice == 1)
+        {
+            currentHost = "46.3.196.72";
+            currentPort = 9541;
+            Console.WriteLine("Кубик показывает номер один");
+        }
+        else if (dice == 2)
+        {
+            currentHost = "46.3.197.61";
+            currentPort = 9207;
+            Console.WriteLine("Кубик показывает номер два");
+        }
+        else if (dice == 3)
+        {
+            currentHost = "46.3.198.6";
+            currentPort = 9714;
+            Console.WriteLine("Кубик показывает номер три");
+        }
+
         var chromeDriverService = ChromeDriverService.CreateDefaultService();
 
         var chromeOptions = new ChromeOptions();
 
-        var user_agent = "Только после того как сделаете нормальную систему уведомлений";
-        chromeOptions.AddArgument($"user-agent={user_agent}");
+        //var user_agent = "Только после того как сделаете нормальную систему уведомлений";
+        //chromeOptions.AddArgument($"user-agent={user_agent}");
 
         // добавить когда будет нужно запускать в скрытом режиме
         //chromeOptions.AddArgument("--headless=chrome");
@@ -69,12 +95,12 @@ public class BrowserDriver : IDisposable
         chromeOptions.AddArguments("--ignore-certificate-errors");
         chromeOptions.AddArguments("--ignore-ssl-errors");
 
-        //chromeOptions.AddHttpProxy(
-        //    host: "46.3.197.61",
-        //    port: 9207,
-        //    userName: "utCwtG",
-        //    password: "h7krbG"
-        //    );
+        chromeOptions.AddHttpProxy(
+            host: currentHost,
+            port: currentPort,
+            userName: "utCwtG",
+            password: "h7krbG"
+            );
 
         var chromeDriver = new ChromeDriver(chromeDriverService, chromeOptions);
         // частично помогло решить вопрос с ожиданием загрузки страницы

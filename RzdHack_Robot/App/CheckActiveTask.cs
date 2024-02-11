@@ -22,8 +22,9 @@ namespace RzdHack_Robot.App
                     CurrentTime = notificationTask.TimeFrom,
                     UserID = notificationTask.UserId
                 };
-                var t = new Thread(() => new Steps().Notification(railwayInput));
-                t.Start();
+                //заккоментировал чтобы ошибка не трезвнила
+                //var t = new Thread(() => new StepsUsingDriver().Notification(railwayInput));
+                //                t.Start();
             }
         }
     }

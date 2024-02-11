@@ -3,30 +3,26 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace RzdHackRobot.Migrations
+namespace RailwayWizzard.App.Migrations
 {
     /// <inheritdoc />
-    public partial class initialization : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "AppNotificationTasks",
+                name: "AppUsers",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    DepartureStation = table.Column<string>(type: "text", nullable: false),
-                    ArrivalStation = table.Column<string>(type: "text", nullable: false),
-                    DateFrom = table.Column<string>(type: "text", nullable: false),
-                    TimeFrom = table.Column<string>(type: "text", nullable: false),
-                    UserId = table.Column<long>(type: "bigint", nullable: false),
-                    IsActual = table.Column<bool>(type: "boolean", nullable: false)
+                    IdTg = table.Column<long>(type: "bigint", nullable: false),
+                    Username = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AppNotificationTasks", x => x.Id);
+                    table.PrimaryKey("PK_AppUsers", x => x.Id);
                 });
         }
 
@@ -34,7 +30,7 @@ namespace RzdHackRobot.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "AppNotificationTasks");
+                name: "AppUsers");
         }
     }
 }

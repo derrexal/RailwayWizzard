@@ -5,6 +5,8 @@ using RzdHack_Robot.Core;
 
 public class Program
 {
+    #region Input's Old
+
     static RailwayInput railwayInput_1 => new RailwayInput()
     {
         DepartureStation = "Москва",
@@ -41,15 +43,25 @@ public class Program
         UserID = 897097392
     };
 
-    static LoginDetails loginDetails_1 => new LoginDetails("ermol_A","Sosipisos07rzd");
+    static LoginDetails loginDetails_1 => new LoginDetails("ermol_A", "Sosipisos07rzd");
 
-    static void Main()
+
+    #endregion
+
+    static async Task Main()
     {
 
-        //var t1 = new Thread(() => new Steps().AutoReservationOfTheSeatOnATrip(loginDetails_1, railwayInput_1, 0));
+        //var t1 = new Thread(() => new StepsUsingDriver().AutoReservationOfTheSeatOnATrip(loginDetails_1, railwayInput_1, 0));
 
-        CheckActiveTask.Start();
-        TCP.Listening();
+        //закоментил на время проведения теста в рамках переделывания робота на менее нагружаемый вариант
+        //CheckActiveTask.Start();
+        //TCP.Listening();
+        await SimpleRobot.GetTicket(new RoutesParam // походу первый параметр - это станция прибытия...
+        {
+            ArrivalStationCode = 2000140,
+            DepartureDate = new DateOnly(2024,01,30),
+            DepartureStationCode = 2000000
+        });
     }
 }
 
@@ -61,7 +73,7 @@ public class Program
 //Может получится ситуация когда информация будет записана в базу, а робот не доступен.
 //Пользователь получит ошибку и следующим бот будет ждать снова время поездки. А должен сбрасывать?
 /*
- * Решение - перед тем как пользователь начинает вводить данные делать проверку доступности робота и в случае чего сразу сообщать ему об этом(Пожалуйста, попробуйте позже)
+ *  Решение - перед тем как пользователь начинает вводить данные делать проверку доступности робота и в случае чего сразу сообщать ему об этом(Пожалуйста, попробуйте позже)
  */
 
 #endregion

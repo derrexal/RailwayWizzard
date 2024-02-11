@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Acme.MyConsoleApp": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

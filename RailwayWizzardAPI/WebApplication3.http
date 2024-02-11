@@ -1,0 +1,11 @@
+@WebApplication3_HostAddress = http://localhost:5178
+
+GET {{WebApplication3_HostAddress}}/weatherforecast/
+Accept: application/json
+###
+
+POST {{WebApplication3_HostAddress}}/users/create/
+Accept: application/json
+###
+
+

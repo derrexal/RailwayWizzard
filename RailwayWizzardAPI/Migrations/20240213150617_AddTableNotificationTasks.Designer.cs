@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RailwayWizzard.App.Data;
@@ -11,9 +12,11 @@ using RailwayWizzard.App.Data;
 namespace RailwayWizzard.App.Migrations
 {
     [DbContext(typeof(RailwayWizzardAppContext))]
-    partial class RailwayWizzardAppContextModelSnapshot : ModelSnapshot
+    [Migration("20240213150617_AddTableNotificationTasks")]
+    partial class AddTableNotificationTasks
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

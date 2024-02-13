@@ -21,14 +21,18 @@ namespace RailwayWizzard.App.Controllers
         }
 
 
-        [HttpPost("Create")]
-        public async Task<IActionResult> Create(NotificationTask stationInfo)
+        [HttpPost("CreateAndGetId")]
+        public async Task<IActionResult> CreateAndGetId(NotificationTask stationInfo)
         {
             if (ModelState.IsValid)
             {
+                stationInfo.CreationTime = DateTime.Now;
+                stationInfo.IsActual = true;
+                
                 _context.Add(stationInfo);
                 await _context.SaveChangesAsync();
-                return Ok("Success NotificationTask Create");
+
+                return Ok(stationInfo.Id);
             }
 
             return BadRequest("Request param is no valid");

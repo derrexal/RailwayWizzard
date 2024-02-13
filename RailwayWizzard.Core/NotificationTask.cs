@@ -12,7 +12,7 @@ namespace RzdHack_Robot.Core
         [Required]
         public string ArrivalStation { get; set; }
         [Required]
-        public string DateFrom { get; set; }
+        public DateTime DateFrom { get; set; }
         [Required]
         public string TimeFrom { get; set; }
         [Required]

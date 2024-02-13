@@ -6,7 +6,7 @@ namespace RailwayWizzard.Core
 {
     [Table("AppStationInfo")]
     public class StationInfo: Entity
-    {
+    {   
         public long ExpressCode { get; set; }
         public string StationName { get; set; }
     }

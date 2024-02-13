@@ -13,5 +13,6 @@ namespace RailwayWizzard.App.Data
 
         public DbSet<User> User { get; set; }
         public DbSet<StationInfo> StationInfo { get; set; }
+        public DbSet<NotificationTask> NotificationTask { get; set; }
     }
 }

@@ -1,7 +1,9 @@
-﻿namespace RzdHack_Robot.App
+﻿using RzdHack.Robot.Core;
+
+namespace RzdHack.Robot.App
 {
     public interface ISteps
     {
-        public Task Notification(object? message);
+        public Task Notification(NotificationTask message);
     }
 }

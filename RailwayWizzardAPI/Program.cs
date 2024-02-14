@@ -16,6 +16,8 @@ namespace RailwayWizzardAPI
 
             builder.Services.AddControllers();
             var app = builder.Build();
+
+            //TODO:Кажется из-за этого в базу время записывается -3 hour
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
             // Configure the HTTP request pipeline.

@@ -14,6 +14,7 @@ namespace RzdHack.Robot.Core
         [Required]
         public DateTime DateFrom { get; set; }
         [Required]
+        //Это тоже перевести бы во время)
         public string TimeFrom { get; set; }
         [Required]
         public long UserId { get; set; }
@@ -21,5 +22,9 @@ namespace RzdHack.Robot.Core
         public int TotalCountNotification { get; set; }
         public DateTime CreationTime { get; set; }
 
+        [NotMapped]
+        public long ArrivalStationCode { get; set; }
+        [NotMapped]
+        public long DepartureStationCode { get; set; }
     }
 }

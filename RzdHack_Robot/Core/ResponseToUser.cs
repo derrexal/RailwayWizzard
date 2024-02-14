@@ -1,4 +1,4 @@
-﻿namespace RzdHack_Robot.Core
+﻿namespace RzdHack.Robot.Core
 {
     public class ResponseToUser
     {

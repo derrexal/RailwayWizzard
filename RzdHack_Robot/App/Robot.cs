@@ -1,23 +1,23 @@
 ﻿using System.Web;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using RzdHack_Robot.Core;
+using RzdHack.Robot.Core;
 
 
-namespace RzdHack_Robot.App
+namespace RzdHack.Robot.App
 {
-    public static class SimpleRobot
+    public class Robot
     {
         private const string _baseUrl = "http://localhost:8000/routes/";
 
         /// <summary>
         /// Получает информацию о свободных местах по заданным параметрам 
         /// </summary>
-        /// <param name="param"></param>
+        /// <task name="param"></task>
         /// <returns></returns>
-        public static async Task<string> GetTicket(RoutesParam param)
+        public async Task<string> GetTicket(NotificationTask task)
         {
-            var url = SetUrlFromGetTicket(param);
+            var url = SetUrlFromGetTicket(task);
             HttpClient client = new HttpClient();
             
             try
@@ -27,7 +27,7 @@ namespace RzdHack_Robot.App
                 var сontent = await response.Content.ReadAsStringAsync();
                 JArray obj = JsonConvert.DeserializeObject<JArray>(сontent);
 
-                var result = GetCurrentRouteFromResponse(obj, "05:01");
+                var result = GetCurrentRouteFromResponse(obj, task.TimeFrom);
                 return result;
             }
 
@@ -41,9 +41,9 @@ namespace RzdHack_Robot.App
         /// <summary>
         /// Формирует URL по заданным параметрам
         /// </summary>
-        /// <param name="param"></param>
+        /// <task name="task"></task>
         /// <returns></returns>
-        private static string SetUrlFromGetTicket(RoutesParam param)
+        private string SetUrlFromGetTicket(NotificationTask task)
         {
             var builder = new UriBuilder(_baseUrl);
             var query = HttpUtility.ParseQueryString(builder.Query);
@@ -51,9 +51,9 @@ namespace RzdHack_Robot.App
             query["dir"] = "0";
             query["tfl"] = "3";
             query["checkSeats"] = "1";
-            query["code0"] = param.DepartureStationCode.ToString();
-            query["code1"] = param.ArrivalStationCode.ToString();
-            query["dt0"] = param.DepartureDate.ToString();
+            query["code0"] = task.DepartureStationCode.ToString();
+            query["code1"] = task.ArrivalStationCode.ToString();
+            query["dt0"] = task.DateFrom.ToShortDateString(); //TODO:Возможно тут он ждет другую дату (без времени...)
             builder.Query = query.ToString();
             return builder.ToString();
         }
@@ -62,7 +62,7 @@ namespace RzdHack_Robot.App
         /// Парсит ответ и возвращает нужную поездку
         /// </summary>
         /// <returns></returns>
-        private static string? GetCurrentRouteFromResponse(JArray data, string departureTime)
+        private string? GetCurrentRouteFromResponse(JArray data, string departureTime)
         {
             string? result = null;
             foreach (var route in data)

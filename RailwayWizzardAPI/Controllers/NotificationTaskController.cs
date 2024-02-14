@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using RailwayWizzard.App.Data;
 using RailwayWizzard.Core;
-using RzdHack_Robot.Core;
+using RzdHack.Robot.App;
 
 
 namespace RailwayWizzard.App.Controllers

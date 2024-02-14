@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RailwayWizzard.Core;
-using RzdHack_Robot.Core;
+using RzdHack.Robot.Core;
 
 namespace RailwayWizzard.App.Data
 {

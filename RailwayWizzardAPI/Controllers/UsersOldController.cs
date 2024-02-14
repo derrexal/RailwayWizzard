@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using RailwayWizzard.App.Data;
-using RzdHack_Robot.Core;
+using RzdHack.Robot.Core;
 
 namespace RailwayWizzard.App.Controllers
 {

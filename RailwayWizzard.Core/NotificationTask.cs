@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Abp.Domain.Entities;
 
-namespace RzdHack_Robot.Core
+namespace RzdHack.Robot.Core
 {
     [Table("AppNotificationTasks")]
     public class NotificationTask: Entity

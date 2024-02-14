@@ -1,9 +1,9 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
-using RzdHack.RobotbLAbLAbLA.Core;
+using RzdHack.Robot.Core;
 
 
-namespace RzdHack.RobotbLAbLAbLA.App
+namespace RzdHack.Robot.App
 {
     public class StepsUsingHttpClient : ISteps
     {

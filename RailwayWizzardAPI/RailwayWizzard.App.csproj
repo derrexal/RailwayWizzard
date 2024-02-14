@@ -17,7 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\RailwayWizzard.Core\RailwayWizzard.Core.csproj" />
-    <ProjectReference Include="..\RzdHack_Robot\RzdHack.Robot.csproj" />
+    <ProjectReference Include="..\RailwayWizzard.Robot\RailwayWizzard.Robot.csproj" />
   </ItemGroup>
 
 </Project>

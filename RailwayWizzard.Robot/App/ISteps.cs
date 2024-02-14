@@ -1,6 +1,6 @@
-﻿using RzdHack.RobotbLAbLAbLA.Core;
+﻿using RzdHack.Robot.Core;
 
-namespace RzdHack.RobotbLAbLAbLA.App
+namespace RzdHack.Robot.App
 {
     public interface ISteps
     {

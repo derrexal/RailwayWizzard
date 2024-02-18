@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RailwayWizzard.App", "Railw
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RailwayWizzard.Core", "RailwayWizzard.Core\RailwayWizzard.Core.csproj", "{21B7D3D5-9643-4298-B0D1-973E9E3C1B47}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RailwayWizzard.Robot", "RailwayWizzard.Robot\RailwayWizzard.Robot.csproj", "{5F8A33FE-9B03-41A0-9B87-197692BBFA89}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RailwayWizzard.Robot", "RailwayWizzard.Robot\RailwayWizzard.Robot.csproj", "{5F8A33FE-9B03-41A0-9B87-197692BBFA89}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -10,7 +10,7 @@ namespace RzdHack.Robot.App
         private const string API_BOT_URL = "http://localhost:5000/";
         public async Task Notification(NotificationTask input)
         {
-            string railwayDataText = $"{input.DepartureStation} - {input.ArrivalStation} \n{input.DateFrom.ToShortDateString()} {input.TimeFrom}";
+            string railwayDataText = $"{input.DepartureStation} - {input.ArrivalStation} {input.TimeFrom} {input.DateFrom.ToShortDateString()}";
             try
             {
                 int countNotification = 0;  //счетчик отправленных уведомлений. Шлем н штук и закрываем таску
@@ -19,13 +19,15 @@ namespace RzdHack.Robot.App
 
                 while (countNotification != 100)
                 {
-                    //test
-                    railwayDataText = $"{input.DepartureStation} - {input.ArrivalStation} \n{input.DateFrom.ToShortDateString()} {input.TimeFrom}";
-                    await GetFreeSeats(input);
+
+                    var freeSeats = await GetFreeSeats(input);
+
                     // Для срочного уведомления о наличии мест
                     ResponseToUser messageToUser = new ResponseToUser
                     {
-                        Message = $"{char.ConvertFromUtf32(0x2705)} {railwayDataText} \n\nПоявилось место на рейс",
+                        Message = $"{char.ConvertFromUtf32(0x2705)} {railwayDataText} " +
+                                  $"\n{String.Join("\n", freeSeats.ToArray())}" +
+                                  "\nОбнаружены свободные места\n",
                         UserId = input.UserId
                     };
 
@@ -70,17 +72,18 @@ namespace RzdHack.Robot.App
             }
         }
 
-        public async Task GetFreeSeats(NotificationTask task)
+        public async Task<List<string>> GetFreeSeats(NotificationTask task)
         {
-            Robot robot = new Robot();
-            string? result;
+            Robot robot = new();
+            List<string> result;
             do
             {
                 result = await robot.GetTicket(task);
                 Thread.Sleep(1000 * 60); //60 секунд
             }
-            while (result == null);
+            while (result.Count == 0);
 
+            return result;
         }
     }
 }

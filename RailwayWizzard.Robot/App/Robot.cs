@@ -1,6 +1,8 @@
-﻿using System.Web;
+﻿using System.Net.Http.Json;
+using System.Web;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using RailwayWizzard.Robot.Core;
 using RzdHack.Robot.Core;
 
 
@@ -15,20 +17,21 @@ namespace RzdHack.Robot.App
         /// </summary>
         /// <task name="param"></task>
         /// <returns></returns>
-        public async Task<string> GetTicket(NotificationTask task)
+        public async Task<List<string>> GetTicket(NotificationTask task)
         {
             var url = SetUrlFromGetTicket(task);
             HttpClient client = new HttpClient();
-            
             try
             {
                 using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
                 using HttpResponseMessage response = await client.SendAsync(request);
-                var сontent = await response.Content.ReadAsStringAsync();
-                JArray obj = JsonConvert.DeserializeObject<JArray>(сontent);
+                var jsonResponse = await response.Content.ReadAsStringAsync();
 
-                var result = GetCurrentRouteFromResponse(obj, task.TimeFrom);
-                return result;
+                //JArray obj = JsonConvert.DeserializeObject<JArray>(сontent);
+                var roots = JsonConvert.DeserializeObject<List<Root>>(jsonResponse);
+                if (roots != null)
+                    return GetCurrentRouteFromResponse(roots, task.TimeFrom);
+                throw new HttpRequestException("Сервис php не вернул ответ");
             }
 
             catch (HttpRequestException e)
@@ -39,7 +42,7 @@ namespace RzdHack.Robot.App
         }
 
         /// <summary>
-        /// Формирует URL по заданным параметрам
+        /// Формирует строку запроса для php-сервиса по заданным параметрам
         /// </summary>
         /// <task name="task"></task>
         /// <returns></returns>
@@ -53,34 +56,27 @@ namespace RzdHack.Robot.App
             query["checkSeats"] = "1";
             query["code0"] = task.DepartureStationCode.ToString();
             query["code1"] = task.ArrivalStationCode.ToString();
-            query["dt0"] = task.DateFrom.ToShortDateString(); //TODO:Возможно тут он ждет другую дату (без времени...)
+            query["dt0"] = task.DateFrom.ToShortDateString();
             builder.Query = query.ToString();
             return builder.ToString();
         }
 
         /// <summary>
-        /// Парсит ответ и возвращает нужную поездку
+        /// Парсит ответ и возвращает информацию о запрашиваемой поездке
         /// </summary>
         /// <returns></returns>
-        private string? GetCurrentRouteFromResponse(JArray data, string departureTime)
+        private List<string> GetCurrentRouteFromResponse(List<Root> roots, string departureTime)
         {
-            string? result = null;
-            foreach (var route in data)
-            {
-                foreach (var field in route)
-                {
-                    //нужно подумать и сделать по нормальному
-                    var fieldString = field.ToString();
-                    if (fieldString.Contains("time0") && fieldString.Contains(departureTime))
-                        //Console.WriteLine(route);//TODO:если это поле - время отправления, если это время отправления равно тому которое мы ищем и если там есть свободные места - забираем
-                        return route.ToString();
-                }
-            }
-
+            List<string> result=new();
+            foreach (var route in roots)
+                if (route.time0 == departureTime && route.cars != null)
+                    foreach (var car in route.cars)
+                        if(!car.typeLoc.Contains("инвалид"))
+                            if (car.freeSeats != null)
+                                result.Add($"Класс обслуживания: <strong>{car.typeLoc}</strong> \nСвободных мест: <strong>{car.freeSeats}</strong>\n");
             return result;
         }
-
-
+        
         #region Old
 
         //private const string _getTicketUrl = "https://pass.rzd.ru/timetable/public/?layer_id=5827&dir=0&tfl=3&checkSeats=1&code0=2004000&code1=2000000&dt0=27.01.2024";

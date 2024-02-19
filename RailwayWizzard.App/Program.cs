@@ -10,7 +10,7 @@ namespace RailwayWizzard.App
         {
             //TODO:Кажется из-за этого в базу время записывается -3 hour
             //todo: Это решает проблему "System.InvalidCastException: Cannot write DateTime with Kind=Local to PostgreSQL type 'timestamp with time zone', only UTC is supported. "
-            //todo: пока оставлю так, оно работает и это сейчас главное
+            //todo: пока оставлю так, оно работает и это сейчас главнее
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 

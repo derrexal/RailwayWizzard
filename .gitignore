@@ -250,6 +250,3 @@ paket-files/
 # JetBrains Rider
 .idea/
 *.sln.iml
-
-# MyConsoleApp
-src/Acme.MyConsoleApp.ConsoleApp/Logs/logs.txt

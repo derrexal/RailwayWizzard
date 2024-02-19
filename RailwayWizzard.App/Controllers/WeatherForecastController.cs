@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
+using RailwayWizzardAPI;
 
-namespace RailwayWizzardAPI.Controllers
+namespace RailwayWizzard.App.Controllers
 {
     [ApiController]
     [Route("[controller]")]

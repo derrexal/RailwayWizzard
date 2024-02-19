@@ -1,0 +1,28 @@
+version: '3.4'
+
+services:
+  railwaywizzard.app:
+    image: ${DOCKER_REGISTRY-}railwaywizzardapp
+    build:
+      context: .
+      dockerfile: RailwayWizzard.App/Dockerfile
+    ports:
+      - "5178:80"
+    depends_on:
+      - postgres_db
+  postgres_db:
+    container_name: postgres
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: qwertyuiop
+      POSTGRES_DB: railwaywizzardapp_dev
+    ports:
+      - "5433:5433"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    command: 
+      -p 5433
+
+volumes:
+  postgres-data:

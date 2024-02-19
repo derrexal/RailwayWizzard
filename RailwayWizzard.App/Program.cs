@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore;
+using Microsoft.EntityFrameworkCore;
 using RailwayWizzard.App.Data;
 
 
@@ -24,6 +25,12 @@ namespace RailwayWizzard.App
             builder.Services.AddHostedService<Worker>();
 
             var app = builder.Build();
+
+            //Applying migrations to run programm
+            var factory = app.Services.GetRequiredService<IDbContextFactory<RailwayWizzardAppContext>>();
+            using(var context = factory.CreateDbContext())
+                context.Database.Migrate();
+            Console.WriteLine("Done applying migrations");
 
             // Configure the HTTP request pipeline.
 

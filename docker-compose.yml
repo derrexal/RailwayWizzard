@@ -42,7 +42,7 @@ services:
   bot_service:
     image: ${DOCKER_REGISTRY-}bot_service
     build:
-      context: ../
+      context: .
       dockerfile: RailwayWizzard.Bot/Dockerfile
     ports:
     - "5000:5000"

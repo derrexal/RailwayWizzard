@@ -47,7 +47,7 @@ services:
     ports:
     - "5000:5000"
     volumes:
-    - ./RailwayWizzard.Bot/:/app
+    - ./RailwayWizzard.Bot:/app
     working_dir: /app
     restart: always
 

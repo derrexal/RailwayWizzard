@@ -6,7 +6,7 @@ WORKDIR /app
 
 COPY . .
 
-RUN apt-get update && apt install -y libpq-dev build-essential python3 python3-pip1
+RUN apt-get update && apt install -y libpq-dev build-essential python3 python3-pip
 
 RUN python3 -m pip install --upgrade pip
 

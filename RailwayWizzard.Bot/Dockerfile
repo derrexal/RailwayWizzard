@@ -1,16 +1,13 @@
 FROM python:3
 
-ENV PYTHONUNBUFFERED True
-
-RUN mkdir /app
 WORKDIR /app
+COPY /RailwayWizzard.Bot/ .
 
 RUN apt-get update && apt install -y libpq-dev build-essential python3 python3-pip 
 
-RUN python3 -m pip install --upgrade pip
+RUN python -m pip install --upgrade pip
 
-CMD ["python3 -m", "pip", "install", "-r requirements.txt"]
+RUN python -m pip install -r requirements.txt
 
-COPY . .
-
-CMD [ "python3", "main.py" ]
+RUN python main.py
+ 

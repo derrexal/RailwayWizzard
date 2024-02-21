@@ -79,7 +79,8 @@ namespace RailwayWizzard.App
                 {
                     DateTime itemDateFromDateTime = DateTime.ParseExact(
                         activeNotificationTask.DateFrom.ToShortDateString() + " " + activeNotificationTask.TimeFrom,
-                        "dd.MM.yyyy HH:mm",
+                        //"dd.MM.yyyy HH:mm",
+                        "MM/dd/yyyy HH:mm",
                         CultureInfo.InvariantCulture);
 
                     if (itemDateFromDateTime < DateTime.Now)

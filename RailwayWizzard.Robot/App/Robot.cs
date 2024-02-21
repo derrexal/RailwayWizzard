@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Json;
+﻿using System.Globalization;
+using System.Net.Http.Json;
 using System.Web;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -10,7 +11,10 @@ namespace RzdHack.Robot.App
 {
     public class Robot
     {
-        private const string _baseUrl = "http://localhost:8000/routes/";
+        //private const string _baseUrl = "0.0.0.0:8000/routes/";
+        //private const string _baseUrl = "localhost:8000/routes/";
+        //private const string _baseUrl = "http://host.docker.internal:8000/routes/";
+        private const string _baseUrl = "php_service:8088/routes/";
 
         /// <summary>
         /// Получает информацию о свободных местах по заданным параметрам 
@@ -34,6 +38,11 @@ namespace RzdHack.Robot.App
                 throw new HttpRequestException("Сервис php не вернул ответ");
             }
 
+            catch (JsonReaderException je)
+            {
+                Console.WriteLine("Не удалось распарсить ответ в JSON");
+                throw;
+            }
             catch (HttpRequestException e)
             {
                 Console.WriteLine($"Не доступен сервис php \n {e}");
@@ -56,7 +65,7 @@ namespace RzdHack.Robot.App
             query["checkSeats"] = "1";
             query["code0"] = task.DepartureStationCode.ToString();
             query["code1"] = task.ArrivalStationCode.ToString();
-            query["dt0"] = task.DateFrom.ToShortDateString();
+            query["dt0"] = task.DateFrom.ToString("dd.MM.yyy", CultureInfo.InvariantCulture);
             builder.Query = query.ToString();
             return builder.ToString();
         }

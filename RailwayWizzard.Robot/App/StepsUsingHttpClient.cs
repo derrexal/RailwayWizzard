@@ -30,21 +30,20 @@ namespace RzdHack.Robot.App
                                   "\nОбнаружены свободные места\n",
                         UserId = input.UserId
                     };
+                        //TODO:Вынести в метод? А лучше в отдельный класс взаимодействия с АПИ бота, так же как сделано и там
+                        HttpClient httpClient = new HttpClient();
+                        // определяем данные запроса
+                        using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, API_BOT_URL + "api/sendMessageForUser");
+                        request.Content = JsonContent.Create(messageToUser);
+                        // выполняем запрос
+                        var response = await httpClient.SendAsync(request);
 
-                    //TODO:Вынести в метод? А лучше в отдельный класс взаимодействия с АПИ бота, так же как сделано и там
-                    HttpClient httpClient = new HttpClient();
-                    // определяем данные запроса
-                    using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, API_BOT_URL + "api/sendMessageForUser");
-                    request.Content = JsonContent.Create(messageToUser);
-                    // выполняем запрос
-                    var response = await httpClient.SendAsync(request);
+                        if (response.StatusCode != HttpStatusCode.OK)
+                            //Это погасит весь метод!
+                            throw new Exception("Не удалось отправить сообщение пользователю");
 
-                    if (response.StatusCode != HttpStatusCode.OK)
-                        //Это погасит весь метод!
-                        //throw new Exception("Не удалось отправить сообщение пользователю");
-
-                    //TODO:Тут может записать это число в БД?.Вдруг крашнется приложение
-                    countNotification++;
+                            //TODO:Тут может записать это число в БД?.Вдруг крашнется приложение
+                            countNotification++;
                 }
 
                 //Если достигли лимита в 100 сообщений

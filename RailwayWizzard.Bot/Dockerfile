@@ -8,7 +8,7 @@ ENV PYTHONUNBUFFERED 1
 RUN apt-get update && apt install -y libpq-dev build-essential python3 python3-pip gcc
 
 
-COPY requirements.txt /app/
+COPY ./requirements.txt /app
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 

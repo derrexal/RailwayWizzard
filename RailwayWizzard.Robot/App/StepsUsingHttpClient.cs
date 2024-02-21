@@ -7,7 +7,7 @@ namespace RzdHack.Robot.App
 {
     public class StepsUsingHttpClient : ISteps
     {
-        private const string API_BOT_URL = "http://localhost:5000/";
+        private const string API_BOT_URL = "http://bot_service:5000/";
         public async Task Notification(NotificationTask input)
         {
             string railwayDataText = $"{input.DepartureStation} - {input.ArrivalStation} {input.TimeFrom} {input.DateFrom.ToShortDateString()}";

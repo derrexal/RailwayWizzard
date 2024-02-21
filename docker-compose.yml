@@ -49,7 +49,6 @@ services:
     volumes:
     - ./RailwayWizzard.Bot/:/app
     working_dir: /app
-    # command: python3 -m pip install --root-user-action=ignore --upgrade pip && pip install --root-user-action=ignore --no-cache-dir -r requirements.txt
     restart: always
 
 volumes:

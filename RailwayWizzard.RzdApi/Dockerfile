@@ -12,5 +12,3 @@ COPY ./Dockerfile /app/Dockerfile
 FROM php:8.3.2
 
 EXPOSE 8088
-
-CMD ["composer", "install", "&&", "php -S", "0.0.0.0:8088"]

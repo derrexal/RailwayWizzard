@@ -5,10 +5,10 @@ WORKDIR /app
 COPY ./examples /app
 COPY ./src /app
 COPY ./tests /app
-COPY ./composer.json /app/composer.json
-COPY ./composer.lock /app/composer.lock
-COPY ./phpunit.xml /app/phpunit.xml
-COPY ./Dockerfile /app/Dockerfile
+COPY ./composer.json /app
+COPY ./composer.lock /app
+COPY ./phpunit.xml /app
+COPY ./Dockerfile /app
 
 RUN apt-get update && apt install -y curl
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer

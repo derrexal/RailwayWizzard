@@ -12,7 +12,8 @@ services:
     depends_on:
       - postgres_db
       - php_service
-      - bot_service
+    networks:
+      - my-network
     restart: always
 
   postgres_db:
@@ -26,6 +27,8 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     command: -p 5433
+    networks:
+      - my-network
     restart: always
 
   php_service:
@@ -38,6 +41,8 @@ services:
     volumes:
       - ./RailwayWizzard.RzdApi/:/app
     working_dir: /app/examples
+    networks:
+      - my-network
     restart: always
 
   bot_service:
@@ -46,11 +51,19 @@ services:
       context: .
       dockerfile: RailwayWizzard.Bot/Dockerfile
     ports:
-    - "5000:5000"
+      - "5000:5000"
     volumes:
-    - ./RailwayWizzard.Bot:/app
+      - ./RailwayWizzard.Bot:/app
     working_dir: /app
+    depends_on:
+      - railwaywizzardapp
+    networks:
+      - my-network
     restart: always
+
+networks:
+  my-network:
+    driver: "bridge"
 
 volumes:
   postgres-data:

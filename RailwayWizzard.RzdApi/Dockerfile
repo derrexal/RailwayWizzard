@@ -2,7 +2,7 @@ FROM composer:2.6
 
 
 COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
-COPY ./app/composer.* ./app
+COPY ./app/composer.* ./
 
 WORKDIR /app
 

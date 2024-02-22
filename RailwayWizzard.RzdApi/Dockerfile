@@ -1,4 +1,5 @@
-FROM composer:2.6.6 as vendor
+FROM composer:2.6
+
 WORKDIR /app
 
 COPY ./examples /app

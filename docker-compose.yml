@@ -43,6 +43,8 @@ services:
     working_dir: /app/examples
     networks:
       - my-network
+    command: composer install && php -S 0.0.0.0:8088
+
     restart: always
 
   bot_service:

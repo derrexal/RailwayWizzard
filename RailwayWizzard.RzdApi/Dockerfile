@@ -2,12 +2,7 @@ FROM php:8.3.2
 
 WORKDIR /app
 
-COPY ./examples /app
-COPY ./src /app
-COPY ./tests /app
-COPY ./composer.json /app
-COPY ./composer.lock /app
-COPY ./phpunit.xml /app
+COPY . /app
 
 RUN apt-get update && apt install -y curl
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer

@@ -7,6 +7,7 @@ COPY ./RailwayWizzard.RzdApi /app
 
 RUN apt-get update && apt install -y curl
 RUN apt install -y git
+RUN apt install -y zip unzip php-zip
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 RUN composer install \

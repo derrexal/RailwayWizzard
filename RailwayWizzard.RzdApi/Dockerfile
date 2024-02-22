@@ -9,11 +9,8 @@ COPY ./composer.lock /app/composer.lock
 COPY ./phpunit.xml /app/phpunit.xml
 COPY ./Dockerfile /app/Dockerfile
 
-RUN composer install
-RUN composer update --no-scripts
-
 FROM php:8.3.2
 
 EXPOSE 8088
 
-CMD [ "php", "-S", "0.0.0.0:8088"]
+CMD bash -c "composer install && php -S 0.0.0.0:8088"

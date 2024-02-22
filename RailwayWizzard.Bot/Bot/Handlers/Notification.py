@@ -114,7 +114,7 @@ async def third_step_notification(update: Update, context: CallbackContext):
             await update.message.reply_text(text='Укажите <strong>дату</strong> отправления',
                                             parse_mode=ParseMode.HTML)
             return 3
-        date = date_and_date_json[['date']]
+        date = date_and_date_json['date']
         context.user_data[2] = date  # Дата в формате даты
         context.user_data[22] = date_format_validate(update.message.text)['date_text'] #Дата в формате строки
         await update.message.reply_text(text='Укажите <strong>время</strong> отправления',

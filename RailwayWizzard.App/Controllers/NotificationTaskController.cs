@@ -19,6 +19,12 @@ namespace RailwayWizzard.App.Controllers
             _context = context;
         }
 
+        [Route("/")]
+        public IActionResult Index()
+        {
+            return Ok("Hello, i'm Web API");
+        }
+
 
         [HttpPost("CreateAndGetId")]
         public async Task<IActionResult> CreateAndGetId(NotificationTask stationInfo)

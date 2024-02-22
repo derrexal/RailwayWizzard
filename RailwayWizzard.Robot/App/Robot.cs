@@ -25,13 +25,11 @@ namespace RzdHack.Robot.App
         {
             var url = SetUrlFromGetTicket(task);
             HttpClient client = new HttpClient();
-            //test
-            string? jsonResponse = "Response";
             try
             {
                 using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
                 using HttpResponseMessage response = await client.SendAsync(request);
-                jsonResponse = await response.Content.ReadAsStringAsync();
+                var jsonResponse = await response.Content.ReadAsStringAsync();
 
                 //JArray obj = JsonConvert.DeserializeObject<JArray>(сontent);
                 var roots = JsonConvert.DeserializeObject<List<Root>>(jsonResponse);
@@ -43,8 +41,6 @@ namespace RzdHack.Robot.App
             catch (JsonReaderException je)
             {
                 Console.WriteLine("Не удалось распарсить ответ в JSON");
-                //test
-                Console.WriteLine(jsonResponse);
                 throw;
             }
             catch (HttpRequestException e)
@@ -86,6 +82,8 @@ namespace RzdHack.Robot.App
                     foreach (var car in route.cars)
                         if(!car.typeLoc.Contains("инвалид"))
                             if (car.freeSeats != null)
+                                //test
+                                Console.WriteLine(car.typeLoc + car.freeSeats);
                                 result.Add($"Класс обслуживания: <strong>{car.typeLoc}</strong> \nСвободных мест: <strong>{car.freeSeats}</strong>\n");
             return result;
         }

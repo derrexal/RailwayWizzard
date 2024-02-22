@@ -6,7 +6,7 @@ WORKDIR /app
 COPY ./RailwayWizzard.RzdApi /app
 
 RUN apt-get update && apt install -y curl
-RUN curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 RUN composer install \
     --ignore-platform-reqs \

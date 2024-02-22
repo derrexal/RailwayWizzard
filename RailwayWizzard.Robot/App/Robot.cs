@@ -25,11 +25,13 @@ namespace RzdHack.Robot.App
         {
             var url = SetUrlFromGetTicket(task);
             HttpClient client = new HttpClient();
+            //test
+            string? jsonResponse = "Response";
             try
             {
                 using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
                 using HttpResponseMessage response = await client.SendAsync(request);
-                var jsonResponse = await response.Content.ReadAsStringAsync();
+                jsonResponse = await response.Content.ReadAsStringAsync();
 
                 //JArray obj = JsonConvert.DeserializeObject<JArray>(сontent);
                 var roots = JsonConvert.DeserializeObject<List<Root>>(jsonResponse);
@@ -41,6 +43,8 @@ namespace RzdHack.Robot.App
             catch (JsonReaderException je)
             {
                 Console.WriteLine("Не удалось распарсить ответ в JSON");
+                //test
+                Console.WriteLine(jsonResponse);
                 throw;
             }
             catch (HttpRequestException e)

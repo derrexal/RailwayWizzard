@@ -18,9 +18,9 @@
     },
     "Docker": {
       "commandName": "Docker",
-      "launchUrl": "{Scheme}://railwaywizzardapp:{ServicePort}/",
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/",
       "environmentVariables": {
-        "ASPNETCORE_URLS": "http://*:5178"
+        "ASPNETCORE_URLS": "http://localhost:5178"
       },
       "publishAllPorts": true
     }

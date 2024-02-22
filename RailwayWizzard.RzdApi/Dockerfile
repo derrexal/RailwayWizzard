@@ -1,8 +1,4 @@
-FROM composer:2.6
-
-
-COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
-COPY ./app/composer.* ./
+FROM php:8.3.2
 
 WORKDIR /app
 
@@ -14,6 +10,7 @@ COPY ./composer.lock /app/composer.lock
 COPY ./phpunit.xml /app/phpunit.xml
 COPY ./Dockerfile /app/Dockerfile
 
+RUN apt-get update && apt install -y curl
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 RUN composer install \
@@ -22,10 +19,6 @@ RUN composer install \
     --no-plugins \
     --no-scripts \
     --prefer-dist
-
-RUN composer update --no-scripts
-
-FROM php:8.3.2
 
 EXPOSE 8088
 

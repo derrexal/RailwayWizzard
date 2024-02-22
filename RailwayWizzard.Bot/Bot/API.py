@@ -1,6 +1,6 @@
 import requests
 
-API_URL = "http://railwaywizzardapp:5178/"
+API_URL = "http://railwaywizzardapp:80/"
 
 #TODO: переименовать все 'add' -> 'create'
 #TODO: если ответ не 200 - выбрасывать Exception

@@ -87,7 +87,10 @@ namespace RzdHack.Robot.App
                         foreach (FieldInfo field in bobik.GetType().GetFields())
                         {
                             
-                            resStr+=field.FieldType.ToString() + "  " + field.Name.ToString() + "  " + field.GetValue(bobik).ToString() + "\n");
+                            resStr+=
+                                field.FieldType.ToString() + "  " + 
+                                field.Name.ToString() + "  " + 
+                                field.GetValue(bobik).ToString() + "\n";
                         }
                         Console.WriteLine(resStr);
                         if (!car.typeLoc.Contains("инвалид"))

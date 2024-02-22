@@ -2,8 +2,9 @@ FROM composer:2.6
 
 
 COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
-WORKDIR /app
 COPY ./app/composer.* ./app
+
+WORKDIR /app
 
 COPY ./examples /app
 COPY ./src /app
@@ -12,6 +13,8 @@ COPY ./composer.json /app/composer.json
 COPY ./composer.lock /app/composer.lock
 COPY ./phpunit.xml /app/phpunit.xml
 COPY ./Dockerfile /app/Dockerfile
+
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 RUN composer install \
     --ignore-platform-reqs \

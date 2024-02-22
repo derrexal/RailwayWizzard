@@ -1,6 +1,6 @@
 <?php
 
-require dirname(__DIR__) . '/vendor/autoload.php';
+require dirname(__DIR__) . '../vendor/autoload.php';
 
 $start = new DateTime();
 $date0 = $start->modify('+1 day');

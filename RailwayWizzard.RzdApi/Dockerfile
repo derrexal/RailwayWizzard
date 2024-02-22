@@ -16,6 +16,7 @@ RUN composer install \
     --no-plugins \
     --no-scripts \
     --prefer-dist
+RUN composer dump-autoload
 
 EXPOSE 8088
 

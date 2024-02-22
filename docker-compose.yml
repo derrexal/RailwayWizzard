@@ -8,7 +8,7 @@ services:
       context: .
       dockerfile: RailwayWizzard.App/Dockerfile
     ports:
-      - "5178:5178"
+      - "5178:80"
     depends_on:
       - postgres_db
       - php_service

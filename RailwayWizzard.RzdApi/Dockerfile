@@ -1,7 +1,8 @@
 FROM php:8.3.2
 
-WORKDIR /app
+COMPOSER_ALLOW_SUPERUSER=1
 
+WORKDIR /app
 COPY . /app
 
 RUN apt-get update && apt install -y curl

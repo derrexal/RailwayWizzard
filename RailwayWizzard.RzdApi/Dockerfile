@@ -10,15 +10,7 @@ RUN apt install -y git
 RUN apt-get install -y zip unzip libzip-dev && docker-php-ext-install zip
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-RUN composer install \
-    --ignore-platform-reqs \
-    --no-interaction \
-    --no-plugins \
-    --no-scripts \
-    --prefer-dist
-RUN composer dump-autoload
-RUN composer update --no-scripts
-
+RUN composer install
 EXPOSE 8088
 
 CMD [ "php", "-S", "0.0.0.0:8088"]

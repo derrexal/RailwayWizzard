@@ -8,7 +8,6 @@ COPY ./tests /app
 COPY ./composer.json /app
 COPY ./composer.lock /app
 COPY ./phpunit.xml /app
-COPY ./Dockerfile /app
 
 RUN apt-get update && apt install -y curl
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer

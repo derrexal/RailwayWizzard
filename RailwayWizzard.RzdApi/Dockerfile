@@ -10,6 +10,7 @@ COPY ./phpunit.xml /app/phpunit.xml
 COPY ./Dockerfile /app/Dockerfile
 
 RUN composer install
+RUN composer update --no-scripts
 
 FROM php:8.3.2
 

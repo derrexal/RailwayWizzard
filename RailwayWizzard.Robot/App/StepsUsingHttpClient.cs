@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Globalization;
+using System.Net;
 using System.Net.Http.Json;
 using RzdHack.Robot.Core;
 
@@ -10,7 +11,7 @@ namespace RzdHack.Robot.App
         private const string API_BOT_URL = "http://bot_service:5000/";
         public async Task Notification(NotificationTask input)
         {
-            string railwayDataText = $"{input.DepartureStation} - {input.ArrivalStation} {input.TimeFrom} {input.DateFrom.ToShortDateString()}";
+            string railwayDataText = $"{input.DepartureStation} - {input.ArrivalStation} {input.TimeFrom} {input.DateFrom.ToString("dd.MM.yyy", CultureInfo.InvariantCulture)}";
             try
             {
                 int countNotification = 0;  //счетчик отправленных уведомлений. Шлем н штук и закрываем таску

@@ -110,7 +110,8 @@ async def third_step_notification(update: Update, context: CallbackContext):
 
         date_and_date_json = date_format_validate(update.message.text)
         if date_and_date_json is None:
-            await update.message.reply_text('Формат даты должен быть dd.mm.yyyy или dd.mm')
+            await update.message.reply_text('Формат даты должен быть dd.mm.yyyy') 
+                                            #или dd.mm')
             await update.message.reply_text(text='Укажите <strong>дату</strong> отправления',
                                             parse_mode=ParseMode.HTML)
             return 3

@@ -1,4 +1,4 @@
-FROM php:8.3.2
+FROM php
 
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
@@ -7,7 +7,7 @@ COPY ./RailwayWizzard.RzdApi /app
 
 RUN apt-get update && apt install -y curl
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-RUN composer update symfony/flex --no-plugins --no-scripts
+
 RUN composer install \
     --ignore-platform-reqs \
     --no-interaction \

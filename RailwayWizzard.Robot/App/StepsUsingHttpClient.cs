@@ -79,7 +79,7 @@ namespace RzdHack.Robot.App
             do
             {
                 result = await robot.GetTicket(task);
-                Thread.Sleep(1000 * 60); //60 секунд
+                Thread.Sleep(1000 * 60*3); //3 минуты
             }
             while (result.Count == 0);
 

@@ -95,7 +95,7 @@ namespace RzdHack.Robot.App
                         Console.WriteLine(resStr);
                         if (!car.typeLoc.Contains("инвалид"))
                             if (car.freeSeats != null)
-                                result.Add($"Класс обслуживания: <strong>{car.type}</strong> \nСвободных мест: <strong>{car.freeSeats}</strong>\n");
+                                result.Add($"Класс обслуживания: <strong>{car.typeLoc}</strong> \nСвободных мест: <strong>{car.freeSeats}</strong>\n");
                     }
 
             return result;

@@ -22,8 +22,7 @@ def test():
     html_content = "<h2>Hello METANIT.COM!</h2>"
     return HTMLResponse(content=html_content)
 
-#todo поменять порт!
 async def run():
-    config = uvicorn.Config("server:app", host="0.0.0.0", port=5000, log_level="info")
+    config = uvicorn.Config("server:app", host="0.0.0.0", port=5000, log_level="info", loop="none")
     server = uvicorn.Server(config)
     await server.serve()

@@ -81,14 +81,15 @@ namespace RzdHack.Robot.App
             List<string> result=new();
             foreach (var route in roots)
                 if (route.time0 == departureTime && route.cars != null)
-                    foreach (var car in route.cars)
-                    {
-                        //test
-                        Console.WriteLine(car.typeLoc + car.freeSeats + car.type);
-                        if (!car.typeLoc.Contains("инвалид")) //выходит, что эта проверка сейчас бесполезна...
-                            if (car.freeSeats != null)
-                                result.Add($"Класс обслуживания: <strong>{car.typeLoc}</strong> \nСвободных мест: <strong>{car.freeSeats}</strong>\n");
-                    }
+                    foreach (var cars in route.cars)
+                        foreach (var car in cars)
+                        {
+                            //test
+                            Console.WriteLine(car.typeLoc + car.freeSeats + car.type);
+                            if (!car.typeLoc.Contains("инвалид")) //выходит, что эта проверка сейчас бесполезна...
+                                if (car.freeSeats != null)
+                                    result.Add($"Класс обслуживания: <strong>{car.typeLoc}</strong> \nСвободных мест: <strong>{car.freeSeats}</strong>\n");
+                        }
 
             return result;
         }

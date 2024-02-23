@@ -57,7 +57,7 @@ namespace RailwayWizzard.Robot.Core
         public string timeInWay { get; set; }
         public int? flMsk { get; set; }
         public int? train_id { get; set; }
-        public List<Car>? cars { get; set; }
+        public List<List<Car>>? cars { get; set; }
         public bool? disabledType { get; set; }
         public int? addCompLuggageNum { get; set; }
         public bool? addCompLuggage { get; set; }

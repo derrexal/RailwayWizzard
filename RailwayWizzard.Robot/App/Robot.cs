@@ -31,7 +31,8 @@ namespace RzdHack.Robot.App
                 using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
                 using HttpResponseMessage response = await client.SendAsync(request);
                 var jsonResponse = await response.Content.ReadAsStringAsync();
-
+                //test
+                Console.WriteLine(jsonResponse);
                 //JArray obj = JsonConvert.DeserializeObject<JArray>(сontent);
                 var roots = JsonConvert.DeserializeObject<List<Root>>(jsonResponse);
                 if (roots != null)
@@ -84,7 +85,7 @@ namespace RzdHack.Robot.App
                     {
                         //test
                         Console.WriteLine(car.typeLoc + car.freeSeats + car.type);
-                        if (!car.typeLoc.Contains("инвалид"))
+                        if (!car.typeLoc.Contains("инвалид")) //выходит, что эта проверка сейчас бесполезна...
                             if (car.freeSeats != null)
                                 result.Add($"Класс обслуживания: <strong>{car.typeLoc}</strong> \nСвободных мест: <strong>{car.freeSeats}</strong>\n");
                     }

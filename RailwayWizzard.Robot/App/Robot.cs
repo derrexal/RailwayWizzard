@@ -82,17 +82,8 @@ namespace RzdHack.Robot.App
                 if (route.time0 == departureTime && route.cars != null)
                     foreach (var car in route.cars)
                     {
-                        var resStr = "";
-                        object bobik = car;
-                        foreach (FieldInfo field in bobik.GetType().GetFields())
-                        {
-                            
-                            resStr+=
-                                field.FieldType.ToString() + "  " + 
-                                field.Name.ToString() + "  " + 
-                                field.GetValue(bobik).ToString() + "\n";
-                        }
-                        Console.WriteLine(resStr);
+                        //test
+                        Console.WriteLine(car.typeLoc + car.freeSeats + car.type);
                         if (!car.typeLoc.Contains("инвалид"))
                             if (car.freeSeats != null)
                                 result.Add($"Класс обслуживания: <strong>{car.typeLoc}</strong> \nСвободных мест: <strong>{car.freeSeats}</strong>\n");

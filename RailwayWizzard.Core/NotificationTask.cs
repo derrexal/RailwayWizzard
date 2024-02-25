@@ -19,7 +19,6 @@ namespace RzdHack.Robot.Core
         [Required]
         public long UserId { get; set; }
         public bool IsActual { get; set; }
-        public int TotalCountNotification { get; set; }
         public DateTime CreationTime { get; set; }
 
         [NotMapped]

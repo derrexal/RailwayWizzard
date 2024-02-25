@@ -14,54 +14,28 @@ namespace RzdHack.Robot.App
             string railwayDataText = $"{input.DepartureStation} - {input.ArrivalStation} {input.TimeFrom} {input.DateFrom.ToString("dd.MM.yyy", CultureInfo.InvariantCulture)}";
             try
             {
-                int countNotification = 0;  //счетчик отправленных уведомлений. Шлем н штук и закрываем таску
-
                 Console.WriteLine($"Запустили процесс поиска мест на рейс:\n {railwayDataText}");
 
-                while (countNotification != 100)
+                var freeSeats = await GetFreeSeats(input);
+
+                // Формируется текст уведомления о наличии мест
+                ResponseToUser messageToUser = new ResponseToUser
                 {
-
-                    var freeSeats = await GetFreeSeats(input);
-
-                    // Для срочного уведомления о наличии мест
-                    ResponseToUser messageToUser = new ResponseToUser
-                    {
-                        Message = $"{char.ConvertFromUtf32(0x2705)} {railwayDataText} " +
-                                  $"\n{String.Join("\n", freeSeats.ToArray())}" +
-                                  "\nОбнаружены свободные места\n",
-                        UserId = input.UserId
-                    };
-                        //TODO:Вынести в метод? А лучше в отдельный класс взаимодействия с АПИ бота, так же как сделано и там
-                        HttpClient httpClient = new HttpClient();
-                        // определяем данные запроса
-                        using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, API_BOT_URL + "api/sendMessageForUser");
-                        request.Content = JsonContent.Create(messageToUser);
-                        // выполняем запрос
-                        var response = await httpClient.SendAsync(request);
-
-                        if (response.StatusCode != HttpStatusCode.OK)
-                            //Это погасит весь метод!
-                            throw new Exception("Не удалось отправить сообщение пользователю");
-
-                            //TODO:Тут может записать это число в БД?.Вдруг крашнется приложение
-                            countNotification++;
-                }
-
-                //Если достигли лимита в 100 сообщений
-                ResponseToUser messageToUserCountLimit = new ResponseToUser
-                {
-                    Message = $"{char.ConvertFromUtf32(0x2705)} Выполнено задание по поиску свободных мест на рейс:\n{railwayDataText}\n(Достигнут лимит в 100 сообщений)\n\n Если уведомления ещё нужны - пожалуйста, создайте новое задание",
+                    Message = $"{char.ConvertFromUtf32(0x2705)} {railwayDataText} " +
+                              $"\n{String.Join("\n", freeSeats.ToArray())}" +
+                              "\nОбнаружены свободные места\n",
                     UserId = input.UserId
                 };
-                //TODO: Тут в базе выставляем статус фолс и количество отправленных уведомлений=100
-                HttpClient client = new HttpClient();
-                using HttpRequestMessage message = new HttpRequestMessage(HttpMethod.Post, API_BOT_URL + "/api/sendMessageForUser");
-                message.Content = JsonContent.Create(messageToUserCountLimit);
-                // выполняем запрос
-                var responseMessage = await client.SendAsync(message);
 
-                if (responseMessage.StatusCode != HttpStatusCode.OK)
-                    //Это погасит весь сервис?
+                //TODO:Вынести в метод? А лучше в отдельный класс взаимодействия с АПИ бота, так же как сделано и там
+                HttpClient httpClient = new HttpClient();
+                // определяем данные запроса
+                using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, API_BOT_URL + "api/sendMessageForUser");
+                request.Content = JsonContent.Create(messageToUser);
+                // выполняем запрос
+                var response = await httpClient.SendAsync(request);
+                if (response.StatusCode != HttpStatusCode.OK)
+                    //Это погасит весь метод!
                     throw new Exception("Не удалось отправить сообщение пользователю");
 
             }

@@ -16,19 +16,15 @@ async def notification_handler(update: Update, context: CallbackContext):
         if init != str(CALLBACK_NOTIFICATION):
             await update.callback_query.message.reply_text(text='Что-то пошло не так, обратитесь к администратору бота')
             return ConversationHandler.END
-        await update.callback_query.message.reply_text(
-                                                     'Обратите внимание, после 100 уведомлений бот прекращает свою работу по данному заданию.\n'
-                                                     'Если будет потребность - необходимо создать новое задание для бота.\n'
-                                                     '\n'
-                                                     'Для прекращения диалога введите /stop')
+        await update.callback_query.message.reply_text('Для возврата в главное меню введите /stop')
 
-        await update.callback_query.message.reply_text(text='Укажите <strong>станцию</strong> отправления',
+        await update.callback_query.message.reply_text(text='Укажите <strong>станцию отправления</strong>',
                                                        parse_mode=ParseMode.HTML)
         return 1
 
     except Exception as e:
         print(e)
-        await update.callback_query.message.reply_text(text='Укажите <strong>станцию</strong> отправления',
+        await update.callback_query.message.reply_text(text='Укажите <strong>станцию отправления</strong>',
                                                        parse_mode=ParseMode.HTML)
         raise
 
@@ -55,7 +51,7 @@ async def first_step_notification(update: Update, context: CallbackContext):
 
         context.user_data[0] = update.message.text.upper()
         context.user_data[10] = station_code
-        await update.message.reply_text(text='Укажите <strong>станцию</strong> прибытия',
+        await update.message.reply_text(text='Укажите <strong>станцию прибытия</strong>',
                                         parse_mode=ParseMode.HTML)
         return 2
 
@@ -90,7 +86,7 @@ async def second_step_notification(update: Update, context: CallbackContext):
             await update.message.reply_text('Станции не могут совпадать')
             return 2
 
-        await update.message.reply_text(text='Укажите <strong>дату</strong> отправления',
+        await update.message.reply_text(text='Укажите <strong>дату отправления</strong>',
                                         parse_mode=ParseMode.HTML)
         return 3
 
@@ -112,13 +108,13 @@ async def third_step_notification(update: Update, context: CallbackContext):
         if date_and_date_json is None:
             await update.message.reply_text('Формат даты должен быть dd.mm.yyyy') 
                                             #или dd.mm')
-            await update.message.reply_text(text='Укажите <strong>дату</strong> отправления',
+            await update.message.reply_text(text='Укажите <strong>дату отправления</strong>',
                                             parse_mode=ParseMode.HTML)
             return 3
         date = date_and_date_json['date']
         context.user_data[2] = date  # Дата в формате даты
         context.user_data[22] = date_format_validate(update.message.text)['date_text'] #Дата в формате строки
-        await update.message.reply_text(text='Укажите <strong>время</strong> отправления',
+        await update.message.reply_text(text='Укажите <strong>время отправления</strong>',
                                         parse_mode=ParseMode.HTML)
 
         return 4
@@ -141,7 +137,7 @@ async def fourth_step_notification(update: Update, context: CallbackContext):
         input_time = update.message.text
         if not time_format_validate(input_time):
             await update.message.reply_text('Формат времени должен быть hh:mm ')
-            await update.message.reply_text(text='Укажите <strong>время</strong> отправления',
+            await update.message.reply_text(text='Укажите <strong>время отправления</strong>',
                                             parse_mode=ParseMode.HTML)
             return 4
 
@@ -154,7 +150,7 @@ async def fourth_step_notification(update: Update, context: CallbackContext):
         if available_time is not True:
             await update.message.reply_text('Не найдено поездки с таким временем')
             await update.message.reply_text('Доступное время для бронирования:\n' + available_time.__str__())
-            await update.message.reply_text(text='Укажите <strong>время</strong> отправления',
+            await update.message.reply_text(text='Укажите <strong>время отправления</strong>',
                                             parse_mode=ParseMode.HTML)
             return 4
         context.user_data[3] = input_time

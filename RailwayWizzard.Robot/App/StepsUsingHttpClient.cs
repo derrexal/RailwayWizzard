@@ -12,32 +12,37 @@ namespace RzdHack.Robot.App
         public async Task Notification(NotificationTask input)
         {
             string railwayDataText = $"{input.DepartureStation} - {input.ArrivalStation} {input.TimeFrom} {input.DateFrom.ToString("dd.MM.yyy", CultureInfo.InvariantCulture)}";
+            long count = 1;
             try
             {
                 Console.WriteLine($"Запустили процесс поиска мест на рейс:\n {railwayDataText}");
-
-                var freeSeats = await GetFreeSeats(input);
-
-                // Формируется текст уведомления о наличии мест
-                ResponseToUser messageToUser = new ResponseToUser
+                while (true)
                 {
-                    Message = $"{char.ConvertFromUtf32(0x2705)} {railwayDataText} " +
-                              $"\n{String.Join("\n", freeSeats.ToArray())}" +
-                              "\nОбнаружены свободные места\n",
-                    UserId = input.UserId
-                };
+                    Console.WriteLine($"Рейс {railwayDataText} Попытка номер {count}");
+                    var freeSeats = await GetFreeSeats(input);
 
-                //TODO:Вынести в метод? А лучше в отдельный класс взаимодействия с АПИ бота, так же как сделано и там
-                HttpClient httpClient = new HttpClient();
-                // определяем данные запроса
-                using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, API_BOT_URL + "api/sendMessageForUser");
-                request.Content = JsonContent.Create(messageToUser);
-                // выполняем запрос
-                var response = await httpClient.SendAsync(request);
-                if (response.StatusCode != HttpStatusCode.OK)
-                    //Это погасит весь метод!
-                    throw new Exception("Не удалось отправить сообщение пользователю");
+                    // Формируется текст уведомления о наличии мест
+                    ResponseToUser messageToUser = new ResponseToUser
+                    {
+                        Message = $"{char.ConvertFromUtf32(0x2705)} {railwayDataText} " +
+                                  $"\n{String.Join("\n", freeSeats.ToArray())}" +
+                                  "\nОбнаружены свободные места\n",
+                        UserId = input.UserId
+                    };
 
+                    //TODO:Вынести в метод? А лучше в отдельный класс взаимодействия с АПИ бота, так же как сделано и там
+                    HttpClient httpClient = new HttpClient();
+                    // определяем данные запроса
+                    using HttpRequestMessage request =
+                        new HttpRequestMessage(HttpMethod.Post, API_BOT_URL + "api/sendMessageForUser");
+                    request.Content = JsonContent.Create(messageToUser);
+                    // выполняем запрос
+                    var response = await httpClient.SendAsync(request);
+                    if (response.StatusCode != HttpStatusCode.OK)
+                        //Это погасит весь метод!
+                        throw new Exception("Не удалось отправить сообщение пользователю");
+                    count++;
+                }
             }
             catch (Exception e)
             {

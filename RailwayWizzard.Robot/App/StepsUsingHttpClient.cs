@@ -57,8 +57,16 @@ namespace RzdHack.Robot.App
             List<string> result;
             do
             {
-                result = await robot.GetTicket(task);
-                Thread.Sleep(1000 * 60*3); //3 минуты
+                try
+                {
+                    result = await robot.GetTicket(task);
+                    Thread.Sleep(1000 * 60 * 3); //3 минуты
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    throw;
+                }
             }
             while (result.Count == 0);
 

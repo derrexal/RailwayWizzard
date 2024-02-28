@@ -4,6 +4,7 @@ using RailwayWizzard.App.Data;
 using RailwayWizzard.Core;
 using RzdHack.Robot.App;
 using RzdHack.Robot.Core;
+using System.Collections.Generic;
 using System.Globalization;
 
 
@@ -13,12 +14,11 @@ namespace RailwayWizzard.App
     {
         private readonly ILogger<Worker> _logger;
         private readonly IDbContextFactory<RailwayWizzardAppContext> _contextFactory;
-        private readonly Dictionary<int, int> _taskDictionary;
+        private static readonly Dictionary<int, int> _taskDictionary = new();
         public Worker(ILogger<Worker> logger, IDbContextFactory<RailwayWizzardAppContext> contextFactory)
         {
             _logger = logger;
             _contextFactory = contextFactory;
-            _taskDictionary = new();
         }
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
@@ -54,14 +54,28 @@ namespace RailwayWizzard.App
                                 new StationInfo { StationName = task.DepartureStation })).ExpressCode;
                     }
 
-                    //Запускаем новым потоком задачу
-                        var t = new Thread(() => new StepsUsingHttpClient().Notification(task));
+                    //Запускаем задачу новым потоком 
+                    var t = new Thread(() => new StepsUsingHttpClient().Notification(task));
+                    try
+                    {
                         t.Start();
-
                         //Добавляем в коллекцию номер задачи-номер потока
                         _taskDictionary.Add(task.Id, t.ManagedThreadId);
                         _logger.LogInformation($"Запущена задача номер: {task.Id} в потоке номер: {t.ManagedThreadId}");
 
+                    }
+                    catch
+                    {
+                        //Если задача вызвала ошибку - удаляем ее из списка активных задач и гасим поток
+                        if (_taskDictionary.ContainsValue(t.ManagedThreadId))
+                        {
+                            var item = _taskDictionary.FirstOrDefault(task => task.Value == t.ManagedThreadId);
+                            _taskDictionary.Remove(item.Key);
+                            t.Abort();
+                            //Это погасит приложение? А надо ли?
+                            //throw;
+                        }
+                    }
                 }
             }
         }

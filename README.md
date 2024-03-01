@@ -16,6 +16,6 @@ $ git clone https://github.com/derrexal/RailwayWizzard.git
    docker compose up-d
    ```
 
-##Благодарность
+## Благодарность
 Данный проект создан с использованием внешнего GitHub-репозитория (https://github.com/visavi/rzd-api)
 Спасибо автору @visavi за одобрение в использовании этого проекта и содействие в решении некоторых вопросов.

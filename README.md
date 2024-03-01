@@ -8,13 +8,13 @@
 $ git clone https://github.com/derrexal/RailwayWizzard.git
 ```
 
-Затем Установить '''docker''' и '''docker-compose'''
+Затем Установить *docker* и *docker-compose*
 
 В директории с проектом ввести следующую команду:
-   '''sh
+   ```sh
    docker compose build &&
    docker compose up-d
-   '''
+   ```
 
 ##Благодарность
 Данный проект создан с использованием внешнего GitHub-репозитория (https://github.com/visavi/rzd-api)

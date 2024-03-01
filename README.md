@@ -17,5 +17,6 @@ $ git clone https://github.com/derrexal/RailwayWizzard.git
    ```
 
 ## Благодарность
-Данный проект создан с использованием внешнего GitHub-репозитория [rzd-api](https://github.com/visavi/rzd-api)
+Данный проект создан с использованием внешнего GitHub-репозитория [rzd-api](https://github.com/visavi/rzd-api).
+
 Спасибо автору [visavi](https://github.com/visavi) за одобрение в использовании этого проекта и содействие в решении некоторых вопросов.

@@ -22,7 +22,7 @@ namespace RailwayWizzard.App.Controllers
         [Route("/")]
         public IActionResult Index()
         {
-            return Ok("Hello, i'm Web API");
+            return Ok("Hello, i'm Web API Railway Wizzard application");
         }
 
 
@@ -36,9 +36,6 @@ namespace RailwayWizzard.App.Controllers
                 _context.Add(stationInfo);
 
                 await _context.SaveChangesAsync();
-                //Все таки есть смысл вынести это в воркер, а отсюда н-р дергать его.
-                //Т.к. при падении сервиса - следующий запуск будет только если другой пользователь создаст еще одну задачу
-                //await RunActiveTask();
 
                 return Ok(stationInfo.Id);
             }

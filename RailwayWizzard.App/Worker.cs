@@ -4,7 +4,6 @@ using RailwayWizzard.App.Data;
 using RailwayWizzard.Core;
 using RzdHack.Robot.App;
 using RzdHack.Robot.Core;
-using System.Collections.Generic;
 using System.Globalization;
 
 
@@ -72,8 +71,8 @@ namespace RailwayWizzard.App
                             var item = _taskDictionary.FirstOrDefault(task => task.Value == t.ManagedThreadId);
                             _taskDictionary.Remove(item.Key);
                             t.Abort();
-                            //Это погасит приложение? А надо ли?
-                            //throw;
+                            //По идее это вызовет критическую ошибку и окерстратор перезапустит контейнер
+                            throw;
                         }
                     }
                 }

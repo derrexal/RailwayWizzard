@@ -253,3 +253,6 @@ paket-files/
 
 #PHP
 /vendor/*
+
+#PYTHON Bot
+./RailwayWizzard.Bot/Bot/.env

@@ -1,3 +1,4 @@
+from dotenv import load_dotenv
 from telegram.constants import ParseMode
 from telegram.ext import CommandHandler, MessageHandler, ConversationHandler, CallbackQueryHandler, Application, filters
 from Bot.Handlers.Help import help_handler

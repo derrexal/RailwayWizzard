@@ -7,7 +7,12 @@ from Bot.Handlers.Start import start_buttons_handler
 from Bot.Other import unknown_handler
 from Bot.Setting import CALLBACK_NOTIFICATION
 
-token = "6656465647:AAERhfX_h1UUk6LYsHpsit2nNPPjjtlGMCU"
+import os
+
+#Получаем токен из файла .env в текущей директории
+load_dotenv()
+token = os.getenv('TOKEN')
+
 application = Application.builder().token(token).build()
 
 #Перенести этот метод в др место не получается, т.к. тут создается application

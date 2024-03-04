@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using System.Net;
 using System.Net.Http.Json;
+using Microsoft.Extensions.Logging;
 using RzdHack.Robot.Core;
 
 
@@ -9,16 +10,22 @@ namespace RzdHack.Robot.App
     public class StepsUsingHttpClient : ISteps
     {
         private const string API_BOT_URL = "http://bot_service:5000/";
+        private readonly ILogger _logger;
+
+        public StepsUsingHttpClient(ILogger logger)
+        {
+            _logger = logger;
+        }
+
         public async Task Notification(NotificationTask input)
         {
             string railwayDataText = $"{input.DepartureStation} - {input.ArrivalStation} {input.TimeFrom} {input.DateFrom.ToString("dd.MM.yyy", CultureInfo.InvariantCulture)}";
             long count = 1;
             try
             {
-                Console.WriteLine($"Запустили процесс поиска мест на рейс:\n {railwayDataText}");
                 while (true)
                 {
-                    Console.WriteLine($"Рейс {railwayDataText} Попытка номер {count}");
+                    _logger.LogTrace($"Рейс {railwayDataText} Попытка номер {count}");
                     var freeSeats = await GetFreeSeats(input);
 
                     // Формируется текст уведомления о наличии мест
@@ -46,7 +53,7 @@ namespace RzdHack.Robot.App
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                _logger.LogError(e);
                 throw;
             }
         }
@@ -64,7 +71,7 @@ namespace RzdHack.Robot.App
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e);
+                    _logger.LogError(e);
                     throw;
                 }
             }

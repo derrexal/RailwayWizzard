@@ -11,12 +11,13 @@ namespace RailwayWizzard.App.Controllers
     [Route("[controller]")]
     public class NotificationTaskController : Controller
     {
-
+        private readonly ILogger _logger;
         private readonly RailwayWizzardAppContext _context;
 
-        public NotificationTaskController(RailwayWizzardAppContext context)
+        public NotificationTaskController(RailwayWizzardAppContext context, ILogger<NotificationTaskController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         [Route("/")]
@@ -36,7 +37,7 @@ namespace RailwayWizzard.App.Controllers
                 _context.Add(stationInfo);
 
                 await _context.SaveChangesAsync();
-
+                _logger.LogTrace($"Success create NotificationTask. Id:{stationInfo.Id} UserId:{stationInfo.UserId}");
                 return Ok(stationInfo.Id);
             }
 

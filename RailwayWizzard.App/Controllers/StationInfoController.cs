@@ -13,10 +13,12 @@ namespace RailwayWizzard.App.Controllers
     {
 
         private readonly RailwayWizzardAppContext _context;
+        private readonly ILogger _logger;
 
-        public StationInfoController(RailwayWizzardAppContext context)
+        public StationInfoController(RailwayWizzardAppContext context, ILogger<StationInfoController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         [HttpGet("GetByName")]
@@ -40,6 +42,7 @@ namespace RailwayWizzard.App.Controllers
                     _context.Update(currentStationInfo);
                 }
                 await _context.SaveChangesAsync();
+                _logger.LogTrace($"Success create or update StationInfo. StationName:{stationInfo.StationName} ExpressCode:{stationInfo.ExpressCode}");
                 return Ok("Success StationInfo CreateOrUpdate");
             }
 

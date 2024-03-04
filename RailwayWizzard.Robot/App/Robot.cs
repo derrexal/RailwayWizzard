@@ -1,9 +1,7 @@
 ﻿using System.Globalization;
-using System.Net.Http.Json;
-using System.Reflection;
 using System.Web;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using RailwayWizzard.Robot.Core;
 using RzdHack.Robot.Core;
 
@@ -13,6 +11,12 @@ namespace RzdHack.Robot.App
     public class Robot
     {
         private const string _baseUrl = "php_service:8088/routes/";
+        private readonly ILogger _logger;
+
+        public Robot(ILogger logger)
+        {
+            _logger = logger;
+        }
 
         /// <summary>
         /// Получает информацию о свободных местах по заданным параметрам 
@@ -37,13 +41,12 @@ namespace RzdHack.Robot.App
 
             catch (JsonReaderException je)
             {
-                Console.WriteLine("Не удалось распарсить ответ в JSON");
-                Console.WriteLine(jsonResponse);
+                _logger.LogError($"Не удалось распарсить ответ в JSON\n\n{jsonResponse}");
                 throw;
             }
             catch (HttpRequestException e)
             {
-                Console.WriteLine($"Не доступен сервис php \n {e}");
+                _logger.LogError($"Не доступен сервис php\n{e}");
                 throw;
             }
         }

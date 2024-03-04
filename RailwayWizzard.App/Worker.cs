@@ -11,10 +11,11 @@ namespace RailwayWizzard.App
 {
     public class Worker : BackgroundService
     {
-        private readonly ILogger<Worker> _logger;
+        private readonly ILogger _logger;
+        private readonly ILogger<StationInfoController> _loggerStationInfoController;
         private readonly IDbContextFactory<RailwayWizzardAppContext> _contextFactory;
         private static readonly Dictionary<int, int> _taskDictionary = new();
-        public Worker(ILogger<Worker> logger, IDbContextFactory<RailwayWizzardAppContext> contextFactory)
+        public Worker(ILogger<Worker> logger, ILogger<StationInfoController> _loggerStationInfoController, IDbContextFactory<RailwayWizzardAppContext> contextFactory)
         {
             _logger = logger;
             _contextFactory = contextFactory;
@@ -46,21 +47,21 @@ namespace RailwayWizzard.App
                     {
                         //Дозаполняем кода городов
                         task.ArrivalStationCode =
-                            (await new StationInfoController(_context).GetByName(
+                            (await new StationInfoController(_context, _loggerStationInfoController).GetByName(
                                 new StationInfo { StationName = task.ArrivalStation })).ExpressCode;
                         task.DepartureStationCode =
-                            (await new StationInfoController(_context).GetByName(
+                            (await new StationInfoController(_context, _loggerStationInfoController).GetByName(
                                 new StationInfo { StationName = task.DepartureStation })).ExpressCode;
                     }
 
                     //Запускаем задачу новым потоком 
-                    var t = new Thread(() => new StepsUsingHttpClient().Notification(task));
+                    var t = new Thread(() => new StepsUsingHttpClient(_logger).Notification(task));
                     try
                     {
                         t.Start();
                         //Добавляем в коллекцию номер задачи-номер потока
                         _taskDictionary.Add(task.Id, t.ManagedThreadId);
-                        _logger.LogInformation($"Запущена задача номер: {task.Id} в потоке номер: {t.ManagedThreadId}");
+                        _logger.LogInformation($"Run Task:{task.Id} in Thread:{t.ManagedThreadId}");
 
                     }
                     catch
@@ -70,9 +71,8 @@ namespace RailwayWizzard.App
                         {
                             var item = _taskDictionary.FirstOrDefault(task => task.Value == t.ManagedThreadId);
                             _taskDictionary.Remove(item.Key);
+                            _logger.LogInformation($"Stopping task:{task.Id} and Thread:{t.ManagedThreadId}");
                             t.Abort();
-                            //По идее это вызовет критическую ошибку и окерстратор перезапустит контейнер
-                            throw;
                         }
                     }
                 }

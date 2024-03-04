@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RailwayWizzard.App.Data;
+using RailwayWizzard.Core;
 using RzdHack.Robot.Core;
 
 
@@ -11,10 +12,12 @@ namespace RailwayWizzard.App.Controllers
     public class UsersController : Controller
     {
         private readonly RailwayWizzardAppContext _context;
+        private readonly ILogger _logger;
 
-        public UsersController(RailwayWizzardAppContext context)
+        public UsersController(RailwayWizzardAppContext context, ILogger<UsersController> logger)
         {
-            _context=context;
+            _context = context;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -38,6 +41,7 @@ namespace RailwayWizzard.App.Controllers
                     _context.Update(currentUser);
                 }
                 await _context.SaveChangesAsync();
+                _logger.LogTrace($"Success create or update User. IdTg:{user.IdTg} Username:{user.Username}");
                 return Ok("Success User Create");
             }
 

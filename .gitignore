@@ -252,8 +252,8 @@ paket-files/
 *.sln.iml
 
 #PHP
-/vendor/*
+/RailwayWizzard.RzdApi/vendor/
 
 #PYTHON Bot
 ./RailwayWizzard.Bot/Bot/.env
-/RailwayWizzard.Bot/__pycache__/
+./RailwayWizzard.Bot/__pycache__/

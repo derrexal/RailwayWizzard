@@ -3,10 +3,11 @@ from RZD import API
 from bs4 import BeautifulSoup
 from Bot.API import *
 
+
 # TODO: объединить проверки по группам(время, дата, город) и в каждом методе (условно main_date_validate)
 #  возвращать сообщение, которое мы напечатаем юзеру. Улучшим читабельность кода бота
 
-#TODO: не используется?
+# TODO: не используется?
 def crunch_validator(input_time):
     try:
         response = API.get_railway_list()
@@ -21,21 +22,24 @@ def json_serial(obj):
     """ Вспомогательная функция форматирующая дату в JSON """
     if isinstance(obj, (datetime, date)):
         return obj.isoformat()
-    raise TypeError ("Type %s not serializable" % type(obj))
+    raise TypeError("Type %s not serializable" % type(obj))
 
 
+# TODO: эту проверку можно упростить и уточнить одновременно.
+# Отправить запрос к АПИ для получения списка поездок на этот день
+# И если таких нет - значит и билет купить нельзя - значит и валидацию не проходит
 def date_limits_validate(input_date_text):
     try:
         input_date = datetime.strptime(input_date_text, '%d.%m.%Y')
-        #купить билет на вчера, очевидно, нельзя
+        # купить билет на вчера, очевидно, нельзя
         if input_date.date() < datetime.now().date():
             return None
-        #90 суток от текущей даты - окончание срока продажи билетов на поезда по России
-        #120 суток от текущей даты - на позда "Красная стрела", "Экспресс"
+        # 90 суток от текущей даты - окончание срока продажи билетов на поезда по России
+        # 120 суток от текущей даты - на позда "Красная стрела", "Экспресс"
         # и на летний период для поездов "Сапсан", "Невский экспресс", "Премиум", "Океан"
         if input_date.date() >= datetime.now().date() + timedelta(120):
             return None
-        return input_date #возвращаю это только чтобы не было None. Нигде не используется
+        return input_date  # возвращаю это только чтобы не было None. Нигде не используется
     except Exception as e:
         print(e)
         raise e
@@ -50,7 +54,7 @@ def date_format_validate(input_date_text):
         # TODO: Пока отключаю успешную валидацию даты без указания года
         # TODO: Обязательно в валидацию добавить соответствие временному интервалу: сегодня + год (н-р)
         # elif len(input_date.split('.')) == 2:
-        #Todo: Баг. Если в конце года создавать уведомление на январь без указания года непосредственно - дата будет н.р. 07.01.2023. А Должно быть 2024
+        # Todo: Баг. Если в конце года создавать уведомление на январь без указания года непосредственно - дата будет н.р. 07.01.2023. А Должно быть 2024
         #     this_year = datetime.today().year
         #     input_date += '.' + this_year.__str__()  # добавляем год к дате
         #     datetime.strptime(input_date, '%d.%m.%Y')
@@ -116,7 +120,7 @@ async def station_validate(input_station):
         expressCode = await get_station_info_by_name(input_station)
         if not expressCode is None:
             return expressCode
-        #Иначе
+        # Иначе
         result_json = API.get_stations(input_station)
         if result_json is None:
             return None

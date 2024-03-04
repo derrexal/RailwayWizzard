@@ -53,14 +53,14 @@ namespace RzdHack.Robot.App
             }
             catch (Exception e)
             {
-                _logger.LogError(e);
+                _logger.LogError(e.ToString());
                 throw;
             }
         }
 
         public async Task<List<string>> GetFreeSeats(NotificationTask task)
         {
-            Robot robot = new();
+            Robot robot = new(_logger);
             List<string> result;
             do
             {
@@ -71,7 +71,7 @@ namespace RzdHack.Robot.App
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError(e);
+                    _logger.LogError(e.ToString());
                     throw;
                 }
             }

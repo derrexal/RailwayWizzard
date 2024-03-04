@@ -114,12 +114,12 @@ async def third_step_notification(update: Update, context: CallbackContext):
             await update.message.reply_text('На указанную дату билеты не продаются')
             await update.message.reply_text(text='Укажите <strong>дату отправления</strong>',
                                             parse_mode=ParseMode.HTML)
+            return 3
 
         context.user_data[2] = date_and_date_json['date']  # Дата в формате даты
         context.user_data[22] = date_and_date_json['date_text'] #Дата в формате строки
         await update.message.reply_text(text='Укажите <strong>время отправления</strong>',
                                         parse_mode=ParseMode.HTML)
-
         return 4
 
     except Exception as e:

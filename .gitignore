@@ -256,4 +256,4 @@ paket-files/
 
 #PYTHON Bot
 ./RailwayWizzard.Bot/Bot/.env
-/RailwayWizzard.Bot/__pycache__/server.cpython-311.pyc
+/RailwayWizzard.Bot/__pycache__/

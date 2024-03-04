@@ -35,6 +35,7 @@ def date_limits_validate(input_date_text):
         # и на летний период для поездов "Сапсан", "Невский экспресс", "Премиум", "Океан"
         if input_date.date() >= datetime.now().date() + timedelta(120):
             return None
+        return input_date #возвращаю это только чтобы не было None. Нигде не используется
     except Exception as e:
         print(e)
         raise e

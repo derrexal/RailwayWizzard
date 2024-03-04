@@ -12,6 +12,9 @@ namespace RzdHack.Robot.App
 {
     public class Robot
     {
+        //private const string _baseUrl = "0.0.0.0:8000/routes/";
+        //private const string _baseUrl = "localhost:8000/routes/";
+        //private const string _baseUrl = "http://host.docker.internal:8000/routes/";
         private const string _baseUrl = "php_service:8088/routes/";
 
         /// <summary>
@@ -23,12 +26,11 @@ namespace RzdHack.Robot.App
         {
             var url = SetUrlFromGetTicket(task);
             HttpClient client = new HttpClient();
-            string? jsonResponse = null;
             try
             {
                 using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
                 using HttpResponseMessage response = await client.SendAsync(request);
-                jsonResponse = await response.Content.ReadAsStringAsync();
+                var jsonResponse = await response.Content.ReadAsStringAsync();
                 //JArray obj = JsonConvert.DeserializeObject<JArray>(сontent);
                 var roots = JsonConvert.DeserializeObject<List<Root>>(jsonResponse);
                 if (roots != null)
@@ -39,7 +41,6 @@ namespace RzdHack.Robot.App
             catch (JsonReaderException je)
             {
                 Console.WriteLine("Не удалось распарсить ответ в JSON");
-                Console.WriteLine(jsonResponse);
                 throw;
             }
             catch (HttpRequestException e)

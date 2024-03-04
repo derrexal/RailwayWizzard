@@ -1,9 +1,6 @@
-import json
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from RZD import API
 from bs4 import BeautifulSoup
-#from jsonschema import validate
-#from TCP.schemas_json import schema
 from Bot.API import *
 
 # TODO: объединить проверки по группам(время, дата, город) и в каждом методе (условно main_date_validate)
@@ -19,26 +16,28 @@ def crunch_validator(input_time):
         raise e
 
 
-# TODO:Какую максимальную дату можно ввести?
-# ограничение чтобы нельзя было ввести меньше чем сегодня
-def date_actual_validate(input_date):
-    try:
-        today_date = datetime.today()
-        input_date = datetime.strptime(input_date, '%d.%m.%Y')
-        if input_date < today_date:
-            return False
-        return True
-    except Exception as e:
-        print(e)
-        raise e
-
-
 def json_serial(obj):
     """JSON serializer for objects not serializable by default json code"""
     """ Вспомогательная функция форматирующая дату в JSON """
     if isinstance(obj, (datetime, date)):
         return obj.isoformat()
     raise TypeError ("Type %s not serializable" % type(obj))
+
+
+def date_limits_validate(input_date_text):
+    try:
+        input_date = datetime.strptime(input_date_text, '%d.%m.%Y')
+        #купить билет на вчера, очевидно, нельзя
+        if input_date.date() < datetime.now().date():
+            return None
+        #90 суток от текущей даты - окончание срока продажи билетов на поезда по России
+        #120 суток от текущей даты - на позда "Красная стрела", "Экспресс"
+        # и на летний период для поездов "Сапсан", "Невский экспресс", "Премиум", "Океан"
+        if input_date.date() >= datetime.now().date() + timedelta(120):
+            return None
+    except Exception as e:
+        print(e)
+        raise e
 
 
 def date_format_validate(input_date_text):

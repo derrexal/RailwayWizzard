@@ -106,14 +106,17 @@ async def third_step_notification(update: Update, context: CallbackContext):
 
         date_and_date_json = date_format_validate(update.message.text)
         if date_and_date_json is None:
-            await update.message.reply_text('Формат даты должен быть dd.mm.yyyy') 
-                                            #или dd.mm')
+            await update.message.reply_text('Формат даты должен быть dd.mm.yyyy')
             await update.message.reply_text(text='Укажите <strong>дату отправления</strong>',
                                             parse_mode=ParseMode.HTML)
             return 3
-        date = date_and_date_json['date']
-        context.user_data[2] = date  # Дата в формате даты
-        context.user_data[22] = date_format_validate(update.message.text)['date_text'] #Дата в формате строки
+        if date_limits_validate(update.message.text) is None:
+            await update.message.reply_text('На указанную дату билеты не продаются')
+            await update.message.reply_text(text='Укажите <strong>дату отправления</strong>',
+                                            parse_mode=ParseMode.HTML)
+
+        context.user_data[2] = date_and_date_json['date']  # Дата в формате даты
+        context.user_data[22] = date_and_date_json['date_text'] #Дата в формате строки
         await update.message.reply_text(text='Укажите <strong>время отправления</strong>',
                                         parse_mode=ParseMode.HTML)
 

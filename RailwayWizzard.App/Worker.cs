@@ -53,28 +53,31 @@ namespace RailwayWizzard.App
                             (await new StationInfoController(_context, _loggerStationInfoController).GetByName(
                                 new StationInfo { StationName = task.DepartureStation })).ExpressCode;
                     }
-
-                    //Запускаем задачу новым потоком 
-                    var t = new Thread(() => new StepsUsingHttpClient(_logger).Notification(task));
                     try
                     {
-                        t.Start();
-                        //Добавляем в коллекцию номер задачи-номер потока
-                        _taskDictionary.Add(task.Id, t.ManagedThreadId);
-                        _logger.LogInformation($"Run Task:{task.Id} in Thread:{t.ManagedThreadId}");
-
-                    }
-                    catch
-                    {
-                        //Если задача вызвала ошибку - удаляем ее из списка активных задач и гасим поток
-                        if (_taskDictionary.ContainsValue(t.ManagedThreadId))
+                        //Инициализируем задачу в новом потоке
+                        var t = new Thread(() => new StepsUsingHttpClient(_logger).Notification(task));
+                        try
                         {
-                            var item = _taskDictionary.FirstOrDefault(task => task.Value == t.ManagedThreadId);
-                            _taskDictionary.Remove(item.Key);
-                            _logger.LogInformation($"Stopping task:{task.Id} and Thread:{t.ManagedThreadId}");
-                            t.Abort();
+                            t.Start();
+                            //Добавляем в коллекцию номер задачи-номер потока
+                            _taskDictionary.Add(task.Id, t.ManagedThreadId);
+                            _logger.LogInformation($"Run Task:{task.Id} in Thread:{t.ManagedThreadId} Count Tasks: {_taskDictionary.Count}");
+
                         }
+                        catch
+                        {
+                            //Если задача вызвала ошибку - удаляем ее из списка активных задач и гасим поток
+                            if (_taskDictionary.ContainsValue(t.ManagedThreadId))
+                            {
+                                var item = _taskDictionary.FirstOrDefault(task => task.Value == t.ManagedThreadId);
+                                _taskDictionary.Remove(item.Key);
+                            }
+                            _logger.LogInformation($"Stopping task:{task.Id} and Thread:{t.ManagedThreadId} Count Tasks: {_taskDictionary.Count}");
+                            t.Abort();
+                        } 
                     }
+                    catch { throw; }
                 }
             }
         }

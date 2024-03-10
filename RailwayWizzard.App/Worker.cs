@@ -7,6 +7,7 @@ using RzdHack.Robot.Core;
 using System.Globalization;
 
 
+
 namespace RailwayWizzard.App
 {
     public class Worker : BackgroundService
@@ -35,50 +36,53 @@ namespace RailwayWizzard.App
 
         private async Task DoWork(CancellationToken cancellationToken)
         {
-            await UpdateIsActual();
-
-            var activeNotificationTasks = await GetActive();
-            foreach (var task in activeNotificationTasks)
+            try
             {
-                //Если такая задача еще не запущена
-                if (!_taskDictionary.ContainsKey(task.Id))
+                await UpdateIsActual();
+
+                var activeNotificationTasks = await GetActive();
+
+                foreach (var task in activeNotificationTasks)
                 {
-                    using (var _context = _contextFactory.CreateDbContext())
+                    //Если такая задача еще не запущена
+                    if (!_taskDictionary.ContainsKey(task.Id))
                     {
-                        //Дозаполняем кода городов
-                        task.ArrivalStationCode =
-                            (await new StationInfoController(_context, _loggerStationInfoController).GetByName(
-                                new StationInfo { StationName = task.ArrivalStation })).ExpressCode;
-                        task.DepartureStationCode =
-                            (await new StationInfoController(_context, _loggerStationInfoController).GetByName(
-                                new StationInfo { StationName = task.DepartureStation })).ExpressCode;
-                    }
-                    try
-                    {
+                        using (var _context = _contextFactory.CreateDbContext())
+                        {
+                            //Дозаполняем кода городов
+                            task.ArrivalStationCode =
+                                (await new StationInfoController(_context, _loggerStationInfoController).GetByName(
+                                    new StationInfo { StationName = task.ArrivalStation })).ExpressCode;
+                            task.DepartureStationCode =
+                                (await new StationInfoController(_context, _loggerStationInfoController).GetByName(
+                                    new StationInfo { StationName = task.DepartureStation })).ExpressCode;
+                        }
                         //Инициализируем задачу в новом потоке
                         var t = new Thread(() => new StepsUsingHttpClient(_logger).Notification(task));
-                        try
-                        {
-                            t.Start();
-                            //Добавляем в коллекцию номер задачи-номер потока
-                            _taskDictionary.Add(task.Id, t.ManagedThreadId);
-                            _logger.LogInformation($"Run Task:{task.Id} in Thread:{t.ManagedThreadId} Count Tasks: {_taskDictionary.Count}");
+                        //Запуск задачи
+                        t.Start();
+                        //Добавление в коллекцию номера задачи и номер потока, в котором эта задача запущена
+                        _taskDictionary.Add(task.Id, t.ManagedThreadId);
+                        _logger.LogInformation($"Run Task:{task.Id} in Thread:{t.ManagedThreadId} Count Tasks: {_taskDictionary.Count}");
 
-                        }
-                        catch
-                        {
-                            //Если задача вызвала ошибку - удаляем ее из списка активных задач и гасим поток
-                            if (_taskDictionary.ContainsValue(t.ManagedThreadId))
-                            {
-                                var item = _taskDictionary.FirstOrDefault(task => task.Value == t.ManagedThreadId);
-                                _taskDictionary.Remove(item.Key);
-                            }
-                            _logger.LogInformation($"Stopping task:{task.Id} and Thread:{t.ManagedThreadId} Count Tasks: {_taskDictionary.Count}");
-                            t.Abort();
-                        } 
                     }
-                    catch { throw; }
                 }
+
+            }
+            catch 
+            {
+                //Если задача вызвала ошибку - удаляем ее из списка активных задач и гасим поток
+                var currentThread = Thread.CurrentThread;
+                if (_taskDictionary.ContainsValue(currentThread.ManagedThreadId))
+                {
+                    var item = _taskDictionary.FirstOrDefault(task => task.Value == c.ManagedThreadId);
+                    _taskDictionary.Remove(item.Key);
+                    _logger.LogInformation($"Remove task: {item.Key}");
+                }
+                _logger.LogInformation($"Stopping Thread:{currentThread.ManagedThreadId} Count Tasks: {_taskDictionary.Count}");
+                currentThread.Abort();
+                _logger.LogInformation($"Abort Thread: {currentThread.ManagedThreadId}");
+                throw;
             }
         }
 

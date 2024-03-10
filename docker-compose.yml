@@ -26,7 +26,6 @@ services:
       - "5433:5433"
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
-      - ./logs:/var/lib/postgresql/data
     command: -p 5433
     networks:
       - my-network
@@ -68,4 +67,3 @@ networks:
 
 volumes:
   postgres-data:
-  logs:  

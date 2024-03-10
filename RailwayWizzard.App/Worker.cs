@@ -75,7 +75,7 @@ namespace RailwayWizzard.App
                 var currentThread = Thread.CurrentThread;
                 if (_taskDictionary.ContainsValue(currentThread.ManagedThreadId))
                 {
-                    var item = _taskDictionary.FirstOrDefault(task => task.Value == c.ManagedThreadId);
+                    var item = _taskDictionary.FirstOrDefault(task => task.Value == currentThread.ManagedThreadId);
                     _taskDictionary.Remove(item.Key);
                     _logger.LogInformation($"Remove task: {item.Key}");
                 }

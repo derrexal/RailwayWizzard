@@ -67,7 +67,7 @@ namespace RzdHack.Robot.App
                 try
                 {
                     result = await robot.GetTicket(task);
-                    Thread.Sleep(1000 * 60 * 3); //3 минуты
+                    Thread.Sleep(1000 * 30 * 3); //1.5 минуты
                 }
                 catch (Exception e)
                 {

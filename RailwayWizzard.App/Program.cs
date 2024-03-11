@@ -39,7 +39,6 @@ namespace RailwayWizzard.App
             var factory = app.Services.GetRequiredService<IDbContextFactory<RailwayWizzardAppContext>>();
             using(var context = factory.CreateDbContext())
                 context.Database.Migrate();
-            Console.WriteLine("Done applying migrations");
 
             // Configure the HTTP request pipeline.
 

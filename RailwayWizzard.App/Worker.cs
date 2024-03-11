@@ -62,7 +62,7 @@ namespace RailwayWizzard.App
                 }
             }
             catch 
-            { throw; }
+            { await base.StopAsync(cancellationToken); }
         }
 
         /// <summary>

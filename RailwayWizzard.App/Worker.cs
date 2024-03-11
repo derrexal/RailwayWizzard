@@ -15,7 +15,6 @@ namespace RailwayWizzard.App
         private readonly ILogger _logger;
         private readonly ILogger<StationInfoController> _loggerStationInfoController;
         private readonly IDbContextFactory<RailwayWizzardAppContext> _contextFactory;
-        private static readonly Dictionary<int, int> _taskDictionary = new();
         public Worker(ILogger<Worker> logger, ILogger<StationInfoController> _loggerStationInfoController, IDbContextFactory<RailwayWizzardAppContext> contextFactory)
         {
             _logger = logger;
@@ -29,8 +28,8 @@ namespace RailwayWizzard.App
                 _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
 
                 await DoWork(cancellationToken);
-                //Запускается 1 раз в 15 минут
-                await Task.Delay(1000*60*15, cancellationToken);
+                //Запускается 1 раз в 16 минут
+                await Task.Delay(1000*60*16, cancellationToken);
             }
         }
 
@@ -44,46 +43,26 @@ namespace RailwayWizzard.App
 
                 foreach (var task in activeNotificationTasks)
                 {
-                    //Если такая задача еще не запущена
-                    if (!_taskDictionary.ContainsKey(task.Id))
+                    using (var _context = _contextFactory.CreateDbContext())
                     {
-                        using (var _context = _contextFactory.CreateDbContext())
-                        {
-                            //Дозаполняем кода городов
-                            task.ArrivalStationCode =
-                                (await new StationInfoController(_context, _loggerStationInfoController).GetByName(
-                                    new StationInfo { StationName = task.ArrivalStation })).ExpressCode;
-                            task.DepartureStationCode =
-                                (await new StationInfoController(_context, _loggerStationInfoController).GetByName(
-                                    new StationInfo { StationName = task.DepartureStation })).ExpressCode;
-                        }
-                        //Инициализируем задачу в новом потоке
-                        var t = new Thread(() => new StepsUsingHttpClient(_logger).Notification(task));
-                        //Запуск задачи
-                        t.Start();
-                        //Добавление в коллекцию номера задачи и номер потока, в котором эта задача запущена
-                        _taskDictionary.Add(task.Id, t.ManagedThreadId);
-                        _logger.LogInformation($"Run Task:{task.Id} in Thread:{t.ManagedThreadId} Count Tasks: {_taskDictionary.Count}");
-
+                        //Дозаполняем кода городов
+                        task.ArrivalStationCode =
+                            (await new StationInfoController(_context, _loggerStationInfoController).GetByName(
+                                new StationInfo { StationName = task.ArrivalStation })).ExpressCode;
+                        task.DepartureStationCode =
+                            (await new StationInfoController(_context, _loggerStationInfoController).GetByName(
+                                new StationInfo { StationName = task.DepartureStation })).ExpressCode;
                     }
-                }
+                    //Инициализируем задачу в новом потоке
+                    var t = new Thread(() => new StepsUsingHttpClient(_logger).Notification(task));
+                    //Запуск задачи
+                    t.Start();
+                    _logger.LogInformation($"Run Task:{task.Id} in Thread:{t.ManagedThreadId}");
 
+                }
             }
             catch 
-            {
-                //Если задача вызвала ошибку - удаляем ее из списка активных задач и гасим поток
-                var currentThread = Thread.CurrentThread;
-                if (_taskDictionary.ContainsValue(currentThread.ManagedThreadId))
-                {
-                    var item = _taskDictionary.FirstOrDefault(task => task.Value == currentThread.ManagedThreadId);
-                    _taskDictionary.Remove(item.Key);
-                    _logger.LogInformation($"Remove task: {item.Key}");
-                }
-                _logger.LogInformation($"Stopping Thread:{currentThread.ManagedThreadId} Count Tasks: {_taskDictionary.Count}");
-                currentThread.Abort();
-                _logger.LogInformation($"Abort Thread: {currentThread.ManagedThreadId}");
-                throw;
-            }
+            { throw; }
         }
 
         /// <summary>
@@ -131,14 +110,13 @@ namespace RailwayWizzard.App
 
         public override async Task StopAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Worker stopped\n");
+            _logger.LogInformation($"Worker stopped at: {DateTimeOffset.Now}");
             await base.StopAsync(cancellationToken);
         }
 
 
         public override void Dispose()
         {
-            _taskDictionary.Clear();
             base.Dispose();
         }
     }

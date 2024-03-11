@@ -62,20 +62,25 @@ namespace RzdHack.Robot.App
         {
             Robot robot = new(_logger);
             List<string> result;
-            do
+            int count = 0;
+            try
             {
-                try
+                do
                 {
+                    //TODO: Переделать на более приближенный способ перезапуска задач
+                    if (count >= 10) // 1.5 * 10 = 15 мин (1 раз в 16 минут запускается воркер, 1 минута - перекур))
+                        throw new Exception($"Поток {Thread.CurrentThread.ManagedThreadId} закончил свое выполнение");
                     result = await robot.GetTicket(task);
+                    count++;
                     Thread.Sleep(1000 * 30 * 3); //1.5 минуты
                 }
-                catch (Exception e)
-                {
-                    _logger.LogError(e.ToString());
-                    throw;
-                }
+                while (result.Count == 0);
             }
-            while (result.Count == 0);
+            catch (Exception e)
+            {
+                _logger.LogError(e.ToString());
+                throw;
+            }
 
             return result;
         }

@@ -20,11 +20,12 @@ namespace RzdHack.Robot.App
         public async Task Notification(NotificationTask input)
         {
             string railwayDataText = $"{input.DepartureStation} - {input.ArrivalStation} {input.TimeFrom} {input.DateFrom.ToString("dd.MM.yyy", CultureInfo.InvariantCulture)}";
+            int count = 1;
             try
             {
                 while (true)
                 {
-                    _logger.LogTrace($"Рейс {railwayDataText} Попытка номер {count}");
+                    _logger.LogTrace($"Задача: {input.Id} Рейс: {railwayDataText} Попытка номер: {count}");
                     var freeSeats = await GetFreeSeats(input);
 
                     // Формируется текст уведомления о наличии мест
@@ -47,6 +48,7 @@ namespace RzdHack.Robot.App
                     if (response.StatusCode != HttpStatusCode.OK)
                         //Это погасит весь метод!
                         throw new Exception("Не удалось отправить сообщение пользователю");
+                    count++;
                 }
             }
             catch (Exception e)

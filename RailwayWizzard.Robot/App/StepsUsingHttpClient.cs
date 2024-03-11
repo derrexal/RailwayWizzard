@@ -20,7 +20,6 @@ namespace RzdHack.Robot.App
         public async Task Notification(NotificationTask input)
         {
             string railwayDataText = $"{input.DepartureStation} - {input.ArrivalStation} {input.TimeFrom} {input.DateFrom.ToString("dd.MM.yyy", CultureInfo.InvariantCulture)}";
-            long count = 1;
             try
             {
                 while (true)
@@ -48,11 +47,11 @@ namespace RzdHack.Robot.App
                     if (response.StatusCode != HttpStatusCode.OK)
                         //Это погасит весь метод!
                         throw new Exception("Не удалось отправить сообщение пользователю");
-                    count++;
                 }
             }
             catch (Exception e)
             {
+                _logger.LogError($"Error Notification method. Task data:{railwayDataText}");
                 _logger.LogError(e.ToString());
                 throw;
             }

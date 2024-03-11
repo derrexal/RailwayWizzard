@@ -61,8 +61,11 @@ namespace RailwayWizzard.App
 
                 }
             }
-            catch 
-            { await base.StopAsync(cancellationToken); }
+            catch
+            {
+                _logger.LogWarning($"Stop Thread:{t.ManagedThreadId}");
+                await base.StopAsync(cancellationToken); 
+            }
         }
 
         /// <summary>

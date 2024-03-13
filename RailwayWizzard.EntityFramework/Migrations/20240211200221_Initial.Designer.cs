@@ -2,13 +2,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using RailwayWizzard.App.Data;
-
+using RailwayWizzard.EntityFrameworkCore.Data;
 #nullable disable
 
-namespace RailwayWizzard.App.Migrations
+namespace RailwayWizzard.EntityFrameworkCore.Migrations
 {
     [DbContext(typeof(RailwayWizzardAppContext))]
     [Migration("20240211200221_Initial")]

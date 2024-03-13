@@ -2,17 +2,15 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using RailwayWizzard.App.Data;
+using RailwayWizzard.EntityFrameworkCore.Data;
 
 #nullable disable
 
-namespace RailwayWizzard.App.Migrations
+namespace RailwayWizzard.EntityFrameworkCore.Migrations
 {
     [DbContext(typeof(RailwayWizzardAppContext))]
-    [Migration("20240211200422_AddStationInfoTable")]
-    partial class AddStationInfoTable
+    [Migration("20240213150617_AddTableNotificationTasks")]
+    partial class AddTableNotificationTasks
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -42,6 +40,46 @@ namespace RailwayWizzard.App.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("AppStationInfo");
+                });
+
+            modelBuilder.Entity("RzdHack_Robot.Core.NotificationTask", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ArrivalStation")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("DateFrom")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DepartureStation")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsActual")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("TimeFrom")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("TotalCountNotification")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AppNotificationTasks");
                 });
 
             modelBuilder.Entity("RzdHack_Robot.Core.User", b =>

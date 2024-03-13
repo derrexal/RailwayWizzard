@@ -1,4 +1,4 @@
-﻿namespace RzdHack.Robot.Core
+﻿namespace RailwayWizzard.Robot.Core
 {
     public class ResponseToUser
     {

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace RailwayWizzard.App.Migrations
+namespace RailwayWizzard.EntityFrameworkCore.Migrations
 {
     /// <inheritdoc />
     public partial class RemoveTotalCountNotificationField : Migration

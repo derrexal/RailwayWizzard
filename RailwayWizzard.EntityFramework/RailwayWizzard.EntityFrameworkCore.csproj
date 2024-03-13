@@ -7,8 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+	<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.5" />
+	<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.11" />
+  </ItemGroup>
+		
+  <ItemGroup>
     <ProjectReference Include="..\RailwayWizzard.Core\RailwayWizzard.Core.csproj" />
-    <ProjectReference Include="..\RailwayWizzard.EntityFramework\RailwayWizzard.EntityFrameworkCore.csproj" />
   </ItemGroup>
 
 </Project>

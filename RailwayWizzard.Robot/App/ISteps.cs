@@ -1,6 +1,7 @@
-﻿using RzdHack.Robot.Core;
+﻿using RailwayWizzard.Core;
 
-namespace RzdHack.Robot.App
+
+namespace RailwayWizzard.Robot.App
 {
     public interface ISteps
     {

@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace RailwayWizzard.App.Migrations
+namespace RailwayWizzard.EntityFrameworkCore.Migrations
 {
     /// <inheritdoc />
     public partial class ChangeNotificationTaskTable : Migration

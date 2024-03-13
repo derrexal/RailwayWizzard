@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using RailwayWizzard.App.Data;
+using RailwayWizzard.EntityFrameworkCore.Data;
 
 
 namespace RailwayWizzard.App.Controllers

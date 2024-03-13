@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RailwayWizzard.Core;
-using RzdHack.Robot.Core;
 
-namespace RailwayWizzard.App.Data
+
+namespace RailwayWizzard.EntityFrameworkCore.Data
 {
     public class RailwayWizzardAppContext : DbContext
     {

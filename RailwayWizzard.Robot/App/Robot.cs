@@ -2,11 +2,11 @@
 using System.Web;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using RailwayWizzard.Core;
 using RailwayWizzard.Robot.Core;
-using RzdHack.Robot.Core;
 
 
-namespace RzdHack.Robot.App
+namespace RailwayWizzard.Robot.App
 {
     public class Robot
     {

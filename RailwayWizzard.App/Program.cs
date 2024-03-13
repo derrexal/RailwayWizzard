@@ -1,7 +1,5 @@
-﻿using Microsoft.AspNetCore;
-using Microsoft.EntityFrameworkCore;
-using RailwayWizzard.App.Data;
-
+﻿using Microsoft.EntityFrameworkCore;
+using RailwayWizzard.EntityFrameworkCore.Data;
 
 namespace RailwayWizzard.App
 {
@@ -47,6 +45,7 @@ namespace RailwayWizzard.App
             app.MapControllers();
 
             app.Run();
+            //TODO: Удалить неиспользуемые ссылки в проектах
         }
     }
 }

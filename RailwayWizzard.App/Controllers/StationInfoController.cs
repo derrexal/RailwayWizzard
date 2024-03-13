@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using RailwayWizzard.App.Data;
 using RailwayWizzard.Core;
+using RailwayWizzard.EntityFrameworkCore.Data;
 
 
 namespace RailwayWizzard.App.Controllers

@@ -4,7 +4,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace RailwayWizzard.App.Migrations
+namespace RailwayWizzard.EntityFrameworkCore.Migrations
 {
     /// <inheritdoc />
     public partial class AddTableNotificationTasks : Migration

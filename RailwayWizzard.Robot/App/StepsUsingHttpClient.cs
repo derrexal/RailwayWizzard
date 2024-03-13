@@ -2,31 +2,42 @@
 using System.Net;
 using System.Net.Http.Json;
 using Microsoft.Extensions.Logging;
-using RzdHack.Robot.Core;
+using RailwayWizzard.Robot.Core;
+using RailwayWizzard.Core;
+using RailwayWizzard.EntityFrameworkCore.Data;
+using Microsoft.EntityFrameworkCore;
 
 
-namespace RzdHack.Robot.App
+namespace RailwayWizzard.Robot.App
 {
     public class StepsUsingHttpClient : ISteps
     {
         private const string API_BOT_URL = "http://bot_service:5000/";
         private readonly ILogger _logger;
+        private readonly IDbContextFactory<RailwayWizzardAppContext> _contextFactory;
 
-        public StepsUsingHttpClient(ILogger logger)
+        public StepsUsingHttpClient(ILogger logger, IDbContextFactory<RailwayWizzardAppContext> contextFactory)
         {
             _logger = logger;
+            _contextFactory = contextFactory;
         }
 
         public async Task Notification(NotificationTask inputNotificationTask)
         {
             string railwayDataText = $"{inputNotificationTask.DepartureStation} - {inputNotificationTask.ArrivalStation} {inputNotificationTask.TimeFrom} {inputNotificationTask.DateFrom.ToString("dd.MM.yyy", CultureInfo.InvariantCulture)}";
             int count = 1;
-
+            string messageNotification = $"Задача: {inputNotificationTask.Id} Рейс: {railwayDataText} Попытка номер: {count}";
             try
             {
+                using (var _context = _contextFactory.CreateDbContext())
+                {
+                    inputNotificationTask.IsWorked = true;
+                    await _context.SaveChangesAsync();
+                }
+
                 while (true)
                 {
-                    _logger.LogTrace($"Задача: {inputNotificationTask.Id} Рейс: {railwayDataText} Попытка номер: {count}");
+                    _logger.LogTrace(messageNotification);
                     var freeSeats = await GetFreeSeats(inputNotificationTask);
 
                     // Формируется текст уведомления о наличии мест
@@ -54,7 +65,13 @@ namespace RzdHack.Robot.App
             }
             catch (Exception e)
             {
-                _logger.LogError($"Error Notification method. Task data:{railwayDataText}");
+                using (var _context = _contextFactory.CreateDbContext())
+                {
+                    inputNotificationTask.IsWorked = false;
+                    await _context.SaveChangesAsync();
+                }
+
+                _logger.LogError($"Ошибка в методе Notification. {messageNotification}");
                 _logger.LogError(e.ToString());
                 throw;
             }
@@ -73,11 +90,7 @@ namespace RzdHack.Robot.App
                 }
                 while (result.Count == 0);
             }
-            catch (Exception e)
-            {
-                _logger.LogError(e.ToString());
-                throw;
-            }
+            catch { throw; }
 
             return result;
         }

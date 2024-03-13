@@ -2,7 +2,8 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Abp.Domain.Entities;
 
-namespace RzdHack.Robot.Core;
+
+namespace RailwayWizzard.Core;
 
 [Table("AppUsers")]
 public class User: Entity

@@ -1,28 +1,29 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
+
 #nullable disable
 
-namespace RailwayWizzard.App.Migrations
+namespace RailwayWizzard.EntityFrameworkCore.Migrations
 {
     /// <inheritdoc />
-    public partial class AddStationInfoTable : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "AppStationInfo",
+                name: "AppUsers",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    ExpressCode = table.Column<long>(type: "bigint", nullable: false),
-                    StationName = table.Column<string>(type: "text", nullable: false)
+                    IdTg = table.Column<long>(type: "bigint", nullable: false),
+                    Username = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AppStationInfo", x => x.Id);
+                    table.PrimaryKey("PK_AppUsers", x => x.Id);
                 });
         }
 
@@ -30,7 +31,7 @@ namespace RailwayWizzard.App.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "AppStationInfo");
+                name: "AppUsers");
         }
     }
 }

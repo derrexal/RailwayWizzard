@@ -1,8 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using RailwayWizzard.App.Controllers;
-using RailwayWizzard.App.Data;
-using RzdHack.Robot.App;
-using RzdHack.Robot.Core;
+using RailwayWizzard.Core;
+using RailwayWizzard.EntityFrameworkCore.Data;
+using RailwayWizzard.Robot.App;
 using System.Globalization;
 
 
@@ -11,9 +10,10 @@ namespace RailwayWizzard.App
     public class Worker : BackgroundService
     {
         private readonly ILogger _logger;
-        private readonly ILogger<StationInfoController> _loggerStationInfoController;
         private readonly IDbContextFactory<RailwayWizzardAppContext> _contextFactory;
-        public Worker(ILogger<Worker> logger, ILogger<StationInfoController> _loggerStationInfoController, IDbContextFactory<RailwayWizzardAppContext> contextFactory)
+        public Worker(
+            ILogger<Worker> logger, 
+            IDbContextFactory<RailwayWizzardAppContext> contextFactory)
         {
             _logger = logger;
             _contextFactory = contextFactory;
@@ -42,40 +42,24 @@ namespace RailwayWizzard.App
 
                 foreach (var task in notWorkedNotificationTasks)
                 {
-                    try
+                    using (var _context = _contextFactory.CreateDbContext())
                     {
-                        using (var _context = _contextFactory.CreateDbContext())
-                        {
-                            //TODO: Вынести наполнение в другое место?
-                            //Дозаполняем кода городов
-                            task.ArrivalStationCode = (await _context.StationInfo.FirstOrDefaultAsync(s => s.StationName == task.ArrivalStation))!.ExpressCode;
-                            task.DepartureStationCode = (await _context.StationInfo.FirstOrDefaultAsync(s => s.StationName == task.DepartureStation))!.ExpressCode;
-                        }
-                        new StepsUsingHttpClient(_logger).Notification(task);
-                        using (var _context = _contextFactory.CreateDbContext())
-                        {
-                            task.IsWorked = true;
-                            await _context.SaveChangesAsync();
-                        }
-
-                        _logger.LogTrace($"Run Task:{task.Id} in Thread:{Thread.CurrentThread.ManagedThreadId}");
+                        //TODO: Вынести наполнение в другое место?
+                        //Дозаполняем кода городов
+                        task.ArrivalStationCode = (await _context.StationInfo.FirstOrDefaultAsync(s => s.StationName == task.ArrivalStation))!.ExpressCode;
+                        task.DepartureStationCode = (await _context.StationInfo.FirstOrDefaultAsync(s => s.StationName == task.DepartureStation))!.ExpressCode;
                     }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError($"Error in Worker");
-                        _logger.LogError(ex.ToString());
+                    new StepsUsingHttpClient(_logger,_contextFactory).Notification(task);
 
-                        using (var _context = _contextFactory.CreateDbContext())
-                        {
-                            task.IsWorked = false;
-                            await _context.SaveChangesAsync();
-                        }
-
-                        throw;
-                    }
+                    _logger.LogTrace($"Run Task:{task.Id} in Thread:{Thread.CurrentThread.ManagedThreadId}");
                 }
             }
-            catch { throw; }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error in Worker");
+                _logger.LogError(ex.ToString());
+                throw; 
+            }
             
         }
 

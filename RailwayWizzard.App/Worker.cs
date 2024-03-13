@@ -49,7 +49,7 @@ namespace RailwayWizzard.App
                             //TODO: Вынести наполнение в другое место?
                             //Дозаполняем кода городов
                             task.ArrivalStationCode = (await _context.StationInfo.FirstOrDefaultAsync(s => s.StationName == task.ArrivalStation))!.ExpressCode;
-                            task.ArrivalStationCode = (await _context.StationInfo.FirstOrDefaultAsync(s => s.StationName == task.DepartureStation))!.ExpressCode;
+                            task.DepartureStationCode = (await _context.StationInfo.FirstOrDefaultAsync(s => s.StationName == task.DepartureStation))!.ExpressCode;
                         }
                         new StepsUsingHttpClient(_logger).Notification(task);
                         using (var _context = _contextFactory.CreateDbContext())

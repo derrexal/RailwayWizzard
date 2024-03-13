@@ -23,9 +23,9 @@ namespace RzdHack.Robot.App
         /// </summary>
         /// <task name="param"></task>
         /// <returns></returns>
-        public async Task<List<string>> GetTicket(NotificationTask task)
+        public async Task<List<string>> GetTicket(NotificationTask inputNotificationTask)
         {
-            var url = SetUrlFromGetTicket(task);
+            var url = SetUrlFromGetTicket(inputNotificationTask);
             HttpClient client = new HttpClient();
             string? jsonResponse = null;
             try
@@ -35,13 +35,13 @@ namespace RzdHack.Robot.App
                 jsonResponse = await response.Content.ReadAsStringAsync();
                 var roots = JsonConvert.DeserializeObject<List<Root>>(jsonResponse);
                 if (roots != null)
-                    return GetCurrentRouteFromResponse(roots, task.TimeFrom);
+                    return GetCurrentRouteFromResponse(roots, inputNotificationTask.TimeFrom);
                 throw new HttpRequestException("Сервис php не вернул ответ");
             }
 
             catch (JsonReaderException je)
             {
-                _logger.LogError($"Не удалось распарсить ответ в JSON\n\n{jsonResponse}");
+                _logger.LogError($"Не удалось распарсить ответ в JSON.Далее последует стек ошибок php сервиса\n\n{jsonResponse}");
                 throw;
             }
             catch (HttpRequestException e)

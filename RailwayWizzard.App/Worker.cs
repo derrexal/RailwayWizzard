@@ -1,11 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using RailwayWizzard.App.Controllers;
 using RailwayWizzard.App.Data;
-using RailwayWizzard.Core;
 using RzdHack.Robot.App;
 using RzdHack.Robot.Core;
 using System.Globalization;
-
 
 
 namespace RailwayWizzard.App
@@ -28,8 +26,9 @@ namespace RailwayWizzard.App
                 _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
 
                 await DoWork(cancellationToken);
-                //Запускается 1 раз в 16 минут
-                await Task.Delay(1000*60*16, cancellationToken);
+                //TODO: Все-таки хочется, чтобы работа по задаче началась непосредственно после создания
+                //Запускается 1 раз в 15 минут
+                await Task.Delay(1000*60*15, cancellationToken);
             }
         }
 
@@ -37,46 +36,58 @@ namespace RailwayWizzard.App
         {
             try
             {
-                await UpdateIsActual();
+                await UpdateActualStatusNotificationTask();
 
-                var activeNotificationTasks = await GetActive();
+                var notWorkedNotificationTasks = await GetNotWorkedNotificationTasks();
 
-                foreach (var task in activeNotificationTasks)
+                foreach (var task in notWorkedNotificationTasks)
                 {
-                    using (var _context = _contextFactory.CreateDbContext())
+                    try
                     {
-                        //Дозаполняем кода городов
-                        task.ArrivalStationCode =
-                            (await new StationInfoController(_context, _loggerStationInfoController).GetByName(
-                                new StationInfo { StationName = task.ArrivalStation })).ExpressCode;
-                        task.DepartureStationCode =
-                            (await new StationInfoController(_context, _loggerStationInfoController).GetByName(
-                                new StationInfo { StationName = task.DepartureStation })).ExpressCode;
-                    }
-                    //Инициализируем задачу в новом потоке
-                    var t = new Thread(() => new StepsUsingHttpClient(_logger).Notification(task));
-                    //Запуск задачи
-                    t.Start();
-                    _logger.LogInformation($"Run Task:{task.Id} in Thread:{t.ManagedThreadId}");
+                        using (var _context = _contextFactory.CreateDbContext())
+                        {
+                            //TODO: Вынести наполнение в другое место?
+                            //Дозаполняем кода городов
+                            task.ArrivalStationCode = (await _context.StationInfo.FirstOrDefaultAsync(s => s.StationName == task.ArrivalStation))!.ExpressCode;
+                            task.ArrivalStationCode = (await _context.StationInfo.FirstOrDefaultAsync(s => s.StationName == task.DepartureStation))!.ExpressCode;
+                        }
+                        new StepsUsingHttpClient(_logger).Notification(task);
+                        using (var _context = _contextFactory.CreateDbContext())
+                        {
+                            task.IsWorked = true;
+                            await _context.SaveChangesAsync();
+                        }
 
+                        _logger.LogTrace($"Run Task:{task.Id} in Thread:{Thread.CurrentThread.ManagedThreadId}");
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError($"Error in Worker");
+                        _logger.LogError(ex.ToString());
+
+                        using (var _context = _contextFactory.CreateDbContext())
+                        {
+                            task.IsWorked = false;
+                            await _context.SaveChangesAsync();
+                        }
+
+                        throw;
+                    }
                 }
             }
-            catch
-            {
-                _logger.LogWarning($"Stop Thread:{Thread.CurrentThread.ManagedThreadId}");
-                await base.StopAsync(cancellationToken); 
-            }
+            catch { throw; }
+            
         }
 
         /// <summary>
         /// Обновляет поле "IsActual" если поездка уже в прошлом
         /// </summary>
         /// <returns></returns>
-        private async Task UpdateIsActual()
+        private async Task UpdateActualStatusNotificationTask()
         {
             using (var _context = _contextFactory.CreateDbContext())
             {
-                var activeNotificationTasks = await GetActive();
+                var activeNotificationTasks = await GetActiveNotificationTasks();
                 foreach (var activeNotificationTask in activeNotificationTasks)
                 {
                     DateTime itemDateFromDateTime = DateTime.ParseExact(
@@ -100,7 +111,7 @@ namespace RailwayWizzard.App
         /// Получает список задач со статусом "Актуально"
         /// </summary>
         /// <returns></returns>
-        private async Task<IList<NotificationTask>> GetActive()
+        private async Task<IList<NotificationTask>> GetActiveNotificationTasks()
         {
             using (var _context = _contextFactory.CreateDbContext())
             {
@@ -109,6 +120,17 @@ namespace RailwayWizzard.App
                     .ToListAsync();
                 return notificationTasks;
             }
+        }
+
+        /// <summary>
+        /// Получает список задач над которыми еще не работают
+        /// </summary>
+        /// <returns></returns>
+        private async Task<IList<NotificationTask>> GetNotWorkedNotificationTasks()
+        {
+            var activeNotificationTasks = await GetActiveNotificationTasks();
+            var notWorkedNotificationTasks = activeNotificationTasks.Where(t => t.IsWorked == false).ToList();
+            return notWorkedNotificationTasks;
         }
 
         public override async Task StopAsync(CancellationToken cancellationToken)

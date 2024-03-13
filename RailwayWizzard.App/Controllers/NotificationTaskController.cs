@@ -34,6 +34,7 @@ namespace RailwayWizzard.App.Controllers
             {
                 stationInfo.CreationTime = DateTime.Now;
                 stationInfo.IsActual = true;
+                stationInfo.IsWorked = false;
                 _context.Add(stationInfo);
 
                 await _context.SaveChangesAsync();

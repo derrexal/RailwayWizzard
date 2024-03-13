@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Abp.Domain.Entities;
 
@@ -20,6 +21,9 @@ namespace RzdHack.Robot.Core
         public long UserId { get; set; }
         public bool IsActual { get; set; }
         public DateTime CreationTime { get; set; }
+
+        [Description("Эта задача уже в работе?")]
+        public bool IsWorked { get; set; }
 
         [NotMapped]
         public long ArrivalStationCode { get; set; }

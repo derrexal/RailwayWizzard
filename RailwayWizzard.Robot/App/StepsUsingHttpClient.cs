@@ -17,16 +17,17 @@ namespace RzdHack.Robot.App
             _logger = logger;
         }
 
-        public async Task Notification(NotificationTask input)
+        public async Task Notification(NotificationTask inputNotificationTask)
         {
-            string railwayDataText = $"{input.DepartureStation} - {input.ArrivalStation} {input.TimeFrom} {input.DateFrom.ToString("dd.MM.yyy", CultureInfo.InvariantCulture)}";
+            string railwayDataText = $"{inputNotificationTask.DepartureStation} - {inputNotificationTask.ArrivalStation} {inputNotificationTask.TimeFrom} {inputNotificationTask.DateFrom.ToString("dd.MM.yyy", CultureInfo.InvariantCulture)}";
             int count = 1;
+
             try
             {
                 while (true)
                 {
-                    _logger.LogTrace($"Задача: {input.Id} Рейс: {railwayDataText} Попытка номер: {count}");
-                    var freeSeats = await GetFreeSeats(input);
+                    _logger.LogTrace($"Задача: {inputNotificationTask.Id} Рейс: {railwayDataText} Попытка номер: {count}");
+                    var freeSeats = await GetFreeSeats(inputNotificationTask);
 
                     // Формируется текст уведомления о наличии мест
                     ResponseToUser messageToUser = new ResponseToUser
@@ -34,7 +35,7 @@ namespace RzdHack.Robot.App
                         Message = $"{char.ConvertFromUtf32(0x2705)} {railwayDataText} " +
                                   $"\n{String.Join("\n", freeSeats.ToArray())}" +
                                   "\nОбнаружены свободные места\n",
-                        UserId = input.UserId
+                        UserId = inputNotificationTask.UserId
                     };
 
                     //TODO:Вынести в метод? А лучше в отдельный класс взаимодействия с АПИ бота, так же как сделано и там
@@ -59,20 +60,15 @@ namespace RzdHack.Robot.App
             }
         }
 
-        public async Task<List<string>> GetFreeSeats(NotificationTask task)
+        public async Task<List<string>> GetFreeSeats(NotificationTask inputNotificationTask)
         {
             Robot robot = new(_logger);
             List<string> result;
-            int count = 0;
             try
             {
                 do
                 {
-                    //TODO: Переделать на более приближенный способ перезапуска задач
-                    if (count >= 10) // 1.5 * 10 = 15 мин (1 раз в 16 минут запускается воркер, 1 минута - перекур))
-                        throw new Exception($"Поток {Thread.CurrentThread.ManagedThreadId} закончил свое выполнение");
-                    result = await robot.GetTicket(task);
-                    count++;
+                    result = await robot.GetTicket(inputNotificationTask);
                     Thread.Sleep(1000 * 30 * 3); //1.5 минуты
                 }
                 while (result.Count == 0);

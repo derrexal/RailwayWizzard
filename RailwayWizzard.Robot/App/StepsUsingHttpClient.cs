@@ -31,7 +31,8 @@ namespace RailwayWizzard.Robot.App
             {
                 using (var _context = _contextFactory.CreateDbContext())
                 {
-                    inputNotificationTask.IsWorked = true;
+                    var currentNotificationTask = await _context.NotificationTask.FirstOrDefaultAsync(t => t.Id == inputNotificationTask.Id);
+                    currentNotificationTask!.IsWorked = true;
                     await _context.SaveChangesAsync();
                 }
 
@@ -67,7 +68,8 @@ namespace RailwayWizzard.Robot.App
             {
                 using (var _context = _contextFactory.CreateDbContext())
                 {
-                    inputNotificationTask.IsWorked = false;
+                    var currentNotificationTask = await _context.NotificationTask.FirstOrDefaultAsync(t => t.Id == inputNotificationTask.Id);
+                    currentNotificationTask!.IsWorked = false;
                     await _context.SaveChangesAsync();
                 }
 

@@ -10,7 +10,7 @@ namespace RailwayWizzard.Robot.App
 {
     public class Robot
     {
-        private const string _baseUrl = "php_service:8088/routes/";
+        private const string _baseUrl = "php_service:8088/";
         private readonly ILogger _logger;
 
         public Robot(ILogger logger)
@@ -58,7 +58,7 @@ namespace RailwayWizzard.Robot.App
         /// <returns></returns>
         private string SetUrlFromGetTicket(NotificationTask task)
         {
-            var builder = new UriBuilder(_baseUrl);
+            var builder = new UriBuilder(_baseUrl + "routes/");
             var query = HttpUtility.ParseQueryString(builder.Query);
             query["layer_id"] = "5827";
             query["dir"] = "0";
@@ -79,11 +79,17 @@ namespace RailwayWizzard.Robot.App
         {
             List<string> result=new();
             foreach (var route in roots)
+                //Если в ответе содержится необходимая поездка
                 if (route.time0 == departureTime && route.cars != null)
                     foreach (var car in route.cars)
-                        if (!car.typeLoc.Contains("инвалид")) //выходит, что эта проверка сейчас бесполезна...
+                        //Если есть свободные места
                             if (car.freeSeats != null)
+                        {
+                            //если место для инвалидов
+                            if (car.disabledPerson != null && car.disabledPerson == true)
+                                car.typeLoc = car.typeLoc + " (для инвалидов)";
                                 result.Add($"Класс обслуживания: <strong>{car.typeLoc}</strong> \nСвободных мест: <strong>{car.freeSeats}</strong>\n");
+                        }
             return result;
         }
         

@@ -33,10 +33,15 @@ namespace RailwayWizzard.App
             
             var app = builder.Build();
 
-            //Applying migrations to run programm
             var factory = app.Services.GetRequiredService<IDbContextFactory<RailwayWizzardAppContext>>();
             using(var context = factory.CreateDbContext())
+            {
+                //Applying migrations to run programm
                 context.Database.Migrate();
+                //Before Run Program Update field IsWorked default value (false)
+                context.NotificationTask.ExecuteUpdate(t =>
+                    t.SetProperty(t => t.IsWorked, false));
+            }
 
             // Configure the HTTP request pipeline.
 

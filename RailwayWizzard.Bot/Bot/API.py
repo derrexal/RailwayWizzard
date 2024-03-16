@@ -2,8 +2,9 @@ import requests
 
 API_URL = "http://railwaywizzardapp:80/"
 
-#TODO: переименовать все 'add' -> 'create'
-#TODO: если ответ не 200 - выбрасывать Exception
+
+# TODO: переименовать все 'add' -> 'create'
+# TODO: если ответ не 200 - выбрасывать Exception
 
 async def add_user(idTg, username):
     """ Добавляет пользователя в БД """
@@ -23,14 +24,14 @@ async def create_and_get_id_notification_task(record_json):
         print('NotificationTask/CreateAndGetId ' + str(status) + ' ')
         if status != 200:
             raise Exception("Не удалось создать задачу. Ошибка записи в БД")
-        return response.text # ID записи в БД
+        print('NotificationTask/CreateAndGetId ' + str(response.status_code) + ' ' + response.text)
+        return response.text  # ID записи в БД
     except Exception as e:
         raise e
-    print('NotificationTask/CreateAndGetId ' + str(response.status_code) + ' ' + response.text)
 
 
 async def add_station_info(record_station_info):
-    ''' Cоздает сущность StationInfo'''
+    """ Создает сущность StationInfo """
     myObj = {'ExpressCode': record_station_info['c'], 'StationName': record_station_info['n']}
     try:
         response = requests.post(API_URL + 'StationInfo/CreateOrUpdate', json=myObj)
@@ -47,7 +48,7 @@ async def get_station_info_by_name(station_info_name):
         response = requests.get(API_URL + 'StationInfo/GetByName', json=myObj)
         status = response.status_code
         print('StationInfo/GetByName ' + str(status) + ' ' + response.text)
-        if status==200:
+        if status == 200:
             return response.json()['expressCode']
         return None
     except Exception as e:

@@ -10,13 +10,14 @@ from Bot.Setting import CALLBACK_NOTIFICATION
 
 import os
 
-#Получаем токен из файла .env в текущей директории
+# Получаем токен из файла .env в текущей директории
 load_dotenv()
 token = os.getenv('TOKEN')
 
 application = Application.builder().token(token).build()
 
-#Перенести этот метод в др место не получается, т.к. тут создается application
+
+# Перенести этот метод в др место не получается, т.к. тут создается application
 async def send_message_to_user(user_id, message):
     global application
     await application.bot.send_message(user_id, message, parse_mode=ParseMode.HTML)
@@ -30,8 +31,9 @@ def run():
         application.add_handler(CommandHandler('start', start_buttons_handler))
         application.add_handler(CommandHandler('help', help_handler))
         application.add_handler(MessageHandler(filters.TEXT
-                                      | filters.COMMAND & ~filters.Regex('/start')
-                                      & ~filters.Regex('/help'), unknown_handler))  # обрабатываем неизвестные команды
+                                               | filters.COMMAND & ~filters.Regex('/start')
+                                               & ~filters.Regex('/help'),
+                                               unknown_handler))  # обрабатываем неизвестные команды
         application.run_polling()
 
     except Exception as e:
@@ -52,6 +54,7 @@ conv_handler_notification = ConversationHandler(
         4: [MessageHandler(filters.TEXT, fourth_step_notification)],
         5: [CallbackQueryHandler(fifth_step_notification)]
     },
-    fallbacks=[CommandHandler('start', start_buttons_handler)],  # '''CommandHandler('stop', stop)'''#Оно не работает( Вернул проверку на стоп
+    fallbacks=[CommandHandler('start', start_buttons_handler)],
+    # '''CommandHandler('stop', stop)'''#Оно не работает( Вернул проверку на стоп
     allow_reentry=True
 )

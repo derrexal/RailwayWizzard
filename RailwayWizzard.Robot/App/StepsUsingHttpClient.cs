@@ -44,9 +44,9 @@ namespace RailwayWizzard.Robot.App
                     // Формируется текст уведомления о наличии мест
                     ResponseToUser messageToUser = new ResponseToUser
                     {
-                        Message = $"{char.ConvertFromUtf32(0x2705)} {railwayDataText} " +
+                        Message = $"<code>{char.ConvertFromUtf32(0x2705)} {railwayDataText} " +
                                   $"\n{String.Join("\n", freeSeats.ToArray())}" +
-                                  "\nОбнаружены свободные места\n",
+                                  "\nОбнаружены свободные места\n</code>",
                         UserId = inputNotificationTask.UserId
                     };
 

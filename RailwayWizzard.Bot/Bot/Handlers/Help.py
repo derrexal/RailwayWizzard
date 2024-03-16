@@ -8,7 +8,7 @@ async def help_handler(update, context):
 
     inline_buttons = InlineKeyboardMarkup(
         inline_keyboard=[[InlineKeyboardButton(
-                    text='\U0001F58C Стена плача',
+                    text='\U0001F58C Написать в поддержку',
                     callback_data=str(CALLBACK_SUPPORT),
                     url='telegram.me/derrexal')]])
 

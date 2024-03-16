@@ -16,7 +16,7 @@ async def notification_handler(update: Update, context: CallbackContext):
         if init != str(CALLBACK_NOTIFICATION):
             await update.callback_query.message.reply_text(text='Что-то пошло не так, обратитесь к администратору бота')
             return ConversationHandler.END
-        await update.callback_query.message.reply_text('Для возврата в главное меню введите /stop')
+        await update.callback_query.message.reply_text('Обратите внимание, по умолчанию не приходят уведомления о местах для инвалидов. Если вам необходимо получать уведомления и в таком случае - пожалуйста, обратитесь к администратору бота.(/help)\n\nДля возврата в главное меню введите /stop')
 
         await update.callback_query.message.reply_text(text='Укажите <strong>станцию отправления</strong>',
                                                        parse_mode=ParseMode.HTML)
@@ -39,7 +39,7 @@ async def first_step_notification(update: Update, context: CallbackContext):
             return ConversationHandler.END
 
         if not language_input_validation(update.message.text):
-            await update.message.reply_text('Недопустимый ввод. \nРазрешается вводить только символы кириллицы и цифры')
+            await update.message.reply_text('Недопустимый ввод.\nРазрешается вводить только символы кириллицы и цифры')
             return 1
         # ToDo: Если станция есть в БД - не нужно ходить к РЖД
         station_code = await station_validate(update.message.text)

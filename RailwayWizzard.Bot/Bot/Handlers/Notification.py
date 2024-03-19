@@ -16,7 +16,7 @@ async def notification_handler(update: Update, context: CallbackContext):
         if init != str(CALLBACK_NOTIFICATION):
             await update.callback_query.message.reply_text(text='Что-то пошло не так, обратитесь к администратору бота')
             return ConversationHandler.END
-        await update.callback_query.message.reply_text('Обратите внимание, по умолчанию не приходят уведомления о местах для инвалидов. Если вам необходимо получать уведомления и в таком случае - пожалуйста, обратитесь к администратору бота.(/help)\n\nДля возврата в главное меню введите /stop')
+        await update.callback_query.message.reply_text('Обратите внимание, по умолчанию не приходят уведомления о местах для инвалидов. Если вам необходимо получать уведомления и в таком случае - пожалуйста, обратитесь к администратору.\n\nДля возврата в главное меню введите /stop')
 
         await update.callback_query.message.reply_text(text='Укажите <strong>станцию отправления</strong>',
                                                        parse_mode=ParseMode.HTML)

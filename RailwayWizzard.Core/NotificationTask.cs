@@ -16,7 +16,7 @@ namespace RailwayWizzard.Core
         [Required]
         public DateTime DateFrom { get; set; }
         [Required]
-        //Это тоже перевести бы во время)
+        //todo:Это тоже перевести бы во время)
         public string TimeFrom { get; set; }
         [Required]
         public long UserId { get; set; }

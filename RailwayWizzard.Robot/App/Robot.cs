@@ -95,46 +95,5 @@ namespace RailwayWizzard.Robot.App
                         }
             return result;
         }
-        
-        #region Old
-
-        //private const string _getTicketUrl = "https://pass.rzd.ru/timetable/public/?layer_id=5827&dir=0&tfl=3&checkSeats=1&code0=2004000&code1=2000000&dt0=27.01.2024";
-        //private const string _baseGetTicketUrl = "https://pass.rzd.ru/timetable/public/ru?layer_id=5827";
-
-
-        //public static async Task<string> GetTicketOld()
-        //{
-        //    HttpClient client = new HttpClient();
-        //    using HttpRequestMessage firstRequest = new HttpRequestMessage(HttpMethod.Get, _getTicketUrl);
-        //    using HttpResponseMessage firstResponse = await client.SendAsync(firstRequest);
-        //    var firstContent = await firstResponse.Content.ReadAsStringAsync();
-
-        //    Console.WriteLine(firstContent);
-        //    Console.WriteLine(firstResponse.StatusCode);
-        //    var rid = JObject.Parse(firstContent)["RID"]?.ToString();
-
-
-
-        //    firstResponse.Headers.TryGetValues("Set-Cookie", out var setCookie);
-
-        //    //Thread.Sleep(61000);//61c
-
-        //    var url = _baseGetTicketUrl + "&rid=" + rid;
-        //    using HttpRequestMessage secondRequest = new HttpRequestMessage(HttpMethod.Get, url);
-        //    //secondRequest.Content = new StringContent($"rid={rid}", Encoding.UTF8, "application/x-www-form-urlencoded");
-        //    //secondRequest.Content!.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
-        //    secondRequest.Headers.Add("Cookie", setCookie!);
-        //    secondRequest.Headers.Add("ContentType", "application/x-www-form-urlencoded"!);
-        //    using HttpResponseMessage secondResponse = await client.SendAsync(secondRequest);
-        //    var secondContent = await secondResponse.Content.ReadAsStringAsync();
-
-        //    Console.WriteLine(secondContent);
-        //    Console.WriteLine(secondResponse.StatusCode);
-        //    return secondContent;
-        //}
-
-
-        #endregion
-
     }
 }

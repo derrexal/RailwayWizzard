@@ -19,6 +19,8 @@ async def add_user(idTg, username):
 async def create_and_get_id_notification_task(record_json):
     """ Отправляет информацию о созданном таске в АПИ чтобы та сохранила в БД и отдала нам ID записи"""
     try:
+        #TODO: где правильнее формировать данные для запроса. Здесь или выше по стеку?
+
         response = requests.post(API_URL + 'NotificationTask/CreateAndGetId', json=record_json)
         status = response.status_code
         print('NotificationTask/CreateAndGetId ' + str(status) + ' ')

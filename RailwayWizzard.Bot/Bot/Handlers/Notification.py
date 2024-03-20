@@ -1,6 +1,6 @@
 from telegram.ext import *
 from telegram.constants import *
-from Bot.Setting import (message_success,message_failure,
+from Bot.Setting import (message_success, message_failure,
                          CALLBACK_DATA_CORRECT_NOTIFICATION,
                          CALLBACK_DATA_INCORRECT_NOTIFICATION, CALLBACK_NOTIFICATION, notification_confirm_inline_buttons)
 from Bot.validators import *
@@ -16,7 +16,10 @@ async def notification_handler(update: Update, context: CallbackContext):
         if init != str(CALLBACK_NOTIFICATION):
             await update.callback_query.message.reply_text(text='Что-то пошло не так, обратитесь к администратору бота')
             return ConversationHandler.END
-        await update.callback_query.message.reply_text('Обратите внимание, по умолчанию не приходят уведомления о местах для инвалидов. Если вам необходимо получать уведомления и в таком случае - пожалуйста, обратитесь к администратору.\n\nДля возврата в главное меню введите /stop')
+        await update.callback_query.message.reply_text('Обратите внимание, по умолчанию не приходят уведомления о '
+                                                       'местах для инвалидов. Если вам необходимо получать '
+                                                       'уведомления и в таком случае - пожалуйста, обратитесь к '
+                                                       'администратору.\n\nДля возврата в главное меню введите /stop')
 
         await update.callback_query.message.reply_text(text='Укажите <strong>станцию отправления</strong>',
                                                        parse_mode=ParseMode.HTML)
@@ -198,13 +201,12 @@ async def fifth_step_notification(update: Update, context: CallbackContext):
 
     except Exception as e:
         print(e)
-        await update.callback_query.edit_message_text(text_message)
         await update.callback_query.message.reply_text(text=message_error)
-        await update.callback_query.message.reply_text(text=message_failure)
         return 5
 
 
 async def send_notification_data_to_robot(update: Update, context: CallbackContext):
+    #TODO: вынести UserId в context
     record_json = {
         "DepartureStation": context.user_data[0],
         "ArrivalStation": context.user_data[1],
@@ -215,10 +217,6 @@ async def send_notification_data_to_robot(update: Update, context: CallbackConte
     try:
         return await create_and_get_id_notification_task(record_json)
 
-    except ConnectionRefusedError:
-        return ConversationHandler.END
-
     except Exception as e:
-        print(e)
-        await update.callback_query.message.reply_text(text=message_error)
-        raise
+        raise e
+

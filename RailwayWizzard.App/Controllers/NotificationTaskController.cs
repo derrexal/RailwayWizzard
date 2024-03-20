@@ -20,12 +20,6 @@ namespace RailwayWizzard.App.Controllers
             _logger = logger;
         }
 
-        [Route("/")]
-        public IActionResult Index()
-        {
-            return Ok("Hello, i'm Web API Railway Wizzard application");
-        }
-
 
         [HttpPost("CreateAndGetId")]
         public async Task<IActionResult> CreateAndGetId(NotificationTask stationInfo)

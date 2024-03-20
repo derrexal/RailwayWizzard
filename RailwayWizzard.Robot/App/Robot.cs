@@ -72,7 +72,7 @@ namespace RailwayWizzard.Robot.App
         }
 
 
-        //TODO: оптимизировать: возвращать не список строк, а словарь {car.typeLoc} {car.freeSeats}, а выше уже распарсить в сообщение динамически
+        //TODO: оптимизировать: возвращать не список строк, а словарь {car.typeLoc} {car.freeSeats}, а выше уже распарсить в сообщение динамически. Или вообще распарсить на клиенте (в коде бота)
         /// <summary>
         /// Парсит ответ и возвращает информацию о запрашиваемой поездке
         /// </summary>
@@ -91,7 +91,7 @@ namespace RailwayWizzard.Robot.App
                             if (car.disabledPerson == null || car.disabledPerson == false)
                                 //Оставил на случай, если понадобится оповещать еще и о местах для инвалидов
                                 //car.typeLoc = car.typeLoc + " (для инвалидов)";
-                                result.Add($"<code>Класс обслуживания:</code> <strong>{car.typeLoc}</strong> \n<code>Свободных мест:</code> <strong>{car.freeSeats}</strong>\n");
+                                result.Add($"Класс обслуживания: <strong>{car.typeLoc}</strong> \nСвободных мест: <strong>{car.freeSeats}</strong>\n");
                         }
             return result;
         }

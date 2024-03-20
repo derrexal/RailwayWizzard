@@ -5,8 +5,9 @@ from Bot.Handlers.Help import help_handler
 from Bot.Handlers.Notification import notification_handler, first_step_notification, second_step_notification, \
     third_step_notification, fourth_step_notification, fifth_step_notification
 from Bot.Handlers.Start import start_buttons_handler
+from Bot.Handlers.ActiveTask import active_task_handler
 from Bot.Other import unknown_handler
-from Bot.Setting import CALLBACK_NOTIFICATION
+from Bot.Setting import CALLBACK_NOTIFICATION, CALLBACK_ACTIVE_TASK
 
 import os
 
@@ -28,6 +29,7 @@ def run():
     print("INFO:        Bot started")
     try:
         application.add_handler(conv_handler_notification)
+        application.add_handler(conv_handler_active_task)
         application.add_handler(CommandHandler('start', start_buttons_handler))
         application.add_handler(CommandHandler('help', help_handler))
         application.add_handler(MessageHandler(filters.TEXT
@@ -41,7 +43,6 @@ def run():
         return None
 
 
-# Описываем обработчики событий
 conv_handler_notification = ConversationHandler(
     # Точка входа в диалог.
     entry_points=[CallbackQueryHandler(notification_handler, pattern=str(CALLBACK_NOTIFICATION))],
@@ -54,7 +55,20 @@ conv_handler_notification = ConversationHandler(
         4: [MessageHandler(filters.TEXT, fourth_step_notification)],
         5: [CallbackQueryHandler(fifth_step_notification)]
     },
-    fallbacks=[CommandHandler('start', start_buttons_handler)],
+    fallbacks=[CommandHandler('start', start_buttons_handler)],  # Точка выхода из диалога - команда /start?
+    # '''CommandHandler('stop', stop)'''#Оно не работает( Вернул проверку на стоп
+    allow_reentry=True
+)
+
+conv_handler_active_task = ConversationHandler(
+    # Точка входа в диалог.
+    entry_points=[CallbackQueryHandler(active_task_handler, pattern=str(CALLBACK_ACTIVE_TASK))],
+
+    # Словарь состояний внутри диалога.
+    states={
+        1: [MessageHandler(filters.TEXT, first_step_notification)],
+    },
+    fallbacks=[CommandHandler('start', start_buttons_handler)],  # Точка выхода из диалога - команда /start?
     # '''CommandHandler('stop', stop)'''#Оно не работает( Вернул проверку на стоп
     allow_reentry=True
 )

@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using RailwayWizzard.Core;
 using RailwayWizzard.EntityFrameworkCore.Data;
+using System.Globalization;
 
 
 namespace RailwayWizzard.App.Controllers
@@ -41,15 +42,32 @@ namespace RailwayWizzard.App.Controllers
 
 
         /// <summary>
-        /// Получает все сущности из таблицы
+        /// Получает список активных задач для конкретного пользователя
         /// </summary>
         /// <returns></returns>
-        private async Task<IList<NotificationTask>> GetAll()
+        [HttpGet("GetActiveByUser")]
+        public async Task<IList<NotificationTask>> GetActiveByUser(long userId)
         {
-            var notificationTasks = await _context.NotificationTask.ToListAsync();
-            return notificationTasks;
-        }
+            if (ModelState.IsValid)
+            {
+                var notificationTasksQuery = _context.NotificationTask
+                .Where(u => u.IsActual)
+                .Where(u => u.UserId == userId)
+                .AsNoTracking();
 
+                var notificationTasks = await notificationTasksQuery.Select(u => new NotificationTask
+        {
+                    Id = u.Id,
+                    ArrivalStation = u.ArrivalStation,
+                    DepartureStation = u.DepartureStation,
+                    TimeFrom = u.TimeFrom,
+                    DateFromString = u.DateFrom.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture)
+                }).ToListAsync();
+
+            return notificationTasks;
+
+            }
+            throw new Exception("Request param is no valid");
+        }
     }
 }
-

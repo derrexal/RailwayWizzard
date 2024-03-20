@@ -56,3 +56,17 @@ async def get_station_info_by_name(station_info_name):
     except Exception as e:
         raise e
 
+
+async def get_active_task_by_user_id(user_id):
+    """ Возвращает expressCode сущности StationInfo по полю Name """
+    myObj = {'userId': user_id}
+    print(user_id)
+    try:
+        response = requests.get(API_URL + 'NotificationTask/GetActiveByUser', params=myObj)
+        status = response.status_code
+        print('NotificationTask/GetActiveByUser' + str(status) + ' ' + response.text)
+        if status == 200:
+            return response.json()
+        return None
+    except Exception as e:
+        raise e

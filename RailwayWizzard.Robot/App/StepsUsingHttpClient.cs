@@ -46,7 +46,7 @@ namespace RailwayWizzard.Robot.App
                     {
                         Message = $"{char.ConvertFromUtf32(0x2705)} {railwayDataText}" +
                                   $"\n{String.Join("\n", freeSeats.ToArray())}" +
-                                  "\n>Обнаружены свободные места\n",
+                                  "\nОбнаружены свободные места\n",
                         UserId = inputNotificationTask.UserId
                     };
 

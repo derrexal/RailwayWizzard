@@ -1,13 +1,12 @@
 from Bot.API import *
-from telegram import *
 from telegram.ext import ConversationHandler
-from Bot.Setting import message_error, start_inline_keyboards
+from Bot.Setting import message_error, message_start, start_inline_keyboards
 
 
 async def start_buttons_handler(update, context):
     """ Создаёт начальные inline-кнопки """
     try:
-        await update.message.reply_text('\U0001F441 Добро пожаловать на борт',
+        await update.message.reply_text(message_start,
                                         reply_markup=start_inline_keyboards)
 
         await add_user(update.message.from_user['id'],

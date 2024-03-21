@@ -25,6 +25,8 @@ namespace RailwayWizzard.Core
 
         [Description("Эта задача уже в работе?")]
         public bool IsWorked { get; set; }
+        [Description("Поиск остановлен")]
+        public bool IsStopped { get; set; }
 
         [NotMapped]
         public long ArrivalStationCode { get; set; }

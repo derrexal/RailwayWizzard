@@ -30,6 +30,7 @@ namespace RailwayWizzard.App.Controllers
                 stationInfo.CreationTime = DateTime.Now;
                 stationInfo.IsActual = true;
                 stationInfo.IsWorked = false;
+                stationInfo.IsStopped = false;
                 _context.Add(stationInfo);
 
                 await _context.SaveChangesAsync();
@@ -40,6 +41,26 @@ namespace RailwayWizzard.App.Controllers
             return BadRequest("Request param is no valid");
         }
 
+        /// <summary>
+        /// Устанавливает флаг IsStopped у конкретной сущности NotificationTask
+        /// </summary>
+        /// <param name="idNotificationTask"></param>
+        /// <returns></returns>
+
+        [HttpGet("SetIsStopped")]
+        public async Task<IActionResult> SetIsStopped(int idNotificationTask)
+        {
+            if (ModelState.IsValid)
+            {
+                var currentTask = await _context.NotificationTask.FirstOrDefaultAsync(t => t.Id==idNotificationTask);
+                if (currentTask is null) { return BadRequest($"Error search task from Id:{idNotificationTask}"); }
+                currentTask.IsStopped = true;
+                currentTask!.IsWorked = false;
+                await _context.SaveChangesAsync();
+                return Ok(currentTask.Id);
+            }
+            return BadRequest("Request param is no valid");
+        }
 
         /// <summary>
         /// Получает список активных задач для конкретного пользователя
@@ -52,11 +73,12 @@ namespace RailwayWizzard.App.Controllers
             {
                 var notificationTasksQuery = _context.NotificationTask
                 .Where(u => u.IsActual)
+                .Where(u=>u.IsStopped==false)
                 .Where(u => u.UserId == userId)
                 .AsNoTracking();
 
                 var notificationTasks = await notificationTasksQuery.Select(u => new NotificationTask
-        {
+                {
                     Id = u.Id,
                     ArrivalStation = u.ArrivalStation,
                     DepartureStation = u.DepartureStation,
@@ -64,7 +86,7 @@ namespace RailwayWizzard.App.Controllers
                     DateFromString = u.DateFrom.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture)
                 }).ToListAsync();
 
-            return notificationTasks;
+                return notificationTasks;
 
             }
             throw new Exception("Request param is no valid");

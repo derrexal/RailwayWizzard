@@ -2,19 +2,22 @@ using Microsoft.EntityFrameworkCore;
 using RailwayWizzard.Core;
 using RailwayWizzard.EntityFrameworkCore.Data;
 using RailwayWizzard.Robot.App;
-using System.Globalization;
+using RailwayWizzard.Shared;
 
 
 namespace RailwayWizzard.App
 {
     public class Worker : BackgroundService
     {
+        private readonly IChecker _checker;
         private readonly ILogger _logger;
         private readonly IDbContextFactory<RailwayWizzardAppContext> _contextFactory;
         public Worker(
+            IChecker checker,
             ILogger<Worker> logger, 
             IDbContextFactory<RailwayWizzardAppContext> contextFactory)
         {
+            _checker = checker;
             _logger = logger;
             _contextFactory = contextFactory;
         }
@@ -49,7 +52,7 @@ namespace RailwayWizzard.App
                         task.ArrivalStationCode = (await _context.StationInfo.FirstOrDefaultAsync(s => s.StationName == task.ArrivalStation))!.ExpressCode;
                         task.DepartureStationCode = (await _context.StationInfo.FirstOrDefaultAsync(s => s.StationName == task.DepartureStation))!.ExpressCode;
                     }
-                    new StepsUsingHttpClient(_logger,_contextFactory).Notification(task);
+                    new StepsUsingHttpClient(_checker,_logger, _contextFactory).Notification(task);
 
                     _logger.LogTrace($"Run Task:{task.Id} in Thread:{Thread.CurrentThread.ManagedThreadId}");
                 }
@@ -74,13 +77,7 @@ namespace RailwayWizzard.App
                 var activeNotificationTasks = await GetActiveNotificationTasks();
                 foreach (var activeNotificationTask in activeNotificationTasks)
                 {
-                    DateTime itemDateFromDateTime = DateTime.ParseExact(
-                        activeNotificationTask.DateFrom.ToShortDateString() + " " + activeNotificationTask.TimeFrom,
-                        //"dd.MM.yyyy HH:mm",
-                        "MM/dd/yyyy HH:mm",
-                        CultureInfo.InvariantCulture);
-
-                    if (itemDateFromDateTime < DateTime.Now)
+                    if (!_checker.CheckActualNotificationTask(activeNotificationTask))
                     {
                         activeNotificationTask.IsActual = false;
                         _context.NotificationTask.Update(activeNotificationTask);
@@ -92,7 +89,7 @@ namespace RailwayWizzard.App
         }
 
         /// <summary>
-        /// Получает список задач со статусом "Актуально"
+        /// Получает список задач со статусом "Актуально" и "Не остановлена"
         /// </summary>
         /// <returns></returns>
         private async Task<IList<NotificationTask>> GetActiveNotificationTasks()
@@ -101,6 +98,7 @@ namespace RailwayWizzard.App
             {
                 var notificationTasks = await _context.NotificationTask
                     .Where(t => t.IsActual == true)
+                    .Where(t => t.IsStopped == false)
                     .ToListAsync();
                 return notificationTasks;
             }

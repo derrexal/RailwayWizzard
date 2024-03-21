@@ -13,7 +13,9 @@ Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-co
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RailwayWizzard.rzd_api", "RailwayWizzard.rzd_api", "{FC6E8802-FECD-42BA-9493-46A7A3062452}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RailwayWizzard.EntityFrameworkCore", "RailwayWizzard.EntityFramework\RailwayWizzard.EntityFrameworkCore.csproj", "{7BC5C4BD-7C70-418E-B877-C5FCC08489F4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RailwayWizzard.EntityFrameworkCore", "RailwayWizzard.EntityFramework\RailwayWizzard.EntityFrameworkCore.csproj", "{7BC5C4BD-7C70-418E-B877-C5FCC08489F4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RailwayWizzard.Shared", "RailwayWizzard.Shared\RailwayWizzard.Shared.csproj", "{339D0B15-3B70-42FD-AFFF-7BEFF09A916D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,6 +43,10 @@ Global
 		{7BC5C4BD-7C70-418E-B877-C5FCC08489F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7BC5C4BD-7C70-418E-B877-C5FCC08489F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7BC5C4BD-7C70-418E-B877-C5FCC08489F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{339D0B15-3B70-42FD-AFFF-7BEFF09A916D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{339D0B15-3B70-42FD-AFFF-7BEFF09A916D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{339D0B15-3B70-42FD-AFFF-7BEFF09A916D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{339D0B15-3B70-42FD-AFFF-7BEFF09A916D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

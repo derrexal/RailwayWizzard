@@ -5,7 +5,7 @@ from Bot.Handlers.Help import help_handler
 from Bot.Handlers.Notification import notification_handler, first_step_notification, second_step_notification, \
     third_step_notification, fourth_step_notification, fifth_step_notification
 from Bot.Handlers.Start import start_buttons_handler
-from Bot.Handlers.ActiveTask import active_task_handler
+from Bot.Handlers.ActiveTask import active_task_handler, one_step_active_task
 from Bot.Other import unknown_handler
 from Bot.Setting import CALLBACK_NOTIFICATION, CALLBACK_ACTIVE_TASK
 
@@ -66,7 +66,7 @@ conv_handler_active_task = ConversationHandler(
 
     # Словарь состояний внутри диалога.
     states={
-        1: [MessageHandler(filters.TEXT, first_step_notification)],
+        1: [CallbackQueryHandler(one_step_active_task)]
     },
     fallbacks=[CommandHandler('start', start_buttons_handler)],  # Точка выхода из диалога - команда /start?
     # '''CommandHandler('stop', stop)'''#Оно не работает( Вернул проверку на стоп

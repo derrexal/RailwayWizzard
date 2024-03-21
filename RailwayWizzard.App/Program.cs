@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RailwayWizzard.EntityFrameworkCore.Data;
+using RailwayWizzard.Shared;
 
 namespace RailwayWizzard.App
 {
@@ -13,6 +14,8 @@ namespace RailwayWizzard.App
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
             var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.AddTransient<IChecker, NotificationTaskChecker>();
 
             builder.Services.AddDbContextFactory<RailwayWizzardAppContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("RailwayWizzardAppContext") 

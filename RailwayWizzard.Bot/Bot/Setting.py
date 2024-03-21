@@ -7,6 +7,7 @@ from telegram import InlineKeyboardMarkup
 message_error = 'Системная ошибка.\nМы уже знаем о проблеме и скоро её решим\nПопробуйте еще раз позже'
 message_success = 'Уведомление о поездке успешно создано. \nЗадача №'
 message_failure = 'Создание уведомления о поездке прекращено'
+message_start = '\U00002388 Добро пожаловать на борт'
 
 start_inline_keyboards = InlineKeyboardMarkup(
         inline_keyboard=[
@@ -14,7 +15,7 @@ start_inline_keyboards = InlineKeyboardMarkup(
                     text='\U00002709 Уведомление об появлении мест',
                     callback_data=str(CALLBACK_NOTIFICATION))],
             [InlineKeyboardButton(
-                text='Список активных задач',
+                text='\U0001F5C2 Список активных задач',
                 callback_data=str(CALLBACK_ACTIVE_TASK))],
         ])
 

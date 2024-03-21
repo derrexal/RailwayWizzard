@@ -6,6 +6,7 @@ using RailwayWizzard.Robot.Core;
 using RailwayWizzard.Core;
 using RailwayWizzard.EntityFrameworkCore.Data;
 using Microsoft.EntityFrameworkCore;
+using RailwayWizzard.Shared;
 
 
 namespace RailwayWizzard.Robot.App
@@ -13,20 +14,26 @@ namespace RailwayWizzard.Robot.App
     public class StepsUsingHttpClient : ISteps
     {
         private const string API_BOT_URL = "http://bot_service:5000/";
+        private readonly IChecker _checker;
         private readonly ILogger _logger;
         private readonly IDbContextFactory<RailwayWizzardAppContext> _contextFactory;
 
-        public StepsUsingHttpClient(ILogger logger, IDbContextFactory<RailwayWizzardAppContext> contextFactory)
+        public StepsUsingHttpClient(
+            IChecker checker,
+            ILogger logger, 
+            IDbContextFactory<RailwayWizzardAppContext> contextFactory)
         {
+            _checker = checker;
             _logger = logger;
             _contextFactory = contextFactory;
         }
 
         public async Task Notification(NotificationTask inputNotificationTask)
         {
-            string railwayDataText = $"{inputNotificationTask.DepartureStation} - {inputNotificationTask.ArrivalStation} {inputNotificationTask.TimeFrom} {inputNotificationTask.DateFrom.ToString("dd.MM.yyy", CultureInfo.InvariantCulture)}";
             int count = 1;
+            string railwayDataText = $"{inputNotificationTask.DepartureStation} - {inputNotificationTask.ArrivalStation} {inputNotificationTask.TimeFrom} {inputNotificationTask.DateFrom.ToString("dd.MM.yyy", CultureInfo.InvariantCulture)}";
             string messageNotification = $"Задача: {inputNotificationTask.Id} Рейс: {railwayDataText} Попытка номер: {count}";
+
             try
             {
                 using (var _context = _contextFactory.CreateDbContext())
@@ -38,8 +45,30 @@ namespace RailwayWizzard.Robot.App
 
                 while (true)
                 {
+
+                    //Если во время выполнения задача стала неактуальна
+                    if (!_checker.CheckActualNotificationTask(inputNotificationTask))
+                    {
+                        using (var _context = _contextFactory.CreateDbContext())
+                        {
+                            var currentNotificationTask = await _context.NotificationTask.FirstOrDefaultAsync(t => t.Id == inputNotificationTask.Id);
+                            currentNotificationTask!.IsActual = false;
+                            currentNotificationTask!.IsWorked = false;
+                            await _context.SaveChangesAsync();
+                        }
+                        break;
+                    }                    
+
                     _logger.LogTrace(messageNotification);
                     var freeSeats = await GetFreeSeats(inputNotificationTask);
+
+                    //Если задача остановлена пользователем. Расположил после наиболее "долгого" места в методе
+                    using (var _context = _contextFactory.CreateDbContext())
+                    {
+                        var currentNotificationTask = await _context.NotificationTask.FirstOrDefaultAsync(t => t.Id == inputNotificationTask.Id);
+                        if (currentNotificationTask!.IsStopped)
+                            break;
+                    }
 
                     // Формируется текст уведомления о наличии мест
                     ResponseToUser messageToUser = new ResponseToUser

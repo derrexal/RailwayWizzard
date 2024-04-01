@@ -117,7 +117,7 @@ namespace RailwayWizzard.Robot.App
             {
                 do
                 {
-                    result = await robot.GetTicketOld(inputNotificationTask);
+                    result = await robot.GetTicket(inputNotificationTask);
                     Thread.Sleep(1000 * 30 * 3); //1.5 минуты
                 }
                 while (result.Count == 0);

@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Globalization;
 using Abp.Domain.Entities;
 
 
@@ -39,5 +40,14 @@ namespace RailwayWizzard.Core
         /// </summary>
         [NotMapped]
         public string? DateFromString { get; set; }
+
+        /// <summary>
+        /// Формирование строки из некоторых полей объекта
+        /// </summary>
+        /// <returns></returns>
+        public string ToCustomString()
+        {
+            return $"{DepartureStation} - {ArrivalStation} {TimeFrom} {DateFrom.ToString("dd.MM.yyy", CultureInfo.InvariantCulture)}";
+        }
     }
 }

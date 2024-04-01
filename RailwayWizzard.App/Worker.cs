@@ -12,6 +12,8 @@ namespace RailwayWizzard.App
         private readonly IChecker _checker;
         private readonly ILogger _logger;
         private readonly IDbContextFactory<RailwayWizzardAppContext> _contextFactory;
+        private readonly RailwayWizzardAppContext _context;
+
         public Worker(
             IChecker checker,
             ILogger<Worker> logger, 
@@ -20,6 +22,7 @@ namespace RailwayWizzard.App
             _checker = checker;
             _logger = logger;
             _contextFactory = contextFactory;
+            _context = _contextFactory.CreateDbContext();
         }
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
@@ -45,7 +48,7 @@ namespace RailwayWizzard.App
 
                 foreach (var task in notWorkedNotificationTasks)
                 {
-                    using (var _context = _contextFactory.CreateDbContext())
+                    await using (_context)
                     {
                         //TODO: Вынести наполнение в другое место?
                         //Дозаполняем кода городов
@@ -59,8 +62,7 @@ namespace RailwayWizzard.App
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error in Worker");
-                _logger.LogError(ex.ToString());
+                _logger.LogError($"Error in Worker {ex}");
                 throw; 
             }
             
@@ -72,7 +74,7 @@ namespace RailwayWizzard.App
         /// <returns></returns>
         private async Task UpdateActualStatusNotificationTask()
         {
-            using (var _context = _contextFactory.CreateDbContext())
+            await using (_context)
             {
                 var activeNotificationTasks = await GetActiveNotificationTasks();
                 foreach (var activeNotificationTask in activeNotificationTasks)
@@ -89,19 +91,29 @@ namespace RailwayWizzard.App
         }
 
         /// <summary>
-        /// Получает список задач со статусом "Актуально" и "Не остановлена"
+        /// Получает список всех задач со статусом "Актуально"
         /// </summary>
         /// <returns></returns>
         private async Task<IList<NotificationTask>> GetActiveNotificationTasks()
         {
-            using (var _context = _contextFactory.CreateDbContext())
+            await using (_context)
             {
                 var notificationTasks = await _context.NotificationTask
                     .Where(t => t.IsActual == true)
-                    .Where(t => t.IsStopped == false)
                     .ToListAsync();
                 return notificationTasks;
             }
+        }
+        
+        /// <summary>
+        /// Получает список задач со статусом "Актуально" и "Не остановлена"
+        /// </summary>
+        /// <returns></returns>
+        private async Task<IList<NotificationTask>> GetActiveAndNotStopNotificationTasks()
+        {
+            var activeNotificationTasks = await GetActiveNotificationTasks();
+            var activeAndNotStopNotificationTasks = activeNotificationTasks.Where(t => t.IsStopped == false).ToList();
+            return activeAndNotStopNotificationTasks;
         }
 
         /// <summary>
@@ -110,11 +122,11 @@ namespace RailwayWizzard.App
         /// <returns></returns>
         private async Task<IList<NotificationTask>> GetNotWorkedNotificationTasks()
         {
-            var activeNotificationTasks = await GetActiveNotificationTasks();
+            var activeNotificationTasks = await GetActiveAndNotStopNotificationTasks();
             var notWorkedNotificationTasks = activeNotificationTasks.Where(t => t.IsWorked == false).ToList();
             return notWorkedNotificationTasks;
         }
-
+        
         public override async Task StopAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation($"Worker stopped at: {DateTimeOffset.Now}");

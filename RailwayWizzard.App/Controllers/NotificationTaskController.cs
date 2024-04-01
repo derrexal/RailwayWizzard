@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using RailwayWizzard.Core;
 using RailwayWizzard.EntityFrameworkCore.Data;
 using System.Globalization;
+using RailwayWizzard.Robot.App;
 
 
 namespace RailwayWizzard.App.Controllers
@@ -12,13 +13,21 @@ namespace RailwayWizzard.App.Controllers
     [Route("[controller]")]
     public class NotificationTaskController : Controller
     {
+        private readonly IBotApi _botApi;
         private readonly ILogger _logger;
+        private readonly IConfiguration _configuration;
         private readonly RailwayWizzardAppContext _context;
 
-        public NotificationTaskController(RailwayWizzardAppContext context, ILogger<NotificationTaskController> logger)
+        public NotificationTaskController(
+            RailwayWizzardAppContext context, 
+            ILogger<NotificationTaskController> logger,
+            IConfiguration configuration,
+            IBotApi botApi)
         {
+            _botApi = botApi;
             _context = context;
             _logger = logger;
+            _configuration = configuration;
         }
 
 
@@ -34,7 +43,13 @@ namespace RailwayWizzard.App.Controllers
                 _context.Add(stationInfo);
 
                 await _context.SaveChangesAsync();
+                
                 _logger.LogTrace($"Success create NotificationTask. Id:{stationInfo.Id} UserId:{stationInfo.UserId}");
+                
+                var adminId = _configuration.GetValue<long>("Telegram:AdminId");
+                await _botApi.SendMessageForUser(
+                    $"Новая активность в боте. Задача: {stationInfo.Id} {stationInfo.ToCustomString()}",adminId);
+                
                 return Ok(stationInfo.Id);
             }
 
@@ -53,9 +68,12 @@ namespace RailwayWizzard.App.Controllers
             if (ModelState.IsValid)
             {
                 var currentTask = await _context.NotificationTask.FirstOrDefaultAsync(t => t.Id==idNotificationTask);
+                
                 if (currentTask is null) { return BadRequest($"Error search task from Id:{idNotificationTask}"); }
+                
                 currentTask.IsStopped = true;
                 currentTask!.IsWorked = false;
+                
                 await _context.SaveChangesAsync();
                 return Ok(currentTask.Id);
             }

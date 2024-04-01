@@ -1,6 +1,8 @@
-﻿namespace RailwayWizzard.Robot.App;
+﻿using Abp.Dependency;
 
-public interface IBotApi
+namespace RailwayWizzard.Robot.App;
+
+public interface IBotApi: ITransientDependency
 {
     public Task SendMessageForUser(string message, long userId);
 }

@@ -12,8 +12,6 @@ namespace RailwayWizzard.App
         private readonly IChecker _checker;
         private readonly ILogger _logger;
         private readonly IDbContextFactory<RailwayWizzardAppContext> _contextFactory;
-        private readonly RailwayWizzardAppContext _context;
-
         public Worker(
             IChecker checker,
             ILogger<Worker> logger, 
@@ -22,7 +20,6 @@ namespace RailwayWizzard.App
             _checker = checker;
             _logger = logger;
             _contextFactory = contextFactory;
-            _context = _contextFactory.CreateDbContext();
         }
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
@@ -48,12 +45,12 @@ namespace RailwayWizzard.App
 
                 foreach (var task in notWorkedNotificationTasks)
                 {
-                    await using (_context)
+                    await using (var context = await _contextFactory.CreateDbContextAsync(cancellationToken))
                     {
                         //TODO: Вынести наполнение в другое место?
                         //Дозаполняем кода городов
-                        task.ArrivalStationCode = (await _context.StationInfo.FirstOrDefaultAsync(s => s.StationName == task.ArrivalStation))!.ExpressCode;
-                        task.DepartureStationCode = (await _context.StationInfo.FirstOrDefaultAsync(s => s.StationName == task.DepartureStation))!.ExpressCode;
+                        task.ArrivalStationCode = (await context.StationInfo.FirstOrDefaultAsync(s => s.StationName == task.ArrivalStation))!.ExpressCode;
+                        task.DepartureStationCode = (await context.StationInfo.FirstOrDefaultAsync(s => s.StationName == task.DepartureStation))!.ExpressCode;
                     }
                     new StepsUsingHttpClient(_checker,_logger, _contextFactory).Notification(task);
 
@@ -74,7 +71,7 @@ namespace RailwayWizzard.App
         /// <returns></returns>
         private async Task UpdateActualStatusNotificationTask()
         {
-            await using (_context)
+            await using (var context = await _contextFactory.CreateDbContextAsync())            
             {
                 var activeNotificationTasks = await GetActiveNotificationTasks();
                 foreach (var activeNotificationTask in activeNotificationTasks)
@@ -82,10 +79,10 @@ namespace RailwayWizzard.App
                     if (!_checker.CheckActualNotificationTask(activeNotificationTask))
                     {
                         activeNotificationTask.IsActual = false;
-                        _context.NotificationTask.Update(activeNotificationTask);
+                        context.NotificationTask.Update(activeNotificationTask);
                     }
                 }
-                await _context.SaveChangesAsync();
+                await context.SaveChangesAsync();
             }
             await Task.CompletedTask;
         }
@@ -96,9 +93,9 @@ namespace RailwayWizzard.App
         /// <returns></returns>
         private async Task<IList<NotificationTask>> GetActiveNotificationTasks()
         {
-            await using (_context)
+            await using (var context = await _contextFactory.CreateDbContextAsync())
             {
-                var notificationTasks = await _context.NotificationTask
+                var notificationTasks = await context.NotificationTask
                     .Where(t => t.IsActual == true)
                     .ToListAsync();
                 return notificationTasks;

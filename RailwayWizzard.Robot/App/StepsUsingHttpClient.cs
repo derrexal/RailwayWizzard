@@ -12,7 +12,6 @@ namespace RailwayWizzard.Robot.App
         private readonly IChecker _checker;
         private readonly ILogger _logger;
         private readonly IDbContextFactory<RailwayWizzardAppContext> _contextFactory;
-        private readonly RailwayWizzardAppContext _context;
         
         public StepsUsingHttpClient(
             IChecker checker,
@@ -22,7 +21,6 @@ namespace RailwayWizzard.Robot.App
             _checker = checker;
             _logger = logger;
             _contextFactory = contextFactory;
-            _context = _contextFactory.CreateDbContext();
         }
 
         public async Task Notification(NotificationTask inputNotificationTask)
@@ -34,11 +32,11 @@ namespace RailwayWizzard.Robot.App
 
             try
             {
-                await using (_context)
+                await using (var context = await _contextFactory.CreateDbContextAsync())
                 {
-                    var currentNotificationTask = await _context.NotificationTask.FirstOrDefaultAsync(t => t.Id == inputNotificationTask.Id);
+                    var currentNotificationTask = await context.NotificationTask.FirstOrDefaultAsync(t => t.Id == inputNotificationTask.Id);
                     currentNotificationTask!.IsWorked = true;
-                    await _context.SaveChangesAsync();
+                    await context.SaveChangesAsync();
                 }
 
                 while (true)
@@ -48,12 +46,12 @@ namespace RailwayWizzard.Robot.App
                     //Если во время выполнения задача стала неактуальна
                     if (!_checker.CheckActualNotificationTask(inputNotificationTask))
                     {
-                        await using (_context)
+                        await using (var context = await _contextFactory.CreateDbContextAsync())
                         {
-                            var currentNotificationTask = await _context.NotificationTask.FirstOrDefaultAsync(t => t.Id == inputNotificationTask.Id);
+                            var currentNotificationTask = await context.NotificationTask.FirstOrDefaultAsync(t => t.Id == inputNotificationTask.Id);
                             currentNotificationTask!.IsActual = false;
                             currentNotificationTask!.IsWorked = false;
-                            await _context.SaveChangesAsync();
+                            await context.SaveChangesAsync();
                         }
                         _logger.LogTrace($"Во время выполнения программы задача {inputNotificationTask.Id} " +
                                          $"стала неактуальна. Подробности задачи:{railwayDataText}");
@@ -68,9 +66,9 @@ namespace RailwayWizzard.Robot.App
 
                     //Если задача остановлена пользователем.
                     //Расположил эту конструкцию перед отправкой сообщения, чтобы наверняка
-                    await using (_context)
+                    await using (var context = await _contextFactory.CreateDbContextAsync())
                     {
-                        var currentNotificationTask = await _context.NotificationTask.FirstOrDefaultAsync(t => t.Id == inputNotificationTask.Id);
+                        var currentNotificationTask = await context.NotificationTask.FirstOrDefaultAsync(t => t.Id == inputNotificationTask.Id);
                         if (currentNotificationTask!.IsStopped)
                         {
                             _logger.LogTrace($"Во время выполнения программы задача {inputNotificationTask.Id} " +
@@ -92,11 +90,11 @@ namespace RailwayWizzard.Robot.App
             }
             catch (Exception e)
             {
-                await using (_context)
+                await using (var context = await _contextFactory.CreateDbContextAsync())
                 {
-                    var currentNotificationTask = await _context.NotificationTask.FirstOrDefaultAsync(t => t.Id == inputNotificationTask.Id);
+                    var currentNotificationTask = await context.NotificationTask.FirstOrDefaultAsync(t => t.Id == inputNotificationTask.Id);
                     currentNotificationTask!.IsWorked = false;
-                    await _context.SaveChangesAsync();
+                    await context.SaveChangesAsync();
                 }
 
                 _logger.LogError($"Неизвестная ошибка метода обработки задач. {messageNotification}/n {e}");
@@ -119,7 +117,7 @@ namespace RailwayWizzard.Robot.App
             {
                 do
                 {
-                    result = await robot.GetTicket(inputNotificationTask);
+                    result = await robot.GetTicketOld(inputNotificationTask);
                     Thread.Sleep(1000 * 30 * 3); //1.5 минуты
                 }
                 while (result.Count == 0);

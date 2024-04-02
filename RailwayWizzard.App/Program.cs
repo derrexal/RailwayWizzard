@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RailwayWizzard.EntityFrameworkCore.Data;
+using RailwayWizzard.Robot.App;
 using RailwayWizzard.Shared;
 
 namespace RailwayWizzard.App
@@ -16,6 +17,7 @@ namespace RailwayWizzard.App
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddTransient<IChecker, NotificationTaskChecker>();
+            builder.Services.AddTransient<IBotApi, BotApi>();
 
             builder.Services.AddDbContextFactory<RailwayWizzardAppContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("RailwayWizzardAppContext") 

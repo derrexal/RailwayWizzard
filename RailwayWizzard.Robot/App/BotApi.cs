@@ -17,13 +17,12 @@ public class BotApi: IBotApi
     public async Task SendMessageForUser(string message, long userId)
     {
         ResponseToUser messageToUser = new ResponseToUser{ Message = message, UserId = userId };
-
+        using HttpClient httpClient = new HttpClient();
         using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, API_BOT_SEND_MESSAGE_URL);
         request.Content = JsonContent.Create(messageToUser);
 
         try
         {
-            using HttpClient httpClient = new HttpClient();
             var response = await httpClient.SendAsync(request);
             if (response.StatusCode != HttpStatusCode.OK)
                 throw new Exception($"Метод отправки сообщения пользователю:{userId} завершился с кодом:{response.StatusCode}");

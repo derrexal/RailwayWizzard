@@ -13,21 +13,15 @@ namespace RailwayWizzard.App.Controllers
     [Route("[controller]")]
     public class NotificationTaskController : Controller
     {
-        private readonly IBotApi _botApi;
         private readonly ILogger _logger;
-        private readonly IConfiguration _configuration;
         private readonly RailwayWizzardAppContext _context;
 
         public NotificationTaskController(
             RailwayWizzardAppContext context, 
-            ILogger<NotificationTaskController> logger,
-            IConfiguration configuration,
-            IBotApi botApi)
+            ILogger<NotificationTaskController> logger)
         {
-            _botApi = botApi;
             _context = context;
             _logger = logger;
-            _configuration = configuration;
         }
 
 
@@ -45,11 +39,7 @@ namespace RailwayWizzard.App.Controllers
                 await _context.SaveChangesAsync();
                 
                 _logger.LogTrace($"Success create NotificationTask. Id:{stationInfo.Id} UserId:{stationInfo.UserId}");
-                
-                var adminId = _configuration.GetValue<long>("Telegram:AdminId");
-                await _botApi.SendMessageForUser(
-                    $"Новая активность в боте. Задача: {stationInfo.Id} {stationInfo.ToCustomString()}",adminId);
-                
+                                              
                 return Ok(stationInfo.Id);
             }
 

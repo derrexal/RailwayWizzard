@@ -28,8 +28,8 @@ async def active_task_handler(update: Update, context: CallbackContext):
                 # Send message for user include task info
                 await update.callback_query.message.reply_text(
                     text="Задача №" + "<strong>" + str(task["id"]) + "</strong>"
-                         + "\nСтанция отправления: " + "<strong>" + task["arrivalStation"] + "</strong>"
-                         + "\nСтанция прибытия: " + "<strong>" + task["departureStation"] + "</strong>"
+                         + "\nСтанция отправления: " + "<strong>" + task["departureStation"] + "</strong>"
+                         + "\nСтанция прибытия: " + "<strong>" + task["arrivalStation"] + "</strong>"
                          + "\nДата отправления: " + "<strong>" + task["dateFromString"] + "</strong>"
                          + "\nВремя отправления: " + "<strong>" + task["timeFrom"] + "</strong>",
                     reply_markup=keyboard,

@@ -24,7 +24,7 @@ namespace RailwayWizzard.Robot.App
         }
 
         public async Task Notification(NotificationTask inputNotificationTask)
-        {
+        {    
             // Счетчик успешных попыток
             int count = 1;
             string railwayDataText = inputNotificationTask.ToCustomString();
@@ -111,14 +111,14 @@ namespace RailwayWizzard.Robot.App
         /// <returns></returns>
         private async Task<List<string>> GetFreeSeats(NotificationTask inputNotificationTask)
         {
-            Robot robot = new(_logger);
+            var robot = new RobotBigBrother(_logger);
             List<string> result;
             try
             {
                 do
                 {
-                    result = await robot.GetTicket(inputNotificationTask);
                     Thread.Sleep(1000 * 30); //пол минуты
+                    result = await robot.GetTicket(inputNotificationTask);
                 }
                 while (result.Count == 0);
             }

@@ -89,6 +89,8 @@ namespace RailwayWizzard.Robot.App
                                 if (carGroup.TotalPlaceQuantity > 0)  //Если есть свободные места
                                 {
                                     var key = carGroup.ServiceClassNameRu is not null ? carGroup.ServiceClassNameRu : carGroup.CarTypeName;
+                                    //TODO: костыльевато, но по другому хз как. В пакете данных приходит только "СИД"
+                                    if (key == "СИД") key = "Сидячий";
                                     if (!result.TryGetValue(key, out int value)) // если элемента нет в коллекции
                                         result.Add(key, carGroup.TotalPlaceQuantity);
                                     else
@@ -104,9 +106,7 @@ namespace RailwayWizzard.Robot.App
         {
             List<string> result = new();
             foreach(var route in currentRoutes)
-            {
                 result.Add($"Класс обслуживания: <strong>{route.Key}</strong> \nСвободных мест: <strong>{route.Value}</strong>\n");
-            }
             return result;
         }
 

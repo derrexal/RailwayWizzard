@@ -26,7 +26,7 @@ async def send_message_to_user(user_id, message):
         await application.bot.send_message(user_id, message, parse_mode=ParseMode.HTML)
         print("Пользователю " + str(user_id) + " отправлено сообщение:\n" + str(message))
     except Forbidden as eF:
-        print("Пользователь " + str(user_id) + "заблокировал бота\n" + eF.message)
+        print("Пользователь " + str(user_id) + " заблокировал бота\n" + eF.message)
         raise
     except Exception as e:
         print(e)

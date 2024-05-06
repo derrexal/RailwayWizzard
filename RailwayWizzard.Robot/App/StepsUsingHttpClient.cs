@@ -24,6 +24,8 @@ namespace RailwayWizzard.Robot.App
         }
 
         // TODO: сделать что-то с тем, что пользователи заблокировал бота...
+        // Если выяснится что пользователь заблокировал бота - выставить ему в таблице юзеров статус - IsBlocked.
+        // Когда пользователь вновь написал боту (Users/CreateOrUpdate) - выставляем ему статус IsBlocked=false
         public async Task Notification(NotificationTask inputNotificationTask)
         {    
             // Счетчик успешных попыток

@@ -71,6 +71,8 @@ namespace RailwayWizzard.Robot.App
                         var currentNotificationTask = await context.NotificationTask.FirstOrDefaultAsync(t => t.Id == inputNotificationTask.Id);
                         if (currentNotificationTask!.IsStopped)
                         {
+                            currentNotificationTask!.IsWorked = false;
+                            await context.SaveChangesAsync();
                             _logger.LogTrace($"Во время выполнения программы задача {inputNotificationTask.Id} " +
                                              $"была остановлена пользователем. Подробности задачи:{railwayDataText}");
                             break;

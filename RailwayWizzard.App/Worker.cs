@@ -30,8 +30,8 @@ namespace RailwayWizzard.App
 
                 await DoWork(cancellationToken);
                 //TODO: Все-таки хочется, чтобы работа по задаче началась непосредственно после создания
-                //Запускается 1 раз в 15 минут
-                await Task.Delay(1000*60*15, cancellationToken);
+                //Запускается 1 раз в 10 минут
+                await Task.Delay(1000*60*10, cancellationToken);
             }
         }
 

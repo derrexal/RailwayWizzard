@@ -99,7 +99,7 @@ namespace RailwayWizzard.Robot.App
                     await context.SaveChangesAsync();
                 }
 
-                _logger.LogError($"Неизвестная ошибка метода обработки задач. {messageNotification}/n {e}");
+                _logger.LogError($"Неизвестная ошибка метода обработки задач. {messageNotification}\n {e}");
                 throw;
             }
         }

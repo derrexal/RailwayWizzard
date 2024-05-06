@@ -12,21 +12,21 @@ from Bot.API import *
 async def notification_handler(update: Update, context: CallbackContext):
     """ Начало взаимодействия по клику на inline-кнопку 'Уведомление' """
     init = update.callback_query.data
-
     try:
         if init != str(CALLBACK_NOTIFICATION):
             await update.callback_query.message.reply_text(text='Что-то пошло не так, обратитесь к администратору бота')
             return ConversationHandler.END
         await update.callback_query.message.reply_text('Для возврата в главное меню введите /stop')
 
-        await update.callback_query.message.reply_text(text='Укажите <strong>станцию отправления</strong>',
-                                                       parse_mode=ParseMode.HTML)
+        await update.callback_query.message.reply_text(
+            text='Укажите <strong>станцию отправления</strong>.\n'
+                 'Например, <strong>Москва</strong>',
+            parse_mode=ParseMode.HTML)
         return 1
 
     except Exception as e:
         print(e)
-        await update.callback_query.message.reply_text(text='Укажите <strong>станцию отправления</strong>',
-                                                       parse_mode=ParseMode.HTML)
+        await update.callback_query.message.reply_text(text=message_error, parse_mode=ParseMode.HTML)
         raise
 
 
@@ -42,17 +42,18 @@ async def first_step_notification(update: Update, context: CallbackContext):
         if not language_input_validation(update.message.text):
             await update.message.reply_text('Недопустимый ввод.\nРазрешается вводить только символы кириллицы и цифры')
             return 1
-        # ToDo: Если станция есть в БД - не нужно ходить к РЖД
         station_code = await station_validate(update.message.text)
         if station_code is None:
-            await update.message.reply_text(text="Такой станции на сайте РЖД не котируется.\n"
-                                                 "Укажите <strong>станцию</strong> отправления",
+            await update.message.reply_text(text='Такой станции на сайте РЖД не котируется.\n'
+                                                 'Укажите <strong>станцию отправления</strong>.\n'
+                                                 'Например, <strong>Москва</strong>',
                                             parse_mode=ParseMode.HTML)
             return 1
 
         context.user_data[0] = update.message.text.upper()
         context.user_data[10] = station_code
-        await update.message.reply_text(text='Укажите <strong>станцию прибытия</strong>',
+        await update.message.reply_text(text='Укажите <strong>станцию прибытия</strong>.\n'
+                                             'Например, <strong>Курск</strong>',
                                         parse_mode=ParseMode.HTML)
         return 2
 
@@ -77,7 +78,9 @@ async def second_step_notification(update: Update, context: CallbackContext):
 
         station_code = await station_validate(update.message.text)
         if station_code is None:
-            await update.message.reply_text('Такой станции на сайте РЖД не котируется.\nУкажите станцию прибытия')
+            await update.message.reply_text('Такой станции на сайте РЖД не котируется.\n'
+                                            'Укажите станцию прибытия\n'
+                                            'Например, <strong>Курск</strong>')
             return 2
 
         context.user_data[1] = update.message.text.upper()
@@ -87,7 +90,8 @@ async def second_step_notification(update: Update, context: CallbackContext):
             await update.message.reply_text('Станции не могут совпадать')
             return 2
 
-        await update.message.reply_text(text='Укажите <strong>дату отправления</strong>',
+        await update.message.reply_text(text='Укажите <strong>дату отправления</strong>.\n'
+                                             'Например, <strong>' + datetime.now().strftime("%d.%m.%Y") + '</strong>',
                                         parse_mode=ParseMode.HTML)
         return 3
 
@@ -108,18 +112,21 @@ async def third_step_notification(update: Update, context: CallbackContext):
         date_and_date_json = date_format_validate(update.message.text)
         if date_and_date_json is None:
             await update.message.reply_text('Формат даты должен быть dd.mm.yyyy')
-            await update.message.reply_text(text='Укажите <strong>дату отправления</strong>',
+            await update.message.reply_text(text='Укажите <strong>дату отправления</strong>\n'
+                                            'Например, <strong>' + datetime.now().strftime("%d.%m.%Y") + '</strong>',
                                             parse_mode=ParseMode.HTML)
             return 3
         if date_limits_validate(update.message.text) is None:
             await update.message.reply_text('На указанную дату билеты не продаются')
-            await update.message.reply_text(text='Укажите <strong>дату отправления</strong>',
+            await update.message.reply_text(text='Укажите <strong>дату отправления</strong>\n'
+                                            'Например, <strong>' + datetime.now().strftime("%d.%m.%Y") + '</strong>',
                                             parse_mode=ParseMode.HTML)
             return 3
 
         context.user_data[2] = date_and_date_json['date']  # Дата в формате даты
-        context.user_data[22] = date_and_date_json['date_text'] #Дата в формате строки
-        await update.message.reply_text(text='Укажите <strong>время отправления</strong>',
+        context.user_data[22] = date_and_date_json['date_text']  # Дата в формате строки
+        await update.message.reply_text(text='Укажите <strong>время отправления</strong>\n'
+                                             'Например, <strong>' + datetime.now().strftime("%H:%M") + '</strong>',
                                         parse_mode=ParseMode.HTML)
         return 4
 
@@ -141,11 +148,11 @@ async def fourth_step_notification(update: Update, context: CallbackContext):
         input_time = update.message.text
         if not time_format_validate(input_time):
             await update.message.reply_text('Формат времени должен быть hh:mm ')
-            await update.message.reply_text(text='Укажите <strong>время отправления</strong>',
+            await update.message.reply_text(text='Укажите <strong>время отправления</strong>\n'
+                                            'Например, <strong>' + datetime.now().strftime("%H:%M") + '</strong>',
                                             parse_mode=ParseMode.HTML)
             return 4
 
-        # True #ToDo:пока отключил проверку времени, т.к. ржд динамит меня
         available_time = time_check_validate(
             input_time,
             context.user_data[10], context.user_data[11],
@@ -160,10 +167,10 @@ async def fourth_step_notification(update: Update, context: CallbackContext):
         context.user_data[3] = input_time
 
         await update.message.reply_text(text="Пожалуйста, проверьте введенные данные:"
-                                        + "\n\nСтанция отправления: " + "<strong>" + context.user_data[0] + "</strong>"
-                                        + "\nСтанция прибытия: " + "<strong>" + context.user_data[1] + "</strong>"
-                                        + "\nДата отправления: " + "<strong>" + context.user_data[22] + "</strong>"
-                                        + "\nВремя отправления: " + "<strong>" + context.user_data[3] + "</strong>",
+                                             + "\n\nСтанция отправления: " + "<strong>" + context.user_data[0] + "</strong>"
+                                             + "\nСтанция прибытия: " + "<strong>" + context.user_data[1] + "</strong>"
+                                             + "\nДата отправления: " + "<strong>" + context.user_data[22] + "</strong>"
+                                             + "\nВремя отправления: " + "<strong>" + context.user_data[3] + "</strong>",
                                         reply_markup=notification_confirm_inline_buttons,
                                         parse_mode=ParseMode.HTML)
         return 5
@@ -217,4 +224,3 @@ async def send_notification_data_to_robot(update: Update, context: CallbackConte
 
     except Exception as e:
         raise e
-

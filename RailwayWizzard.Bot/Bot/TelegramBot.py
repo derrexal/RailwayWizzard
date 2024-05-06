@@ -27,7 +27,7 @@ async def send_message_to_user(user_id, message):
         print("Пользователю " + str(user_id) + " отправлено сообщение:\n" + str(message))
     except Forbidden as eF:
         print("Пользователь " + str(user_id) + " заблокировал бота\n" + eF.message)
-        raise
+        raise eF
     except Exception as e:
         print(e)
         raise

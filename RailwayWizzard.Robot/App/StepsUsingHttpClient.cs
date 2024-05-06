@@ -23,6 +23,7 @@ namespace RailwayWizzard.Robot.App
             _contextFactory = contextFactory;
         }
 
+        // TODO: сделать что-то с тем, что пользователи заблокировал бота...
         public async Task Notification(NotificationTask inputNotificationTask)
         {    
             // Счетчик успешных попыток

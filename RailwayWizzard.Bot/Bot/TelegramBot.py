@@ -1,4 +1,5 @@
 from dotenv import load_dotenv
+from telegram.error import Forbidden
 from telegram.constants import ParseMode
 from telegram.ext import CommandHandler, MessageHandler, ConversationHandler, CallbackQueryHandler, Application, filters
 from Bot.Handlers.Help import help_handler
@@ -21,9 +22,16 @@ application = Application.builder().token(token).build()
 # Перенести этот метод в др место не получается, т.к. тут создается application
 async def send_message_to_user(user_id, message):
     global application
-    await application.bot.send_message(user_id, message, parse_mode=ParseMode.HTML)
-    print("Пользователю " + str(user_id) + " отправлено сообщение:\n" + str(message))
-
+    try:
+        await application.bot.send_message(user_id, message, parse_mode=ParseMode.HTML)
+        print("Пользователю " + str(user_id) + " отправлено сообщение:\n" + str(message))
+    except Forbidden as eF:
+        print("Пользователь " + str(user_id) + "заблокировал бота\n" + eF.message)
+        raise
+    except Exception as e:
+        print(e)
+        raise
+  
 
 def run():
     print("INFO:        Bot started")

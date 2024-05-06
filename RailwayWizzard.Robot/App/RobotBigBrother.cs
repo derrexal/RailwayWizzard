@@ -86,16 +86,17 @@ namespace RailwayWizzard.Robot.App
                     if (train.LocalDepartureDateTime.ToString()!.Contains(departureTime)) //Если в ответе содержится необходимая поездка
                         foreach (var carGroup in train.CarGroups)
                             if (!carGroup.HasPlacesForDisabledPersons) // Если место не для инвалидов
-                                if (carGroup.TotalPlaceQuantity > 0)  //Если есть свободные места
-                                {
-                                    var key = carGroup.ServiceClassNameRu is not null ? carGroup.ServiceClassNameRu : carGroup.CarTypeName;
-                                    //TODO: костыльевато, но по другому хз как. В пакете данных приходит только "СИД"
-                                    if (key == "СИД") key = "Сидячий";
-                                    if (!result.TryGetValue(key, out int value)) // если элемента нет в коллекции
-                                        result.Add(key, carGroup.TotalPlaceQuantity);
-                                    else
-                                        result[key] = value + carGroup.TotalPlaceQuantity;
-                                }
+                                if(carGroup.CarType != "Baggage") // Если это не информация о багаже (Окавается и это присылают)
+                                    if (carGroup.TotalPlaceQuantity > 0)  //Если есть свободные места
+                                    {
+                                        var key = carGroup.ServiceClassNameRu is not null ? carGroup.ServiceClassNameRu : carGroup.CarTypeName;
+                                        //TODO: костыльевато, но по другому хз как. В пакете данных приходит только "СИД"
+                                        if (key == "СИД") key = "СИДЯЧИЙ";
+                                        if (!result.TryGetValue(key, out int value)) // если элемента нет в коллекции
+                                            result.Add(key, carGroup.TotalPlaceQuantity);
+                                        else
+                                            result[key] = value + carGroup.TotalPlaceQuantity;
+                                    }
             }
             catch { throw; }
             return result;

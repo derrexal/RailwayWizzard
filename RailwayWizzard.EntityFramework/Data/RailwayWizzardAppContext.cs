@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RailwayWizzard.Core;
 
-
+// dotnet ef migrations add test --project ..\RailwayWizzard.EntityFramework\
 namespace RailwayWizzard.EntityFrameworkCore.Data
 {
     public class RailwayWizzardAppContext : DbContext

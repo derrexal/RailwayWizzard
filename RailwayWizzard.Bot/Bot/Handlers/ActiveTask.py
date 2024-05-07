@@ -32,6 +32,7 @@ async def active_task_handler(update: Update, context: CallbackContext):
                          + "\nСтанция прибытия: " + "<strong>" + task["arrivalStation"] + "</strong>"
                          + "\nДата отправления: " + "<strong>" + task["dateFromString"] + "</strong>"
                          + "\nВремя отправления: " + "<strong>" + task["timeFrom"] + "</strong>",
+                        #TODO: добавить типы вагонов которые выбрал пользователь по данному рейсу
                     reply_markup=keyboard,
                     parse_mode=ParseMode.HTML)
 

@@ -64,7 +64,7 @@ namespace RailwayWizzard.Robot.App
                 if(myDeserializedClass == null) { throw new Exception("Сервис РЖД при запросе списка свободных мест вернул пустой ответ"); }
                 if(myDeserializedClass.Trains.Count == 0) { throw new Exception("Сервис РЖД при запросе списка свободных мест вернул ответ в котором нет поездок"); }
                 //вытаскиваем свободные места по запрашиваемому рейсу
-                var currentRoute = GetCurrentRouteFromResponse(myDeserializedClass, inputNotificationTask.TimeFrom);
+                var currentRoute = GetCurrentRouteFromResponse(myDeserializedClass, inputNotificationTask);
                 var result = SupportingMethod(currentRoute);
                 return result;
             }
@@ -77,16 +77,38 @@ namespace RailwayWizzard.Robot.App
         /// <param name="root"></param>
         /// <param name="departureTime"></param>
         /// <returns></returns>
-        private Dictionary<string,int> GetCurrentRouteFromResponse(RootBigBrother root, string departureTime)
+        private Dictionary<string,int> GetCurrentRouteFromResponse(RootBigBrother root, NotificationTask inputNotificationTask)
         {
+            //словарь - тип вагона:кол-во мест
             Dictionary<string, int> result = new Dictionary<string, int>();
+            
+            //todo: костыль, но как по другому?
+            //наполяем список типов вагонов словами, чтобы было с чем сравнивать
+            List<string> carTypesText = new List<string>();
+            foreach(var carType in inputNotificationTask.CarTypes)
+                switch(carType)
+                {
+                    case CarTypeEnum.Sedentary:
+                        carTypesText.Add("Sedentary");
+                        break;
+                    case CarTypeEnum.ReservedSeat:
+                        carTypesText.Add("ReservedSeat");
+                        break;
+                    case CarTypeEnum.Compartment:
+                        carTypesText.Add("Compartment");
+                        break;
+                    case CarTypeEnum.Luxury:
+                        carTypesText.Add("Luxury");
+                        break;
+                }
+
             try
             {
                 foreach (var train in root.Trains)
-                    if (train.LocalDepartureDateTime.ToString()!.Contains(departureTime)) //Если в ответе содержится необходимая поездка
+                    if (train.LocalDepartureDateTime.ToString()!.Contains(inputNotificationTask.TimeFrom)) //Если в ответе содержится необходимая поездка
                         foreach (var carGroup in train.CarGroups)
-                            if (!carGroup.HasPlacesForDisabledPersons) // Если место не для инвалидов
-                                if(carGroup.CarType != "Baggage") // Если это не информация о багаже (Окавается и это присылают)
+                            if (!carGroup.HasPlacesForDisabledPersons) // Если место не для инвалидов                               
+                                if(carTypesText.Contains(carGroup.CarType)) //Если это тот тип вагонов, которые выбрал пользователь
                                     if (carGroup.TotalPlaceQuantity > 0)  //Если есть свободные места
                                     {
                                         var key = carGroup.ServiceClassNameRu is not null ? carGroup.ServiceClassNameRu : carGroup.CarTypeName;

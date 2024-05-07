@@ -29,6 +29,8 @@ namespace RailwayWizzard.Core
         [Description("Поиск остановлен")]
         public bool IsStopped { get; set; }
 
+        [Description("Типы вагона")]
+        public List<CarTypeEnum> CarTypes { get; set; }
         [NotMapped]
         public long ArrivalStationCode { get; set; }
         [NotMapped]

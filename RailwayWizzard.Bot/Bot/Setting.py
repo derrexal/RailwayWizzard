@@ -11,17 +11,13 @@ message_start = '\U00002388 Добро пожаловать на борт'
 
 start_inline_keyboards = InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(
-                    text='\U00002709 Уведомление об появлении мест',
+            [InlineKeyboardButton(text='\U00002709 Уведомление об появлении мест',
                     callback_data=str(CALLBACK_NOTIFICATION))],
-            [InlineKeyboardButton(
-                text='\U0001F5C2 Список активных задач',
-                callback_data=str(CALLBACK_ACTIVE_TASK))],
+            [InlineKeyboardButton(text='\U0001F5C2 Список активных задач', callback_data=str(CALLBACK_ACTIVE_TASK))],
         ])
 
 notification_confirm_inline_buttons = InlineKeyboardMarkup([[
-            InlineKeyboardButton(text='Данные верны',
-                                 callback_data=str(CALLBACK_DATA_CORRECT_NOTIFICATION)),
+            InlineKeyboardButton(text='Данные верны', callback_data=str(CALLBACK_DATA_CORRECT_NOTIFICATION)),
             InlineKeyboardButton(text='Отменить создание уведомлений',
                                  callback_data=str(CALLBACK_DATA_INCORRECT_NOTIFICATION)),
     ]])

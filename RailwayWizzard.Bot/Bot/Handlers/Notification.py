@@ -35,7 +35,7 @@ async def notification_handler(update: Update, context: CallbackContext):
 
 async def first_step_notification(update: Update, context: CallbackContext):
     try:
-        # Duplicate Code(1)
+        #TODO: Duplicate Code(1)
         log_user_message(update, context)
         await update.message.reply_chat_action(ChatAction.TYPING)
 
@@ -116,13 +116,15 @@ async def third_step_notification(update: Update, context: CallbackContext):
         if date_and_date_json is None:
             await update.message.reply_text('Формат даты должен быть dd.mm.yyyy')
             await update.message.reply_text(text='Укажите <strong>дату отправления</strong>\n'
-                                            'Например, <strong>' + datetime.now().strftime("%d.%m.%Y") + '</strong>',
+                                                 'Например, <strong>' + datetime.now().strftime("%d.%m.%Y")
+                                                 + '</strong>',
                                             parse_mode=ParseMode.HTML)
             return 3
         if date_limits_validate(update.message.text) is None:
             await update.message.reply_text('На указанную дату билеты не продаются')
             await update.message.reply_text(text='Укажите <strong>дату отправления</strong>\n'
-                                            'Например, <strong>' + datetime.now().strftime("%d.%m.%Y") + '</strong>',
+                                                 'Например, <strong>' + datetime.now().strftime("%d.%m.%Y")
+                                                 + '</strong>',
                                             parse_mode=ParseMode.HTML)
             return 3
 

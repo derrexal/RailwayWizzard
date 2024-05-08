@@ -6,6 +6,21 @@ from Bot.Other import *
 from Bot.API import *
 
 
+def get_car_types_text(car_types: list) -> str:
+    """ Converting an car types array to a string like "купе, плацкарт, св """
+    result = ""
+    for car_type in car_types:
+        if car_type == 1:
+            result = result + "Сидячий, "
+        elif car_type == 2:
+            result = result + "Плацкарт, "
+        elif car_type == 3:
+            result = result + "Купе, "
+        elif car_type == 4:
+            result = result + "СВ"
+    return result
+
+
 async def active_task_handler(update: Update, context: CallbackContext):
     """ Начало взаимодействия по клику на inline-кнопку 'Список активных задач' """
     init = update.callback_query.data
@@ -25,16 +40,21 @@ async def active_task_handler(update: Update, context: CallbackContext):
                 keyboard = InlineKeyboardMarkup(inline_keyboard=[[
                     InlineKeyboardButton(text='Остановить поиск по задаче', callback_data=callback)]])
 
+                text = ("Задача №" + "<strong>" + str(task["id"]) + "</strong>"
+                        + "\nСтанция отправления: " + "<strong>" + task["departureStation"] + "</strong>"
+                        + "\nСтанция прибытия: " + "<strong>" + task["arrivalStation"] + "</strong>"
+                        + "\nДата отправления: " + "<strong>" + task["dateFromString"] + "</strong>"
+                        + "\nВремя отправления: " + "<strong>" + task["timeFrom"] + "</strong>")
+
+                car_types_text = get_car_types_text(task["carTypes"])
+                #В старых задачах не выбраны типы вагонов
+                #TODO: по прошествии времени станет неактуально
+                if car_types_text != "":
+                    text = text + "\nТип вагона: " + "<strong>" + car_types_text + "</strong>"
+
                 # Send message for user include task info
-                await update.callback_query.message.reply_text(
-                    text="Задача №" + "<strong>" + str(task["id"]) + "</strong>"
-                         + "\nСтанция отправления: " + "<strong>" + task["departureStation"] + "</strong>"
-                         + "\nСтанция прибытия: " + "<strong>" + task["arrivalStation"] + "</strong>"
-                         + "\nДата отправления: " + "<strong>" + task["dateFromString"] + "</strong>"
-                         + "\nВремя отправления: " + "<strong>" + task["timeFrom"] + "</strong>",
-                        #TODO: добавить типы вагонов которые выбрал пользователь по данному рейсу
-                    reply_markup=keyboard,
-                    parse_mode=ParseMode.HTML)
+                await update.callback_query.message.reply_text(text=text, reply_markup=keyboard,
+                                                               parse_mode=ParseMode.HTML)
 
         return 1
 
@@ -62,8 +82,7 @@ async def one_step_active_task(update: Update, context: CallbackContext):
             await update.callback_query.message.reply_text(text=message_error)
             return ConversationHandler.END
         await update.callback_query.edit_message_text(text_message_html + "\n Остановлена", parse_mode=ParseMode.HTML)
-        await update.callback_query.message.reply_text("Задача №" +
-                                                       "<strong>" + str(task_number) + "</strong>"
+        await update.callback_query.message.reply_text("Задача №" + "<strong>" + str(task_number) + "</strong>"
                                                        + " успешно остановлена.", parse_mode=ParseMode.HTML)
         return 1
 

@@ -267,9 +267,11 @@ async def fifth_step_notification(update: Update, context: CallbackContext):
             if car_types['luxury']:
                 car_types_text = car_types_text + 'СВ'
                 car_types_list.append(4)
-            #TODO: нужно бы это сообщение убирать, или выводить в другом месте
+
             if len(car_types_list) == 0:
-                await update.callback_query.message.reply_text("Необходимо выбрать хотя бы 1 тип вагона")
+                message_warning = "Необходимо выбрать хотя бы 1 тип вагона"
+                if message_warning not in update.callback_query.message.text:
+                    await update.callback_query.edit_message_text(message_warning, reply_markup=car_type_inline_buttons)
                 return 5
             context.user_data[5] = car_types_list
             await update.callback_query.edit_message_text(text="Пожалуйста, проверьте введенные данные:"

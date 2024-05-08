@@ -256,16 +256,16 @@ async def fifth_step_notification(update: Update, context: CallbackContext):
             car_types_text = ''
             car_types_list = []
             if car_types['sedentary']:
-                car_types_text = car_types_text + 'Сидячий\n'
+                car_types_text = car_types_text + 'Сидячий, '
                 car_types_list.append(1)
             if car_types['reserved_seat']:
-                car_types_text = car_types_text + 'Плацкарт\n'
+                car_types_text = car_types_text + 'Плацкарт, '
                 car_types_list.append(2)
             if car_types['compartment']:
-                car_types_text = car_types_text + 'Купе\n'
+                car_types_text = car_types_text + 'Купе, '
                 car_types_list.append(3)
             if car_types['luxury']:
-                car_types_text = car_types_text + 'СВ\n'
+                car_types_text = car_types_text + 'СВ'
                 car_types_list.append(4)
             #TODO: нужно бы это сообщение убирать, или выводить в другом месте
             if len(car_types_list) == 0:

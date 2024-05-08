@@ -230,6 +230,7 @@ async def fourth_step_notification(update: Update, context: CallbackContext):
         set_default_car_types()
         await update.message.reply_text(text="Выберите тип вагона который вас интересует",
                                         reply_markup=car_type_inline_buttons)
+        set_default_car_types()
         return 5
 
     except Exception as e:

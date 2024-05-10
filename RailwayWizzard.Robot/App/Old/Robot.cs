@@ -6,8 +6,9 @@ using RailwayWizzard.Core;
 using RailwayWizzard.Robot.Core;
 
 
-namespace RailwayWizzard.Robot.App
+namespace RailwayWizzard.Robot.App.Old
 {
+    //Устаревшая версия робота, который использовал внешний сервис для доступа к РЖД АПИ
     public class Robot
     {
         private const string _baseUrl = "php_service:8088/";
@@ -79,13 +80,13 @@ namespace RailwayWizzard.Robot.App
         /// <returns></returns>
         private List<string> GetCurrentRouteFromResponse(List<Root> roots, string departureTime)
         {
-            List<string> result=new();
+            List<string> result = new();
             foreach (var route in roots)
                 //Если в ответе содержится необходимая поездка
                 if (route.time0 == departureTime && route.cars != null)
                     foreach (var car in route.cars)
                         //Если есть свободные места
-                            if (car.freeSeats != null)
+                        if (car.freeSeats != null)
                         {
                             //если место не для инвалидов
                             if (car.disabledPerson == null || car.disabledPerson == false)

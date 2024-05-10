@@ -5,11 +5,10 @@ using RailwayWizzard.Core;
 namespace RailwayWizzard.Shared
 {
     /// <summary>
-    /// Класс, содержаший вспомогательные методы, имеет отношение к модели "NotificationTask:
+    /// Cодержит вспомогательные методы для сущности NotificationTask
     /// </summary>
     public class NotificationTaskChecker: IChecker
     {
-
         /// <summary>
         /// Проверяет задачу на актуальность
         /// </summary>

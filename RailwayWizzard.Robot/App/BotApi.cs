@@ -4,9 +4,11 @@ using System.Net.Http.Json;
 
 namespace RailwayWizzard.Robot.App;
 
-public class BotApi: IBotApi
+/// <summary>
+/// Описывает методы взаимодействия с ботом
+/// </summary>
+public class BotApi : IBotApi
 {
-    // private const string API_BOT_URL = "http://bot_service:5000/";
     private const string API_BOT_SEND_MESSAGE_URL = "http://bot_service:5000/api/sendMessageForUser";
 
     /// <summary>

@@ -11,6 +11,8 @@ namespace RailwayWizzard.App
         private readonly IChecker _checker;
         private readonly ILogger _logger;
         private readonly IDbContextFactory<RailwayWizzardAppContext> _contextFactory;
+        private const int timeInterval = 1000 * 60 * 10; //»нтервал запуска (10 мин)
+
         public NotificationTaskWorker(
             IChecker checker,
             ILogger<NotificationTaskWorker> logger, 
@@ -30,8 +32,7 @@ namespace RailwayWizzard.App
                 await DoWork();
                 //TODO: ¬се-таки хочетс€, чтобы работа по задаче началась непосредственно после создани€
 
-                //«апускаетс€ 1 раз в 10 минут
-                await Task.Delay(1000*60*10, cancellationToken);
+                await Task.Delay(timeInterval, cancellationToken);
             }
         }
 

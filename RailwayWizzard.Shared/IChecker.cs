@@ -8,5 +8,13 @@ namespace RailwayWizzard.Shared
     public interface IChecker
     {
         public bool CheckActualNotificationTask(NotificationTask task);
+
+        public Task<IList<NotificationTask>> GetActiveNotificationTasks();
+
+        public Task<IList<NotificationTask>> GetActiveAndNotStopNotificationTasks();
+
+        public Task<IList<NotificationTask>> GetNotWorkedNotificationTasks();
+        
+        public Task<IList<NotificationTask>> GetNotificationTasksForWork();
     }
 }

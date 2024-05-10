@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\RailwayWizzard.Core\RailwayWizzard.Core.csproj" />
+    <ProjectReference Include="..\RailwayWizzard.EntityFramework\RailwayWizzard.EntityFrameworkCore.csproj" />
   </ItemGroup>
 
 </Project>

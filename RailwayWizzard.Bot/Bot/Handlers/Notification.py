@@ -33,6 +33,7 @@ car_types = {'sedentary': True,
              'compartment': True,
              'luxury': False}
 
+
 #TODO:duplicate
 def set_default_car_types():
     global car_types
@@ -80,7 +81,7 @@ async def notification_handler(update: Update, context: CallbackContext):
 
         await update.callback_query.message.reply_text(
             text='Укажите <strong>станцию отправления</strong>.\n'
-                 'Например, <strong>Москва</strong>',
+                 'Например, <code>Москва</code>',
             parse_mode=ParseMode.HTML)
         return 1
 
@@ -106,14 +107,14 @@ async def first_step_notification(update: Update, context: CallbackContext):
         if station_code is None:
             await update.message.reply_text(text='Такой станции на сайте РЖД не котируется.\n'
                                                  'Укажите <strong>станцию отправления</strong>.\n'
-                                                 'Например, <strong>Москва</strong>',
+                                                 'Например, <code>Москва</code>',
                                             parse_mode=ParseMode.HTML)
             return 1
 
         context.user_data[0] = update.message.text.upper()
         context.user_data[10] = station_code
         await update.message.reply_text(text='Укажите <strong>станцию прибытия</strong>.\n'
-                                             'Например, <strong>Курск</strong>',
+                                             'Например, <code>Курск</code>',
                                         parse_mode=ParseMode.HTML)
         return 2
 
@@ -140,7 +141,7 @@ async def second_step_notification(update: Update, context: CallbackContext):
         if station_code is None:
             await update.message.reply_text('Такой станции на сайте РЖД не котируется.\n'
                                             'Укажите станцию прибытия\n'
-                                            'Например, <strong>Курск</strong>')
+                                            'Например, <code>Курск</code>')
             return 2
 
         context.user_data[1] = update.message.text.upper()
@@ -151,7 +152,7 @@ async def second_step_notification(update: Update, context: CallbackContext):
             return 2
 
         await update.message.reply_text(text='Укажите <strong>дату отправления</strong>.\n'
-                                             'Например, <strong>' + datetime.now().strftime("%d.%m.%Y") + '</strong>',
+                                             'Например, <code>' + datetime.now().strftime("%d.%m.%Y") + '</code>',
                                         parse_mode=ParseMode.HTML)
         return 3
 
@@ -173,22 +174,20 @@ async def third_step_notification(update: Update, context: CallbackContext):
         if date_and_date_json is None:
             await update.message.reply_text('Формат даты должен быть dd.mm.yyyy')
             await update.message.reply_text(text='Укажите <strong>дату отправления</strong>\n'
-                                                 'Например, <strong>' + datetime.now().strftime("%d.%m.%Y")
-                                                 + '</strong>',
+                                                 'Например, <code>' + datetime.now().strftime("%d.%m.%Y") + '</code>',
                                             parse_mode=ParseMode.HTML)
             return 3
         if date_limits_validate(update.message.text) is None:
             await update.message.reply_text('На указанную дату билеты не продаются')
             await update.message.reply_text(text='Укажите <strong>дату отправления</strong>\n'
-                                                 'Например, <strong>' + datetime.now().strftime("%d.%m.%Y")
-                                                 + '</strong>',
+                                                 'Например, <code>' + datetime.now().strftime("%d.%m.%Y") + '</code>',
                                             parse_mode=ParseMode.HTML)
             return 3
 
         context.user_data[2] = date_and_date_json['date']  # Дата в формате даты
         context.user_data[22] = date_and_date_json['date_text']  # Дата в формате строки
         await update.message.reply_text(text='Укажите <strong>время отправления</strong>\n'
-                                             'Например, <strong>' + datetime.now().strftime("%H:%M") + '</strong>',
+                                             'Например, <code>' + datetime.now().strftime("%H:%M") + '</code>',
                                         parse_mode=ParseMode.HTML)
         return 4
 
@@ -211,7 +210,7 @@ async def fourth_step_notification(update: Update, context: CallbackContext):
         if not time_format_validate(input_time):
             await update.message.reply_text('Формат времени должен быть hh:mm ')
             await update.message.reply_text(text='Укажите <strong>время отправления</strong>\n'
-                                                 'Например, <strong>' + datetime.now().strftime("%H:%M") + '</strong>',
+                                                 'Например, <code>' + datetime.now().strftime("%H:%M") + '</code>',
                                             parse_mode=ParseMode.HTML)
             return 4
         available_time = time_check_validate(
@@ -221,7 +220,9 @@ async def fourth_step_notification(update: Update, context: CallbackContext):
             context.user_data[22])
         if available_time is not True:
             await update.message.reply_text('Не найдено поездки с таким временем')
-            await update.message.reply_text('Доступное время для бронирования:\n' + available_time.__str__())
+            await update.message.reply_text(text='Доступное время для бронирования:\n' +
+                                            '    '.join('<code>' + str(time) + '</code>' for time in available_time),
+                                            parse_mode=ParseMode.HTML)
             await update.message.reply_text(text='Укажите <strong>время отправления</strong>',
                                             parse_mode=ParseMode.HTML)
             return 4

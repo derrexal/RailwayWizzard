@@ -9,15 +9,21 @@ namespace RailwayWizzard.Robot.App
 {
     public class StepsUsingHttpClient : ISteps
     {
+        private readonly IRobot _robot;
+        private readonly IBotApi _botApi;
         private readonly IChecker _checker;
         private readonly ILogger _logger;
         private readonly IDbContextFactory<RailwayWizzardAppContext> _contextFactory;
         
         public StepsUsingHttpClient(
+            IRobot robot,
+            IBotApi botApi,
             IChecker checker,
             ILogger logger, 
             IDbContextFactory<RailwayWizzardAppContext> contextFactory)
         {
+            _robot = robot;
+            _botApi = botApi;
             _checker = checker;
             _logger = logger;
             _contextFactory = contextFactory;
@@ -82,13 +88,13 @@ namespace RailwayWizzard.Robot.App
                         }
                     }
 
-                    var botApi = new BotApi();
                     // Формирование текста уведомления о наличии мест
                     string message = $"{char.ConvertFromUtf32(0x2705)} {railwayDataText}" +
                                      $"\n{String.Join("\n", freeSeats.ToArray())}" +
                                      "\nОбнаружены свободные места\n";
+                    
                     // Отправка сообщения пользователю
-                    await botApi.SendMessageForUser(message, inputNotificationTask.UserId);
+                    await _botApi.SendMessageForUserAsync(message, inputNotificationTask.UserId);
                                             
                     count++;
                 }
@@ -116,14 +122,13 @@ namespace RailwayWizzard.Robot.App
         /// <returns></returns>
         private async Task<List<string>> GetFreeSeats(NotificationTask inputNotificationTask)
         {
-            var robot = new RobotBigBrother(_logger);
             List<string> result;
             try
             {
                 do
                 {
                     Thread.Sleep(1000 * 30); //пол минуты
-                    result = await robot.GetTicket(inputNotificationTask);
+                    result = await _robot.GetFreeSeatsOnTheTrain(inputNotificationTask);
                 }
                 while (result.Count == 0);
             }

@@ -5,5 +5,7 @@
 /// </summary>
 public interface IBotApi
 {
-    public Task SendMessageForUser(string message, long userId);
+    public Task SendMessageForUserAsync(string message, long userId);
+    public Task SendMessageForAdminAsync(string message);
+
 }

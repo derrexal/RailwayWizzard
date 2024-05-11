@@ -11,19 +11,46 @@ namespace RailwayWizzard.Robot.App
     /// <summary>
     /// Класс для работы с АПИ РЖД
     /// </summary>
-    public class RobotBigBrother
+    public class RobotBigBrother: IRobot
     {
-        private readonly ILogger _logger;
+        private readonly ILogger<RobotBigBrother> _logger;
 
-        public RobotBigBrother(ILogger logger)
+        public RobotBigBrother(ILogger<RobotBigBrother> logger)
         {
             _logger = logger;
         }
 
-        public async Task<List<string>> GetTicket(NotificationTask inputNotificationTask)
+        /// <summary>
+        /// Получение свободных мест в запрашиваемом рейсе
+        /// </summary>
+        /// <param name="inputNotificationTask"></param>
+        /// <returns></returns>
+        public async Task<List<string>> GetFreeSeatsOnTheTrain(NotificationTask inputNotificationTask)
+        {
+            try
+            {
+                var textResponse = await GetTrainInformationByParameters(inputNotificationTask);
+                //TODO: нужно смапить в DTO чтобы этот огромный объект не таскать по памяти
+                RootBigBrother myDeserializedClass = JsonConvert.DeserializeObject<RootBigBrother>(textResponse);
+                if (myDeserializedClass == null) { throw new Exception("Сервис РЖД при запросе списка свободных мест вернул пустой ответ"); }
+                if (myDeserializedClass.Trains.Count == 0) { throw new Exception("Сервис РЖД при запросе списка свободных мест вернул ответ в котором нет поездок"); }
+                //вытаскиваем свободные места по запрашиваемому рейсу
+                var currentRoute = GetCurrentRouteFromResponse(myDeserializedClass, inputNotificationTask);
+                var result = SupportingMethod(currentRoute);
+                return result;
+            }
+            catch { throw; }
+        }
+
+        /// <summary>
+        /// Получение информации об рейсах по запрашиваемым параметрам
+        /// </summary>
+        /// <param name="inputNotificationTask"></param>
+        /// <returns></returns>
+        private async Task<string> GetTrainInformationByParameters(NotificationTask inputNotificationTask)
         {
             //адрес сервиса получения рейсов по заданной дате
-            string url = "https://ticket.rzd.ru/apib2b/p/Railway/V1/Search/TrainPricing?service_provider=B2B_RZD&bs="; 
+            string url = "https://ticket.rzd.ru/apib2b/p/Railway/V1/Search/TrainPricing?service_provider=B2B_RZD&bs=";
 
             try
             {
@@ -38,7 +65,7 @@ namespace RailwayWizzard.Robot.App
                 request.Headers.Add("Connection", "keep-alive");
                 request.Headers.Add("Origin", "https://ticket.rzd.ru");
                 request.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36");
-                request.Headers.Add("Cookie"," LANG_SITE=ru; " + $"oxxfgh={ksid}");
+                request.Headers.Add("Cookie", " LANG_SITE=ru; " + $"oxxfgh={ksid}");
                 request.Content = new StringContent(
                     "{\"Origin\":\"" + inputNotificationTask.DepartureStationCode + "\"," +
                     "\"Destination\":\"" + inputNotificationTask.ArrivalStationCode + "\"," +
@@ -51,7 +78,7 @@ namespace RailwayWizzard.Robot.App
                     "\"CarIssuingType\":\"All\"," +
                     "\"GetTrainsFromSchedule\":false}"
                     , null, "application/json");
-                
+
                 //отправляем запрос
                 var client = new HttpClient();
                 var response = await client.SendAsync(request);
@@ -59,17 +86,10 @@ namespace RailwayWizzard.Robot.App
 
                 var textResponse = await response.Content.ReadAsStringAsync();
                 if (textResponse == null || textResponse == "") { throw new Exception("Сервис РЖД при запросе списка свободных мест вернул пустой ответ"); }
-                //TODO: нужно смапить в DTO чтобы этот огромный объект не таскать по памяти
-                RootBigBrother myDeserializedClass = JsonConvert.DeserializeObject<RootBigBrother>(textResponse);
-                if(myDeserializedClass == null) { throw new Exception("Сервис РЖД при запросе списка свободных мест вернул пустой ответ"); }
-                if(myDeserializedClass.Trains.Count == 0) { throw new Exception("Сервис РЖД при запросе списка свободных мест вернул ответ в котором нет поездок"); }
-                //вытаскиваем свободные места по запрашиваемому рейсу
-                var currentRoute = GetCurrentRouteFromResponse(myDeserializedClass, inputNotificationTask);
-                var result = SupportingMethod(currentRoute);
-                return result;
+                return textResponse;
             }
             catch { throw; }
-        }
+            }
 
         /// <summary>
         /// Из ответа по рейсам в запрашиваемый день вытаскивает свободные места по запрашиваемому рейсу

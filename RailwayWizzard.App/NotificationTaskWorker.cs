@@ -8,16 +8,22 @@ namespace RailwayWizzard.App
 {
     public class NotificationTaskWorker : BackgroundService
     {
+        private readonly IRobot _robot;
+        private readonly IBotApi _botApi;
         private readonly IChecker _checker;
         private readonly ILogger _logger;
         private readonly IDbContextFactory<RailwayWizzardAppContext> _contextFactory;
         private const int timeInterval = 1000 * 60 * 10; //Интервал запуска (10 мин)
 
         public NotificationTaskWorker(
+            IRobot robot,
+            IBotApi botApi,
             IChecker checker,
             ILogger<NotificationTaskWorker> logger, 
             IDbContextFactory<RailwayWizzardAppContext> contextFactory)
         {
+            _robot = robot;
+            _botApi = botApi;
             _checker = checker;
             _logger = logger;
             _contextFactory = contextFactory;
@@ -43,7 +49,7 @@ namespace RailwayWizzard.App
                 var currentNotificationTasks = await _checker.GetNotificationTasksForWork();
                 foreach (var task in currentNotificationTasks)
                 {
-                    new StepsUsingHttpClient(_checker,_logger, _contextFactory).Notification(task);
+                    new StepsUsingHttpClient(_robot,_botApi,_checker,_logger, _contextFactory).Notification(task);
                     _logger.LogTrace($"Run Task:{task.Id} in Thread:{Thread.CurrentThread.ManagedThreadId}");
                 }
             }

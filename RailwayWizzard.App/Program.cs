@@ -18,6 +18,8 @@ namespace RailwayWizzard.App
 
             builder.Services.AddTransient<IChecker, NotificationTaskChecker>();
             builder.Services.AddTransient<IBotApi, BotApi>();
+            builder.Services.AddTransient<IRobot, RobotBigBrother>();
+            builder.Services.AddTransient<ISteps, StepsUsingHttpClient>();
 
             builder.Services.AddDbContextFactory<RailwayWizzardAppContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("RailwayWizzardAppContext") 
@@ -26,7 +28,8 @@ namespace RailwayWizzard.App
             // Add services to the container.
             builder.Services.AddControllers();
 
-            builder.Services.AddHostedService<Worker>();
+            builder.Services.AddHostedService<NotificationTaskWorker>();
+            builder.Services.AddHostedService<HealthCheckWorker>();
 
             builder.Services.AddLogging(options =>
             {

@@ -6,11 +6,11 @@ from Bot.Setting import (message_success, message_failure,
                          CALLBACK_DATA_INCORRECT_NOTIFICATION, CALLBACK_NOTIFICATION,
                          CALLBACK_CAR_TYPE_SEDENTARY, CALLBACK_CAR_TYPE_RESERVED_SEAT, CALLBACK_CAR_TYPE_COMPARTMENT,
                          CALLBACK_CAR_TYPE_LUXURY, CALLBACK_CAR_TYPE_CONTINUE,
-                         notification_confirm_inline_buttons, footer_menu_car_type_inline_buttons)
+                         notification_confirm_inline_buttons, footer_menu_car_type_inline_buttons,
+                         CALLBACK_DATA_CANCEL_NOTIFICATION)
 from Bot.validators import *
 from Bot.Other import *
 from Bot.API import *
-
 
 non_select_smile = '\U000025FB'
 select_smile = '\U00002705'
@@ -57,7 +57,7 @@ def set_default_car_types():
     car_type_compartment_text = select_smile + ' Купе'
     car_type_luxury_text = non_select_smile + ' СВ'
     car_type_sedentary_button = InlineKeyboardButton(text=car_type_sedentary_text,
-                                                        callback_data=CALLBACK_CAR_TYPE_SEDENTARY)
+                                                     callback_data=CALLBACK_CAR_TYPE_SEDENTARY)
     car_type_reserved_seat_button = InlineKeyboardButton(text=car_type_reserved_seat_text,
                                                          callback_data=CALLBACK_CAR_TYPE_RESERVED_SEAT)
     car_type_compartment_button = InlineKeyboardButton(text=car_type_compartment_text,
@@ -289,7 +289,6 @@ async def fifth_step_notification(update: Update, context: CallbackContext):
                                                                car_types_text + "</strong>",
                                                           reply_markup=notification_confirm_inline_buttons,
                                                           parse_mode=ParseMode.HTML)
-            set_default_car_types()
             return 6
 
         if query_data == str(CALLBACK_CAR_TYPE_SEDENTARY):
@@ -360,7 +359,11 @@ async def sixth_step_notification(update: Update, context: CallbackContext):
     text_message = update.callback_query.message.text
 
     try:
-        if query_data == str(CALLBACK_DATA_CORRECT_NOTIFICATION):
+        if query_data == str(CALLBACK_DATA_CANCEL_NOTIFICATION):
+            await update.callback_query.edit_message_text(text="Выберите тип вагона который вас интересует",
+                                                          reply_markup=car_type_inline_buttons)
+            return 5
+        elif query_data == str(CALLBACK_DATA_CORRECT_NOTIFICATION):
             notification_data_id = await send_notification_data_to_robot(update, context)
             update_text_message = (message_success + '<strong>' + notification_data_id + '</strong>' + ".\n\n"
                                    + str(text_message_html)[str(text_message_html).find('Станция отправления'):])
@@ -376,7 +379,7 @@ async def sixth_step_notification(update: Update, context: CallbackContext):
             return ConversationHandler.END
         if await check_stop(update, context):
             return ConversationHandler.END
-
+        set_default_car_types()
     except Exception as e:
         print(e)
         await update.callback_query.message.reply_text(text=message_error)

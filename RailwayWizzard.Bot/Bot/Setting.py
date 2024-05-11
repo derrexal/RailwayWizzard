@@ -1,10 +1,10 @@
 from telebot.types import InlineKeyboardButton
 from telegram import InlineKeyboardMarkup
 
-(CALLBACK_NOTIFICATION, CALLBACK_ACTIVE_TASK, CALLBACK_DATA_CORRECT_NOTIFICATION,
+(CALLBACK_NOTIFICATION, CALLBACK_ACTIVE_TASK, CALLBACK_DATA_CANCEL_NOTIFICATION, CALLBACK_DATA_CORRECT_NOTIFICATION,
  CALLBACK_DATA_INCORRECT_NOTIFICATION, CALLBACK_RESERVATION, CALLBACK_SUPPORT,
  CALLBACK_CAR_TYPE_SEDENTARY, CALLBACK_CAR_TYPE_RESERVED_SEAT, CALLBACK_CAR_TYPE_COMPARTMENT, CALLBACK_CAR_TYPE_LUXURY,
- CALLBACK_CAR_TYPE_SELECT_ALL, CALLBACK_CAR_TYPE_REMOVE_ALL, CALLBACK_CAR_TYPE_CONTINUE) = range(13)
+ CALLBACK_CAR_TYPE_SELECT_ALL, CALLBACK_CAR_TYPE_REMOVE_ALL, CALLBACK_CAR_TYPE_CONTINUE) = range(14)
 
 message_error = 'Системная ошибка.\nМы уже знаем о проблеме и скоро её решим\nПопробуйте еще раз позже'
 message_success = 'Уведомление о поездке успешно создано. \nЗадача №'
@@ -19,6 +19,7 @@ start_inline_keyboards = InlineKeyboardMarkup(
 ])
 
 notification_confirm_inline_buttons = InlineKeyboardMarkup([[
+            InlineKeyboardButton(text='Назад', callback_data=str(CALLBACK_DATA_CANCEL_NOTIFICATION)),
             InlineKeyboardButton(text='Данные верны', callback_data=str(CALLBACK_DATA_CORRECT_NOTIFICATION)),
             InlineKeyboardButton(text='Отменить создание уведомлений',
                                  callback_data=str(CALLBACK_DATA_INCORRECT_NOTIFICATION)),

@@ -62,6 +62,8 @@ def set_default_car_types():
                                                          callback_data=CALLBACK_CAR_TYPE_RESERVED_SEAT)
     car_type_compartment_button = InlineKeyboardButton(text=car_type_compartment_text,
                                                        callback_data=CALLBACK_CAR_TYPE_COMPARTMENT)
+    car_type_luxury_button = InlineKeyboardButton(text=car_type_luxury_text, callback_data=CALLBACK_CAR_TYPE_LUXURY)
+
     car_type_inline_buttons = InlineKeyboardMarkup([[car_type_sedentary_button, car_type_reserved_seat_button,
                                                      car_type_compartment_button, car_type_luxury_button],
                                                     footer_menu_car_type_inline_buttons])
@@ -198,6 +200,7 @@ async def third_step_notification(update: Update, context: CallbackContext):
 
 
 async def fourth_step_notification(update: Update, context: CallbackContext):
+    global car_type_inline_buttons
     try:
         log_user_message(update, context)
         await update.message.reply_chat_action(ChatAction.TYPING)
@@ -231,7 +234,6 @@ async def fourth_step_notification(update: Update, context: CallbackContext):
         set_default_car_types()
         await update.message.reply_text(text="Выберите тип вагона который вас интересует",
                                         reply_markup=car_type_inline_buttons)
-        set_default_car_types()
         return 5
 
     except Exception as e:
@@ -354,6 +356,7 @@ async def fifth_step_notification(update: Update, context: CallbackContext):
 
 
 async def sixth_step_notification(update: Update, context: CallbackContext):
+    global car_type_inline_buttons
     query_data = update.callback_query.data
     text_message_html = update.callback_query.message.text_html
     text_message = update.callback_query.message.text
@@ -379,7 +382,6 @@ async def sixth_step_notification(update: Update, context: CallbackContext):
             return ConversationHandler.END
         if await check_stop(update, context):
             return ConversationHandler.END
-        set_default_car_types()
     except Exception as e:
         print(e)
         await update.callback_query.message.reply_text(text=message_error)

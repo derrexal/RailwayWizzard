@@ -2,19 +2,11 @@ from datetime import datetime, date, timedelta
 from RZD import API
 from bs4 import BeautifulSoup
 from Bot.API import *
+import pytz
 
 
 # TODO: объединить проверки по группам(время, дата, город) и в каждом методе (условно main_date_validate)
 #  возвращать сообщение, которое мы напечатаем юзеру. Улучшим читабельность кода бота
-
-# TODO: не используется?
-def crunch_validator(input_time):
-    try:
-        response = API.get_railway_list()
-
-    except Exception as e:
-        print(e)
-        raise e
 
 
 def json_serial(obj):
@@ -69,7 +61,8 @@ def date_format_validate(input_date_text):
         raise e
 
 
-def time_format_validate(input_time):
+def time_format_validate(input_time) -> bool:
+    """ Проверка времени, введенного пользователем на валидность """
     try:
         datetime.strptime(input_time, '%H:%M')
         return True
@@ -80,33 +73,60 @@ def time_format_validate(input_time):
         raise e
 
 
-# Проверка времени на наличие его в списке рейсов на запрошенный день
-def time_check_validate(input_time, station_from, station_to, station_from_name, station_to_name, dateFrom):
-    available_time = []
+def time_check_validate(input_time, station_from, station_to, station_from_name, station_to_name, date_from):
+    """
+    Проверяет время введенное пользователем на наличие его в списке рейсов на запрошенный день.
+    Возвращает список доступных, если время некорректно
+    """
+
     try:
-        response_text = API.get_schedule(station_from, station_to, station_from_name, station_to_name, dateFrom)
+        available_time = get_available_times(station_from,station_to,station_from_name,station_to_name,date_from)
+        if len(available_time) == 0:
+            raise Exception("Сервис: get_available_times вернул пустой ответ")
+        for time in available_time:
+            if time == input_time:
+                return True
+        return available_time
+
+    except Exception as e:
+        print(e)
+        raise e
+
+
+def get_available_times(station_from, station_to, station_from_name, station_to_name, date_from) -> list:
+    """ Получает список доступного времени для бронирования в выбранный день """
+
+    available_time = []
+    moscow_tz = pytz.timezone('Europe/Moscow')
+    today_time = datetime.now(moscow_tz).time().strftime('%H:%M')
+
+    print("today_time:" + today_time)
+    try:
+        response_text = API.get_schedule(station_from, station_to, station_from_name, station_to_name, date_from)
         soup = BeautifulSoup(response_text, 'html.parser')
         table = soup.find('table', class_='basicSched_trainsInfo_table')
         tr = table.find_all('tr')
         for row in tr:
             td = row.find_all('td')
             if td:
-                time_railway = td[1].text
-                # добавляем время в список доступных для выбора
-                available_time.append(time_railway)
-                if time_railway == input_time:
-                    return True
+                time_railway_str = td[1].text
+                # Если время из расписания больше чем сейчас - добавляем его в список доступных для выбора
+                # time_railway = datetime.strptime(time_railway_str, '%H:%M')
+                print("time_railway:" + time_railway_str)
+                if time_railway_str > today_time:
+                    available_time.append(time_railway_str)
         return available_time
     except Exception as e:
         print(e)
         raise e
 
 
-# Проверка ввода на русские символы и цифры
-def language_input_validation(input_station):
+def language_input_validation(input_station) -> bool:
+    """ Проверка ввода на русские символы и цифры """
     try:
         alphabet = set('абвгдеёжзийклмнопрстуфхцчшщъыьэюя')
         return not alphabet.isdisjoint(input_station.lower())
+
     except Exception as e:
         print(e)
         raise e

@@ -42,7 +42,7 @@ async def add_station_info(record_station_info):
     print('StationName/CreateOrUpdate ' + str(response.status_code) + ' ' + response.text)
 
 
-async def get_station_info_by_name(station_info_name):
+async def get_express_code_station_by_name(station_info_name):
     """ Возвращает expressCode сущности StationInfo по полю Name """
     myObj = {'StationName': station_info_name}
 

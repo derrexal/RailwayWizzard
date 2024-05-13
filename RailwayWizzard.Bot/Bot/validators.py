@@ -137,7 +137,7 @@ async def station_validate(input_station):
         input_station = input_station.upper()
 
         # Если в базе есть станция с таким именем
-        expressCode = await get_station_info_by_name(input_station)
+        expressCode = await get_express_code_station_by_name(input_station)
         if not expressCode is None:
             return expressCode
         # Иначе

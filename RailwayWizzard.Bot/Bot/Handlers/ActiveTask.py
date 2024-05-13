@@ -1,7 +1,8 @@
 from telegram import *
 from telegram.ext import *
 from telegram.constants import *
-from Bot.Setting import (message_success, message_failure, CALLBACK_ACTIVE_TASK, notification_confirm_inline_buttons)
+from Bot.Setting import (message_success, message_failure, CALLBACK_ACTIVE_TASK, notification_confirm_inline_buttons,
+                         admin_username)
 from Bot.Other import *
 from Bot.API import *
 
@@ -27,7 +28,8 @@ async def active_task_handler(update: Update, context: CallbackContext):
     user_id = update.callback_query.message.chat.id
     try:
         if init != str(CALLBACK_ACTIVE_TASK):
-            await update.callback_query.message.reply_text(text="Что-то пошло не так, обратитесь к администратору бота")
+            await update.callback_query.message.reply_text(text="Что-то пошло не так, обратитесь к администратору бота "
+                                                           + admin_username)
             return ConversationHandler.END
 
         active_tasks = await get_active_task_by_user_id(user_id)
@@ -49,7 +51,8 @@ async def active_task_handler(update: Update, context: CallbackContext):
                         + "\nСтанция отправления: " + "<strong>" + task["departureStation"] + "</strong>"
                         + "\nСтанция прибытия: " + "<strong>" + task["arrivalStation"] + "</strong>"
                         + "\nДата отправления: " + "<strong>" + task["dateFromString"] + "</strong>"
-                        + "\nВремя отправления: " + "<strong>" + task["timeFrom"] + "</strong>")
+                        + "\nВремя отправления: " + "<strong>" + task["timeFrom"] + "</strong>"
+                        + "\nКоличество мест: " + "<strong>" + str(task["numberSeats"]) + "</strong>" )
 
                 car_types_text = get_car_types_text(task["carTypes"])
                 #В старых задачах не выбраны типы вагонов

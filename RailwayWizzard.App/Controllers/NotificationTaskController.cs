@@ -90,6 +90,7 @@ namespace RailwayWizzard.App.Controllers
                     DepartureStation = u.DepartureStation,
                     TimeFrom = u.TimeFrom,
                     CarTypes = u.CarTypes,
+                    NumberSeats = u.NumberSeats,
                     DateFromString = u.DateFrom.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture)
                 }).ToListAsync();
 

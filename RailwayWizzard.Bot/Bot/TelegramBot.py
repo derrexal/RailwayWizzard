@@ -5,7 +5,8 @@ from telegram.ext import CommandHandler, MessageHandler, ConversationHandler, Ca
 from Bot.Handlers.Help import help_handler
 from Bot.Handlers.Notification import (notification_handler,
                                        first_step_notification, second_step_notification, third_step_notification,
-                                       fourth_step_notification, fifth_step_notification, sixth_step_notification)
+                                       fourth_step_notification, sixth_step_notification, seventh_step_notification,
+                                       fifth_step_notification)
 from Bot.Handlers.Start import start_buttons_handler
 from Bot.Handlers.ActiveTask import active_task_handler, one_step_active_task
 from Bot.Other import unknown_handler
@@ -62,8 +63,9 @@ conv_handler_notification = ConversationHandler(
         2: [MessageHandler(filters.TEXT, second_step_notification)],
         3: [MessageHandler(filters.TEXT, third_step_notification)],
         4: [MessageHandler(filters.TEXT, fourth_step_notification)],
-        5: [CallbackQueryHandler(fifth_step_notification)],
-        6: [CallbackQueryHandler(sixth_step_notification)]
+        5: [MessageHandler(filters.TEXT, fifth_step_notification)],
+        6: [CallbackQueryHandler(sixth_step_notification)],
+        7: [CallbackQueryHandler(seventh_step_notification)]
     },
     fallbacks=[CommandHandler('start', start_buttons_handler)],  # Точка выхода из диалога - команда /start?
     # '''CommandHandler('stop', stop)'''#Оно не работает( Вернул проверку на стоп

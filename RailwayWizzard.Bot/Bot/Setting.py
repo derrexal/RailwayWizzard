@@ -3,6 +3,8 @@ from telegram import InlineKeyboardMarkup
 import pytz
 
 moscow_tz = pytz.timezone('Europe/Moscow')
+max_number_seats = 10
+admin_username = '@derrexal'
 
 (CALLBACK_NOTIFICATION, CALLBACK_ACTIVE_TASK, CALLBACK_DATA_CANCEL_NOTIFICATION, CALLBACK_DATA_CORRECT_NOTIFICATION,
  CALLBACK_DATA_INCORRECT_NOTIFICATION, CALLBACK_RESERVATION, CALLBACK_SUPPORT,

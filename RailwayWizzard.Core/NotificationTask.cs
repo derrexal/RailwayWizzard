@@ -35,7 +35,9 @@ namespace RailwayWizzard.Core
         public long ArrivalStationCode { get; set; }
         [NotMapped]
         public long DepartureStationCode { get; set; }
-        
+
+        [Range(1, 10)]
+        public short NumberSeats { get; set; }
         //TODO: вынести в DTO, сделал nulalble так как была ошибка при создании таска из-за отсутствия этого параметра в запросе
         /// <summary>
         /// Дата в формате строки для отправки пользователю

@@ -129,7 +129,7 @@ namespace RailwayWizzard.Robot.App
                         foreach (var carGroup in train.CarGroups)
                             if (!carGroup.HasPlacesForDisabledPersons) // Если место не для инвалидов                               
                                 if(carTypesText.Contains(carGroup.CarType)) //Если это тот тип вагонов, которые выбрал пользователь
-                                    if (carGroup.TotalPlaceQuantity > 0)  //Если есть свободные места
+                                    if (carGroup.TotalPlaceQuantity >= inputNotificationTask.NumberSeats)  //Если есть свободные места
                                     {
                                         var key = carGroup.ServiceClassNameRu is not null ? carGroup.ServiceClassNameRu : carGroup.CarTypeName;
                                         //TODO: костыльевато, но по другому хз как. В пакете данных приходит только "СИД"

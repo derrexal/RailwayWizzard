@@ -34,6 +34,11 @@ async def active_task_handler(update: Update, context: CallbackContext):
         if active_tasks is None or not active_tasks:
             await update.callback_query.message.reply_text("У вас нет активных задач")
         else:
+            # Send message for user include task info
+            await update.callback_query.message.reply_text(text="Обратите внимание, в данном разделе не отображаются "
+                                                                "устаревшие задания поиск по которым более не "
+                                                                "актуален.",
+                                                           parse_mode=ParseMode.HTML)
             for task in active_tasks:
                 callback = "active_task_callback" + str(task["id"])
                 # Init keyboard

@@ -1,5 +1,8 @@
 from telebot.types import InlineKeyboardButton
 from telegram import InlineKeyboardMarkup
+import pytz
+
+moscow_tz = pytz.timezone('Europe/Moscow')
 
 (CALLBACK_NOTIFICATION, CALLBACK_ACTIVE_TASK, CALLBACK_DATA_CANCEL_NOTIFICATION, CALLBACK_DATA_CORRECT_NOTIFICATION,
  CALLBACK_DATA_INCORRECT_NOTIFICATION, CALLBACK_RESERVATION, CALLBACK_SUPPORT,

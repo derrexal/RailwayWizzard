@@ -1,8 +1,9 @@
 from datetime import datetime, date, timedelta
+
+from Bot.Setting import moscow_tz
 from RZD import API
 from bs4 import BeautifulSoup
 from Bot.API import *
-import pytz
 
 
 # TODO: объединить проверки по группам(время, дата, город) и в каждом методе (условно main_date_validate)
@@ -20,8 +21,13 @@ def json_serial(obj):
 # TODO: эту проверку можно упростить и уточнить одновременно.
 # Отправить запрос к АПИ для получения списка поездок на этот день
 # И если таких нет - значит и билет купить нельзя - значит и валидацию не проходит
-def date_limits_validate(input_date_text):
+def date_limits_validate(input_date_text, station_from, station_to, station_from_name, station_to_name, date_from):
     try:
+        # Если на указанную дату уже нет билетов (н-р сегодня в 23:59)
+        available_time = get_available_times(station_from, station_to, station_from_name, station_to_name, date_from)
+        if len(available_time) == 0:
+            return None
+
         input_date = datetime.strptime(input_date_text, '%d.%m.%Y')
         # купить билет на вчера, очевидно, нельзя
         if input_date.date() < datetime.now().date():
@@ -80,7 +86,7 @@ def time_check_validate(input_time, station_from, station_to, station_from_name,
     """
 
     try:
-        available_time = get_available_times(station_from,station_to,station_from_name,station_to_name,date_from)
+        available_time = get_available_times(station_from, station_to, station_from_name, station_to_name, date_from)
         if len(available_time) == 0:
             raise Exception("Сервис: get_available_times вернул пустой ответ")
         for time in available_time:
@@ -97,10 +103,8 @@ def get_available_times(station_from, station_to, station_from_name, station_to_
     """ Получает список доступного времени для бронирования в выбранный день """
 
     available_time = []
-    moscow_tz = pytz.timezone('Europe/Moscow')
     today_time = datetime.now(moscow_tz).time().strftime('%H:%M')
 
-    print("today_time:" + today_time)
     try:
         response_text = API.get_schedule(station_from, station_to, station_from_name, station_to_name, date_from)
         soup = BeautifulSoup(response_text, 'html.parser')
@@ -110,10 +114,11 @@ def get_available_times(station_from, station_to, station_from_name, station_to_
             td = row.find_all('td')
             if td:
                 time_railway_str = td[1].text
-                # Если время из расписания больше чем сейчас - добавляем его в список доступных для выбора
-                # time_railway = datetime.strptime(time_railway_str, '%H:%M')
-                print("time_railway:" + time_railway_str)
-                if time_railway_str > today_time:
+                if date_from == datetime.now(moscow_tz).date().strftime('%d.%m.%Y'):
+                    # Если время из расписания больше чем сейчас - добавляем его в список доступных для выбора
+                    if time_railway_str > today_time:
+                        available_time.append(time_railway_str)
+                else:
                     available_time.append(time_railway_str)
         return available_time
     except Exception as e:

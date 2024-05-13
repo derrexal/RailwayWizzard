@@ -1,3 +1,5 @@
+import datetime
+
 from telegram import *
 from telegram.ext import *
 from telegram.constants import *
@@ -7,7 +9,7 @@ from Bot.Setting import (message_success, message_failure,
                          CALLBACK_CAR_TYPE_SEDENTARY, CALLBACK_CAR_TYPE_RESERVED_SEAT, CALLBACK_CAR_TYPE_COMPARTMENT,
                          CALLBACK_CAR_TYPE_LUXURY, CALLBACK_CAR_TYPE_CONTINUE,
                          notification_confirm_inline_buttons, footer_menu_car_type_inline_buttons,
-                         CALLBACK_DATA_CANCEL_NOTIFICATION)
+                         CALLBACK_DATA_CANCEL_NOTIFICATION, moscow_tz)
 from Bot.validators import *
 from Bot.Other import *
 from Bot.API import *
@@ -127,6 +129,8 @@ async def first_step_notification(update: Update, context: CallbackContext):
 
 
 async def second_step_notification(update: Update, context: CallbackContext):
+
+    tomorrow = (datetime.now(moscow_tz) + timedelta(days=1)).strftime("%d.%m.%Y")
     try:
         # Duplicate Code(1)
         log_user_message(update, context)
@@ -153,8 +157,8 @@ async def second_step_notification(update: Update, context: CallbackContext):
             await update.message.reply_text('Станции не могут совпадать')
             return 2
 
-        await update.message.reply_text(text='Укажите <strong>дату отправления</strong>.\n'
-                                             'Например, <code>' + datetime.now().strftime("%d.%m.%Y") + '</code>',
+        await update.message.reply_text(text='Укажите <strong>дату отправления</strong>.\n''Например, '
+                                             '<code>' + tomorrow + '</code>',
                                         parse_mode=ParseMode.HTML)
         return 3
 
@@ -165,6 +169,7 @@ async def second_step_notification(update: Update, context: CallbackContext):
 
 
 async def third_step_notification(update: Update, context: CallbackContext):
+    tomorrow = (datetime.now(moscow_tz) + timedelta(days=1)).strftime("%d.%m.%Y")
     try:
         log_user_message(update, context)
         await update.message.reply_chat_action(ChatAction.TYPING)
@@ -173,23 +178,33 @@ async def third_step_notification(update: Update, context: CallbackContext):
             return ConversationHandler.END
 
         date_and_date_json = date_format_validate(update.message.text)
+        context.user_data[2] = date_and_date_json['date']  # Дата в формате даты
+        context.user_data[22] = date_and_date_json['date_text']  # Дата в формате строки
+
         if date_and_date_json is None:
             await update.message.reply_text('Формат даты должен быть dd.mm.yyyy')
-            await update.message.reply_text(text='Укажите <strong>дату отправления</strong>\n'
-                                                 'Например, <code>' + datetime.now().strftime("%d.%m.%Y") + '</code>',
-                                            parse_mode=ParseMode.HTML)
-            return 3
-        if date_limits_validate(update.message.text) is None:
-            await update.message.reply_text('На указанную дату билеты не продаются')
-            await update.message.reply_text(text='Укажите <strong>дату отправления</strong>\n'
-                                                 'Например, <code>' + datetime.now().strftime("%d.%m.%Y") + '</code>',
+            await update.message.reply_text(text='Укажите <strong>дату отправления</strong>.\n''Например, '
+                                                 '<code>' + tomorrow + '</code>',
                                             parse_mode=ParseMode.HTML)
             return 3
 
-        context.user_data[2] = date_and_date_json['date']  # Дата в формате даты
-        context.user_data[22] = date_and_date_json['date_text']  # Дата в формате строки
+        if date_limits_validate(update.message.text, context.user_data[10], context.user_data[11],
+                                context.user_data[0], context.user_data[1], context.user_data[22]) is None:
+            await update.message.reply_text('На указанную дату билеты не продаются')
+            await update.message.reply_text(text='Укажите <strong>дату отправления</strong>.\n''Например, '
+                                                 '<code>' + tomorrow + '</code>',
+                                            parse_mode=ParseMode.HTML)
+            return 3
+
+        available_time = time_check_validate(
+            '00:00',    # заглушка для получения списка времен доступных для бронирования
+            context.user_data[10], context.user_data[11],
+            context.user_data[0], context.user_data[1],
+            context.user_data[22])
         await update.message.reply_text(text='Укажите <strong>время отправления</strong>\n'
-                                             'Например, <code>' + datetime.now().strftime("%H:%M") + '</code>',
+                                             'Доступное время для бронирования:\n' +
+                                             '    '.join(
+                                                 '<code>' + str(time) + '</code>' for time in available_time),
                                         parse_mode=ParseMode.HTML)
         return 4
 
@@ -210,31 +225,36 @@ async def fourth_step_notification(update: Update, context: CallbackContext):
 
         # обрабатываем время отправления
         input_time = update.message.text
-        if not time_format_validate(input_time):
-            await update.message.reply_text('Формат времени должен быть hh:mm ')
-            await update.message.reply_text(text='Укажите <strong>время отправления</strong>\n'
-                                                 'Например, <code>' + datetime.now().strftime("%H:%M") + '</code>',
-                                            parse_mode=ParseMode.HTML)
-            return 4
         available_time = time_check_validate(
             input_time,
             context.user_data[10], context.user_data[11],
             context.user_data[0], context.user_data[1],
             context.user_data[22])
-        if available_time is not True:
-            await update.message.reply_text('Не найдено поездки с таким временем')
-            await update.message.reply_text(text='Доступное время для бронирования:\n' +
-                                            '    '.join('<code>' + str(time) + '</code>' for time in available_time),
-                                            parse_mode=ParseMode.HTML)
-            await update.message.reply_text(text='Укажите <strong>время отправления</strong>',
+
+        if not time_format_validate(input_time):
+            await update.message.reply_text('Формат времени должен быть hh:mm ')
+            await update.message.reply_text(text='Укажите <strong>время отправления</strong>\n'
+                                                 'Доступное время для бронирования:\n' +
+                                                 '    '.join(
+                                                     '<code>' + str(time) + '</code>' for time in available_time),
                                             parse_mode=ParseMode.HTML)
             return 4
 
-        context.user_data[3] = input_time
-        set_default_car_types()
-        await update.message.reply_text(text="Выберите тип вагона который вас интересует",
-                                        reply_markup=car_type_inline_buttons)
-        return 5
+        if available_time is True:
+            context.user_data[3] = input_time
+            set_default_car_types()
+            await update.message.reply_text(text="Выберите тип вагона который вас интересует",
+                                            reply_markup=car_type_inline_buttons)
+            return 5
+
+        else:
+            await update.message.reply_text('Не найдено поездки с таким временем')
+            await update.message.reply_text(text='Укажите <strong>время отправления</strong>\n'
+                                                 'Доступное время для бронирования:\n' +
+                                                 '    '.join(
+                                                     '<code>' + str(time) + '</code>' for time in available_time),
+                                            parse_mode=ParseMode.HTML)
+            return 4
 
     except Exception as e:
         print(e)

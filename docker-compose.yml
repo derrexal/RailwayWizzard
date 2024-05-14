@@ -11,7 +11,6 @@ services:
       - "5178:80"
     depends_on:
       - postgres_db
-      - php_service
     networks:
       - my-network
     restart: always

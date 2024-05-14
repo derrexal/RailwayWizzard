@@ -31,20 +31,6 @@ services:
       - my-network
     restart: always
 
-  php_service:
-    image: ${DOCKER_REGISTRY-}php_service
-    build:
-      context: .
-      dockerfile: RailwayWizzard.RzdApi/Dockerfile
-    ports:
-      - "8088:8088"
-    volumes:
-      - ./RailwayWizzard.RzdApi/:/app
-    working_dir: /app/examples
-    networks:
-      - my-network
-    restart: always
-
   bot_service:
     image: ${DOCKER_REGISTRY-}bot_service
     build:

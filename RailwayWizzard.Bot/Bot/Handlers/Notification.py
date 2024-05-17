@@ -244,8 +244,8 @@ async def fourth_step_notification(update: Update, context: CallbackContext):
         if available_time is True:
             context.user_data[3] = input_time
             await update.message.reply_text(text="Укажите минимальное количество мест в поезде, "
-                                                 "на которое вам необходимо создать уведомление")
-            return 5
+                                                 "на которое вам необходимо создать уведомление.\n"
+                                                 "Если не знаете что указать, напишите цифру 1")
 
         else:
             await update.message.reply_text('Не найдено поездки с таким временем')
@@ -286,13 +286,13 @@ async def fifth_step_notification(update: Update, context: CallbackContext):
                                                      "одновременно, пожалуйста, обратитесь к администратору бота"
                                                      + admin_username)
                 await update.message.reply_text(text="Укажите минимальное количество мест в поезде, "
-                                                     "на которое вам необходимо создать уведомление")
-                return 5
+                                                     "на которое вам необходимо создать уведомление.\n"
+                                                     "Если не знаете что указать, напишите цифру 1")
         else:
             await update.message.reply_text(text="Необходимо ввести цифру")
             await update.message.reply_text(text="Укажите минимальное количество мест в поезде, "
-                                                 "на которое вам необходимо создать уведомление")
-            return 5
+                                                 "на которое вам необходимо создать уведомление.\n"
+                                                 "Если не знаете что указать, напишите цифру 1")
     except Exception as e:
         print(e)
         await update.message.reply_text(message_error)

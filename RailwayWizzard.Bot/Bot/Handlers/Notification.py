@@ -1,93 +1,67 @@
 import datetime
-
 from telegram import *
 from telegram.ext import *
 from telegram.constants import *
-from Bot.Setting import (message_success, message_failure,
-                         CALLBACK_DATA_CORRECT_NOTIFICATION,
-                         CALLBACK_DATA_INCORRECT_NOTIFICATION, CALLBACK_NOTIFICATION,
-                         CALLBACK_CAR_TYPE_SEDENTARY, CALLBACK_CAR_TYPE_RESERVED_SEAT, CALLBACK_CAR_TYPE_COMPARTMENT,
-                         CALLBACK_CAR_TYPE_LUXURY, CALLBACK_CAR_TYPE_CONTINUE,
-                         notification_confirm_inline_buttons, footer_menu_car_type_inline_buttons,
-                         CALLBACK_DATA_CANCEL_NOTIFICATION, moscow_tz, max_number_seats, admin_username)
+from Bot.Setting import *
 from Bot.validators import *
 from Bot.Other import *
 from Bot.API import *
 
-non_select_smile = '\U000025FB'
-select_smile = '\U00002705'
-car_type_sedentary_text = select_smile + ' Сидячий'
-car_type_reserved_seat_text = select_smile + ' Плацкарт'
-car_type_compartment_text = select_smile + ' Купе'
-car_type_luxury_text = non_select_smile + ' СВ'
-car_type_sedentary_button = InlineKeyboardButton(text=car_type_sedentary_text,
-                                                 callback_data=CALLBACK_CAR_TYPE_SEDENTARY)
-car_type_reserved_seat_button = InlineKeyboardButton(text=car_type_reserved_seat_text,
-                                                     callback_data=CALLBACK_CAR_TYPE_RESERVED_SEAT)
-car_type_compartment_button = InlineKeyboardButton(text=car_type_compartment_text,
-                                                   callback_data=CALLBACK_CAR_TYPE_COMPARTMENT)
-car_type_luxury_button = InlineKeyboardButton(text=car_type_luxury_text, callback_data=CALLBACK_CAR_TYPE_LUXURY)
-car_type_inline_buttons = InlineKeyboardMarkup([[car_type_sedentary_button, car_type_reserved_seat_button,
-                                                 car_type_compartment_button, car_type_luxury_button],
-                                                footer_menu_car_type_inline_buttons])
-car_types = {'sedentary': True,
-             'reserved_seat': True,
-             'compartment': True,
-             'luxury': False}
+car_types = {
+    CarType.SEDENTARY: True,
+    CarType.RESERVED_SEAT: True,
+    CarType.COMPARTMENT: True,
+    CarType.LUXURY: False
+}
 
 
-#TODO:duplicate
+def generate_car_type_buttons():
+    return InlineKeyboardMarkup(
+        [[create_car_type_button(CarType.SEDENTARY), create_car_type_button(CarType.RESERVED_SEAT),
+          create_car_type_button(CarType.COMPARTMENT), create_car_type_button(CarType.LUXURY)],
+         footer_menu_car_type_inline_buttons])
+
+
+def create_car_type_button(car_type: CarType) -> InlineKeyboardButton:
+    """ Helper Functions """
+    selected = car_types[car_type]
+    emoji = SELECT_SMILE if selected else NON_SELECT_SMILE
+    return InlineKeyboardButton(text=f"{emoji} {car_type.value[0]}", callback_data=f"callback_{car_type.name.lower()}")
+
+
+#init
+car_type_inline_buttons = generate_car_type_buttons()
+
+
 def set_default_car_types():
     global car_types
-    global car_type_sedentary_text
-    global car_type_reserved_seat_text
-    global car_type_compartment_text
-    global car_type_luxury_text
-    global car_type_sedentary_button
-    global car_type_reserved_seat_button
-    global car_type_compartment_button
-    global car_type_luxury_button
     global car_type_inline_buttons
-    global select_smile
-    global non_select_smile
-    car_types = {'sedentary': True,
-                 'reserved_seat': True,
-                 'compartment': True,
-                 'luxury': False}
-    car_type_sedentary_text = select_smile + ' Сидячий'
-    car_type_reserved_seat_text = select_smile + ' Плацкарт'
-    car_type_compartment_text = select_smile + ' Купе'
-    car_type_luxury_text = non_select_smile + ' СВ'
-    car_type_sedentary_button = InlineKeyboardButton(text=car_type_sedentary_text,
-                                                     callback_data=CALLBACK_CAR_TYPE_SEDENTARY)
-    car_type_reserved_seat_button = InlineKeyboardButton(text=car_type_reserved_seat_text,
-                                                         callback_data=CALLBACK_CAR_TYPE_RESERVED_SEAT)
-    car_type_compartment_button = InlineKeyboardButton(text=car_type_compartment_text,
-                                                       callback_data=CALLBACK_CAR_TYPE_COMPARTMENT)
-    car_type_luxury_button = InlineKeyboardButton(text=car_type_luxury_text, callback_data=CALLBACK_CAR_TYPE_LUXURY)
 
-    car_type_inline_buttons = InlineKeyboardMarkup([[car_type_sedentary_button, car_type_reserved_seat_button,
-                                                     car_type_compartment_button, car_type_luxury_button],
-                                                    footer_menu_car_type_inline_buttons])
+    car_types = {
+        CarType.SEDENTARY: True,
+        CarType.RESERVED_SEAT: True,
+        CarType.COMPARTMENT: True,
+        CarType.LUXURY: False
+    }
+
+    car_type_inline_buttons = generate_car_type_buttons()
 
 
 async def notification_handler(update: Update, context: CallbackContext):
     """ Начало взаимодействия по клику на inline-кнопку 'Уведомление' """
-    init = update.callback_query.data
     try:
-        if init != str(CALLBACK_NOTIFICATION):
-            await update.callback_query.message.reply_text(text='Что-то пошло не так, обратитесь к администратору бота '
-                                                                + admin_username)
+        if update.callback_query.data != CALLBACK_NOTIFICATION:
+            await update.callback_query.message.reply_text(
+                text=f"Что-то пошло не так, обратитесь к администратору бота {admin_username}")
             return ConversationHandler.END
-        await update.callback_query.message.reply_text('Обратите внимание, по умолчанию не приходят уведомления о '
-                                                       'местах для инвалидов. Если вам необходимо получать '
-                                                       'уведомления и в таком случае - пожалуйста, обратитесь к '
-                                                       'администратору бота ' + admin_username +
-                                                       '\n\nДля возврата в главное меню введите /stop')
+        await update.callback_query.message.reply_text(text="Обратите внимание, по умолчанию не приходят уведомления о "
+                                                            "местах для инвалидов. Если вам необходимо получать "
+                                                            "уведомления и в таком случае - пожалуйста, обратитесь к "
+                                                            f"администратору бота {admin_username}"
+                                                            "\n\nДля возврата в главное меню введите /stop")
 
         await update.callback_query.message.reply_text(
-            text='Укажите <strong>станцию отправления</strong>.\n'
-                 'Например, <code>Москва</code>',
+            text="Укажите <strong>станцию отправления</strong>.\nНапример, <code>Москва</code>",
             parse_mode=ParseMode.HTML)
         return 1
 
@@ -98,131 +72,112 @@ async def notification_handler(update: Update, context: CallbackContext):
 
 
 async def first_step_notification(update: Update, context: CallbackContext):
+    next_step = 2
     try:
-        #TODO: Duplicate Code(1)
-        log_user_message(update, context)
-        await update.message.reply_chat_action(ChatAction.TYPING)
+        await base_step_notification(update, context, next_step)
+        validate_station_input(update.message.text)
 
-        if await check_stop(update, context):
-            return ConversationHandler.END
-
-        if not language_input_validation(update.message.text):
-            await update.message.reply_text('Недопустимый ввод.\nРазрешается вводить только символы кириллицы и цифры')
-            return 1
         station_code = await station_validate(update.message.text)
         if station_code is None:
-            await update.message.reply_text(text='Такой станции на сайте РЖД не котируется.\n'
-                                                 'Укажите <strong>станцию отправления</strong>.\n'
-                                                 'Например, <code>Москва</code>',
+            await update.message.reply_text(text="Такой станции на сайте РЖД не котируется.\n"
+                                                 "Укажите <strong>станцию отправления</strong>.\n"
+                                                 "Например, <code>Москва</code>",
                                             parse_mode=ParseMode.HTML)
-            return 1
+            return next_step - 1
 
         context.user_data[0] = update.message.text.upper()
         context.user_data[10] = station_code
-        await update.message.reply_text(text='Укажите <strong>станцию прибытия</strong>.\n'
-                                             'Например, <code>Курск</code>',
+        await update.message.reply_text(text="Укажите <strong>станцию прибытия</strong>.\n"
+                                             "Например, <code>Курск</code>",
                                         parse_mode=ParseMode.HTML)
-        return 2
+        return next_step
+
+    except ValueError as e:
+        return await base_error_handler(update, e, next_step, message_format_error)
 
     except Exception as e:
-        print(e)
-        await update.message.reply_text(message_error)
-        return 1
+        return await base_error_handler(update, e, next_step, message_error)
 
 
 async def second_step_notification(update: Update, context: CallbackContext):
+    next_step = 3
     tomorrow = (datetime.now(moscow_tz) + timedelta(days=1)).strftime("%d.%m.%Y")
     try:
-        # Duplicate Code(1)
-        log_user_message(update, context)
-        await update.message.reply_chat_action(ChatAction.TYPING)
-
-        if await check_stop(update, context):
-            return ConversationHandler.END
-
-        if not language_input_validation(update.message.text):
-            await update.message.reply_text('Недопустимый ввод. \nРазрешается вводить только символы кириллицы и цифры')
-            return 1
+        await base_step_notification(update, context, next_step)
+        validate_station_input(update.message.text)
 
         station_code = await station_validate(update.message.text)
         if station_code is None:
-            await update.message.reply_text('Такой станции на сайте РЖД не котируется.\n'
-                                            'Укажите станцию прибытия\n'
-                                            'Например, <code>Курск</code>')
-            return 2
+            await update.message.reply_text("Такой станции на сайте РЖД не котируется.\n"
+                                            "Укажите станцию прибытия\n"
+                                            "Например, <code>Курск</code>")
+            return next_step - 1
 
         context.user_data[1] = update.message.text.upper()
         context.user_data[11] = station_code
 
         if context.user_data[0] == context.user_data[1]:
-            await update.message.reply_text('Станции не могут совпадать')
-            return 2
+            await update.message.reply_text("Станции не могут совпадать")
+            return next_step - 1
 
-        await update.message.reply_text(text='Укажите <strong>дату отправления</strong>.\n''Например, '
-                                             '<code>' + tomorrow + '</code>',
+        await update.message.reply_text(text="Укажите <strong>дату отправления</strong>.\n"
+                                             f"Например, <code>{tomorrow}</code>",
                                         parse_mode=ParseMode.HTML)
-        return 3
+        return next_step
+
+    except ValueError as e:
+        return await base_error_handler(update, e, next_step, message_format_error)
 
     except Exception as e:
-        print(e)
-        await update.message.reply_text(message_error)
-        return 2
+        return await base_error_handler(update, e, next_step, message_error)
 
 
 async def third_step_notification(update: Update, context: CallbackContext):
+    next_step = 4
     tomorrow = (datetime.now(moscow_tz) + timedelta(days=1)).strftime("%d.%m.%Y")
     try:
-        log_user_message(update, context)
-        await update.message.reply_chat_action(ChatAction.TYPING)
-
-        if await check_stop(update, context):
-            return ConversationHandler.END
+        await base_step_notification(update, context, next_step)
 
         date_and_date_json = date_format_validate(update.message.text)
-        context.user_data[2] = date_and_date_json['date']  # Дата в формате даты
-        context.user_data[22] = date_and_date_json['date_text']  # Дата в формате строки
 
         if date_and_date_json is None:
-            await update.message.reply_text('Формат даты должен быть dd.mm.yyyy')
-            await update.message.reply_text(text='Укажите <strong>дату отправления</strong>.\n''Например, '
-                                                 '<code>' + tomorrow + '</code>',
+            await update.message.reply_text("Формат даты должен быть dd.mm.yyyy")
+            await update.message.reply_text(text="Укажите <strong>дату отправления</strong>.\n"
+                                                 f"Например, <code>{tomorrow}</code>",
                                             parse_mode=ParseMode.HTML)
-            return 3
-
+            return next_step - 1
         if date_limits_validate(update.message.text, context.user_data[10], context.user_data[11],
-                                context.user_data[0], context.user_data[1], context.user_data[22]) is None:
-            await update.message.reply_text('На указанную дату билеты не продаются')
-            await update.message.reply_text(text='Укажите <strong>дату отправления</strong>.\n''Например, '
-                                                 '<code>' + tomorrow + '</code>',
+                                context.user_data[0], context.user_data[1], date_and_date_json['date_text']) is None:
+            await update.message.reply_text("На указанную дату билеты не продаются")
+            await update.message.reply_text(text="Укажите <strong>дату отправления</strong>.\n"
+                                                 f"Например, <code>{tomorrow}</code>",
                                             parse_mode=ParseMode.HTML)
-            return 3
+            return next_step - 1
+        context.user_data[2] = date_and_date_json['date']  # Дата в формате даты
+        context.user_data[22] = date_and_date_json['date_text']  # Дата в формате строки
 
         available_time = time_check_validate(
             '00:00',  # заглушка для получения списка времен доступных для бронирования
             context.user_data[10], context.user_data[11],
             context.user_data[0], context.user_data[1],
             context.user_data[22])
-        await update.message.reply_text(text='Укажите <strong>время отправления</strong>\n'
-                                             'Доступное время для бронирования:\n' +
+
+        await update.message.reply_text(text="Укажите <strong>время отправления</strong>\n"
+                                             "Доступное время для бронирования:\n" +
                                              '    '.join(
                                                  '<code>' + str(time) + '</code>' for time in available_time),
                                         parse_mode=ParseMode.HTML)
-        return 4
+        return next_step
 
     except Exception as e:
-        print(e)
-        await update.message.reply_text(message_error)
-        return 3
+        return await base_error_handler(update, e, next_step, message_error)
 
 
 async def fourth_step_notification(update: Update, context: CallbackContext):
     global car_type_inline_buttons
+    next_step = 5
     try:
-        log_user_message(update, context)
-        await update.message.reply_chat_action(ChatAction.TYPING)
-
-        if await check_stop(update, context):
-            return ConversationHandler.END
+        await base_step_notification(update, context, next_step)
 
         # обрабатываем время отправления
         input_time = update.message.text
@@ -233,185 +188,116 @@ async def fourth_step_notification(update: Update, context: CallbackContext):
             context.user_data[22])
 
         if not time_format_validate(input_time):
-            await update.message.reply_text('Формат времени должен быть hh:mm ')
-            await update.message.reply_text(text='Укажите <strong>время отправления</strong>\n'
-                                                 'Доступное время для бронирования:\n' +
+            await update.message.reply_text("Формат времени должен быть hh:mm ")
+            await update.message.reply_text(text="Укажите <strong>время отправления</strong>\n"
+                                                 "Доступное время для бронирования:\n" +
                                                  '    '.join(
                                                      '<code>' + str(time) + '</code>' for time in available_time),
                                             parse_mode=ParseMode.HTML)
-            return 4
+            return next_step - 1
 
         if available_time is True:
             context.user_data[3] = input_time
             await update.message.reply_text(text="Укажите минимальное количество мест в поезде, "
-                                                 "на которое вам необходимо создать уведомление")
-            return 5
+                                                 "на которое вам необходимо создать уведомление.\n"
+                                                 "Если не знаете что указать, напишите цифру 1")
+            return next_step
 
         else:
-            await update.message.reply_text('Не найдено поездки с таким временем')
-            await update.message.reply_text(text='Укажите <strong>время отправления</strong>\n'
-                                                 'Доступное время для бронирования:\n' +
+            await update.message.reply_text("Не найдено поездки с таким временем")
+            await update.message.reply_text(text="Укажите <strong>время отправления</strong>\n"
+                                                 "Доступное время для бронирования:\n" +
                                                  '    '.join(
                                                      '<code>' + str(time) + '</code>' for time in available_time),
                                             parse_mode=ParseMode.HTML)
-            return 4
+            return next_step - 1
 
     except Exception as e:
-        print(e)
-        await update.message.reply_text(message_error)
-        return 4
+        return await base_error_handler(update, e, next_step, message_error)
 
 
 async def fifth_step_notification(update: Update, context: CallbackContext):
+    next_step = 6
     try:
-        log_user_message(update, context)
-        await update.message.reply_chat_action(ChatAction.TYPING)
+        await base_step_notification(update, context, next_step)
 
-        if await check_stop(update, context):
-            return ConversationHandler.END
         # обрабатываем количество мест которое ввел пользователь
         input_amount_seats = update.message.text
         if input_amount_seats.isdigit():
             input_amount_seats = int(input_amount_seats)
-            if max_number_seats >= input_amount_seats > 0:  # ни к чему не привязанное значение, в случае чего увеличить
+            if MAX_NUMBER_SEATS >= input_amount_seats > 0:
                 context.user_data[33] = input_amount_seats
                 set_default_car_types()
-                await update.message.reply_text(text="Выберите тип вагона который вас интересует.\n"
-                                                     "Проставьте все варианты, если не знаете что выбрать",
-                                                reply_markup=car_type_inline_buttons)
-                return 6
+                await update.message.reply_text(
+                    text="Выберите тип вагона который вас интересует.\n"
+                         "Проставьте все варианты, если не знаете что выбрать",
+                    reply_markup=car_type_inline_buttons)
+                return next_step
             else:
-                await update.message.reply_text(text="Ошибка. Вы ввели число более 10 или менее 1. Если вы "
-                                                     "действительно хотите создать задачу на появление 10 мест "
-                                                     "одновременно, пожалуйста, обратитесь к администратору бота"
-                                                     + admin_username)
+                await update.message.reply_text(
+                    text="Ошибка. Вы ввели число более 10 или менее 1. Если вы действительно хотите создать задачу на "
+                         f"появление 10 мест одновременно, пожалуйста, обратитесь к администратору бота {admin_username}")
                 await update.message.reply_text(text="Укажите минимальное количество мест в поезде, "
-                                                     "на которое вам необходимо создать уведомление")
-                return 5
+                                                     "на которое вам необходимо создать уведомление.\n"
+                                                     "Если не знаете что указать, напишите цифру 1")
+                return next_step - 1
         else:
             await update.message.reply_text(text="Необходимо ввести цифру")
             await update.message.reply_text(text="Укажите минимальное количество мест в поезде, "
-                                                 "на которое вам необходимо создать уведомление")
-            return 5
+                                                 "на которое вам необходимо создать уведомление.\n"
+                                                 "Если не знаете что указать, напишите цифру 1")
+            return next_step - 1
+
     except Exception as e:
-        print(e)
-        await update.message.reply_text(message_error)
-        return 5
+        return await base_error_handler(update, e, next_step, message_error)
 
 
 async def sixth_step_notification(update: Update, context: CallbackContext):
-    global car_type_sedentary_text
-    global car_type_reserved_seat_text
-    global car_type_compartment_text
-    global car_type_luxury_text
-    global car_type_sedentary_button
-    global car_type_reserved_seat_button
-    global car_type_compartment_button
-    global car_type_luxury_button
     global car_type_inline_buttons
     global car_types
 
+    next_step = 7
+    query_data = update.callback_query.data
+
     try:
-        query_data = update.callback_query.data
         if query_data == str(CALLBACK_CAR_TYPE_CONTINUE):
+            # Выбранные пользователем типы вагонов записываем в строку для отображения
+            # и наполняем массив для отправки на сервер
             car_types_text = ''
             car_types_list = []
-            if car_types['sedentary']:
-                car_types_text = car_types_text + 'Сидячий, '
-                car_types_list.append(1)
-            if car_types['reserved_seat']:
-                car_types_text = car_types_text + 'Плацкарт, '
-                car_types_list.append(2)
-            if car_types['compartment']:
-                car_types_text = car_types_text + 'Купе, '
-                car_types_list.append(3)
-            if car_types['luxury']:
-                car_types_text = car_types_text + 'СВ'
-                car_types_list.append(4)
+            for car_type, selected in car_types.items():
+                if selected:
+                    car_types_text += f"{car_type.value[0]}, "
+                    car_types_list.append(car_type.value[0])
 
-            if len(car_types_list) == 0:
+            if not car_types_list:
                 message_warning = "Необходимо выбрать хотя бы 1 тип вагона"
                 if message_warning not in update.callback_query.message.text:
                     await update.callback_query.edit_message_text(message_warning, reply_markup=car_type_inline_buttons)
                 return 6
+
             context.user_data[5] = car_types_list
-            await update.callback_query.edit_message_text(text="Пожалуйста, проверьте введенные данные:"
-                                                               + "\n\nСтанция отправления: " + "<strong>" +
-                                                               context.user_data[0] + "</strong>"
-                                                               + "\nСтанция прибытия: " + "<strong>" +
-                                                               context.user_data[1] + "</strong>"
-                                                               + "\nДата отправления: " + "<strong>" +
-                                                               context.user_data[22] + "</strong>"
-                                                               + "\nВремя отправления: " + "<strong>" +
-                                                               context.user_data[3] + "</strong>"
-                                                               + "\nВыбранные типы вагонов: " + "<strong>" +
-                                                               car_types_text + "</strong>"
-                                                               + "\nКоличество мест: " + "<strong>" +
-                                                               str(context.user_data[33]) + "</strong>",
-                                                          reply_markup=notification_confirm_inline_buttons,
-                                                          parse_mode=ParseMode.HTML)
-            return 7
+            await update.callback_query.edit_message_text(
+                text="Пожалуйста, проверьте введенные данные:"
+                     f"\n\nСтанция отправления: <strong>{context.user_data[0]}</strong>"
+                     f"\nСтанция прибытия: <strong>{context.user_data[1]}</strong>"
+                     f"\nДата отправления: <strong>{context.user_data[22]}</strong>"
+                     f"\nВремя отправления: <strong>{context.user_data[3]}</strong>"
+                     f"\nВыбранные типы вагонов: <strong>{car_types_text}</strong>"
+                     f"\nКоличество мест: <strong>{str(context.user_data[33])}</strong>",
+                reply_markup=notification_confirm_inline_buttons,
+                parse_mode=ParseMode.HTML)
+            return next_step
 
-        if query_data == str(CALLBACK_CAR_TYPE_SEDENTARY):
-            if non_select_smile in car_type_sedentary_text:
-                car_type_sedentary_text = car_type_sedentary_text.replace(non_select_smile, select_smile)
-                car_types['sedentary'] = True
-            elif select_smile in car_type_sedentary_text:
-                car_type_sedentary_text = car_type_sedentary_text.replace(select_smile, non_select_smile)
-                car_types['sedentary'] = False
-            car_type_sedentary_button.text = car_type_sedentary_text
-            car_type_inline_buttons = InlineKeyboardMarkup([[car_type_sedentary_button, car_type_reserved_seat_button,
-                                                             car_type_compartment_button, car_type_luxury_button],
-                                                            footer_menu_car_type_inline_buttons])
-            await update.callback_query.edit_message_reply_markup(car_type_inline_buttons)
-            return 6
-
-        if query_data == str(CALLBACK_CAR_TYPE_RESERVED_SEAT):
-            if non_select_smile in car_type_reserved_seat_text:
-                car_type_reserved_seat_text = car_type_reserved_seat_text.replace(non_select_smile, select_smile)
-                car_types['reserved_seat'] = True
-            elif select_smile in car_type_reserved_seat_text:
-                car_type_reserved_seat_text = car_type_reserved_seat_text.replace(select_smile, non_select_smile)
-                car_types['reserved_seat'] = False
-            car_type_reserved_seat_button.text = car_type_reserved_seat_text
-            car_type_inline_buttons = InlineKeyboardMarkup([[car_type_sedentary_button, car_type_reserved_seat_button,
-                                                             car_type_compartment_button, car_type_luxury_button],
-                                                            footer_menu_car_type_inline_buttons])
-            await update.callback_query.edit_message_reply_markup(car_type_inline_buttons)
-            return 6
-
-        if query_data == str(CALLBACK_CAR_TYPE_COMPARTMENT):
-            if non_select_smile in car_type_compartment_text:
-                car_type_compartment_text = car_type_compartment_text.replace(non_select_smile, select_smile)
-                car_types['compartment'] = True
-            elif select_smile in car_type_compartment_text:
-                car_type_compartment_text = car_type_compartment_text.replace(select_smile, non_select_smile)
-                car_types['compartment'] = False
-            car_type_compartment_button.text = car_type_compartment_text
-            car_type_inline_buttons = InlineKeyboardMarkup([[car_type_sedentary_button, car_type_reserved_seat_button,
-                                                             car_type_compartment_button, car_type_luxury_button],
-                                                            footer_menu_car_type_inline_buttons])
-            await update.callback_query.edit_message_reply_markup(car_type_inline_buttons)
-            return 6
-
-        if query_data == str(CALLBACK_CAR_TYPE_LUXURY):
-            if non_select_smile in car_type_luxury_text:
-                car_type_luxury_text = car_type_luxury_text.replace(non_select_smile, select_smile)
-                car_types['luxury'] = True
-            elif select_smile in car_type_luxury_text:
-                car_type_luxury_text = car_type_luxury_text.replace(select_smile, non_select_smile)
-                car_types['luxury'] = False
-            car_type_luxury_button.text = car_type_luxury_text
-            car_type_inline_buttons = InlineKeyboardMarkup([[car_type_sedentary_button, car_type_reserved_seat_button,
-                                                             car_type_compartment_button, car_type_luxury_button],
-                                                            footer_menu_car_type_inline_buttons])
-            await update.callback_query.edit_message_reply_markup(car_type_inline_buttons)
-            return 6
-
+        # Отрисовка флажков у типов вагона по нажатию
+        for car_type in CarType:
+            if query_data == f"callback_{car_type.name.lower()}":
+                car_types[car_type] = not car_types[car_type]
+                car_type_inline_buttons = generate_car_type_buttons()
+                await update.callback_query.edit_message_reply_markup(car_type_inline_buttons)
+                return next_step - 1
     except Exception as e:
-        print(e)
-        await update.callback_query.message.reply_text(text=message_error)
-        return 6
+        return await base_error_handler(update, e, next_step, message_error)
 
 
 async def seventh_step_notification(update: Update, context: CallbackContext):
@@ -419,17 +305,17 @@ async def seventh_step_notification(update: Update, context: CallbackContext):
     query_data = update.callback_query.data
     text_message_html = update.callback_query.message.text_html
     text_message = update.callback_query.message.text
+    next_step = 7
 
     try:
-        if query_data == str(CALLBACK_DATA_CANCEL_NOTIFICATION):
-            await update.callback_query.edit_message_text(text="Выберите тип вагона который вас интересует",
-                                                          reply_markup=car_type_inline_buttons)
-            return 6
-        elif query_data == str(CALLBACK_DATA_CORRECT_NOTIFICATION):
+
+        if query_data == str(CALLBACK_DATA_CORRECT_NOTIFICATION):
             notification_data_id = await send_notification_data_to_robot(update, context)
-            update_text_message = (message_success + '<strong>' + notification_data_id + '</strong>' + ".\n\n"
-                                   + str(text_message_html)[str(text_message_html).find('Станция отправления'):])
+            # TODO: Зачем
+            update_text_message = (message_success + "<strong>" + notification_data_id + "</strong>" + ".\n\n"
+                                   + str(text_message_html)[str(text_message_html).find("Станция отправления"):])
             await update.callback_query.edit_message_text(update_text_message, parse_mode=ParseMode.HTML)
+
             # Возвращаемся в главное меню
             await start_buttons(update, context)
             return ConversationHandler.END
@@ -442,13 +328,12 @@ async def seventh_step_notification(update: Update, context: CallbackContext):
         if await check_stop(update, context):
             return ConversationHandler.END
     except Exception as e:
-        print(e)
-        await update.callback_query.message.reply_text(text=message_error)
-        return 7
+        return await base_error_handler(update, e, next_step, message_error)
 
 
 async def send_notification_data_to_robot(update: Update, context: CallbackContext):
-    #TODO: вынести UserId в context
+
+    # TODO: вынести UserId в context
     record_json = {
         "DepartureStation": context.user_data[0],
         "ArrivalStation": context.user_data[1],
@@ -458,8 +343,36 @@ async def send_notification_data_to_robot(update: Update, context: CallbackConte
         "CarTypes": context.user_data[5],
         "NumberSeats": context.user_data[33]
     }
+
     try:
         return await create_and_get_id_notification_task(record_json)
 
     except Exception as e:
+        await update.message.reply_text(message_error)
         raise e
+
+
+async def base_error_handler(update: Update, e: Exception, next_step: int, text: str) -> int:
+    """ Базовый обработчик ошибок для step функций"""
+    print(e)
+    await update.message.reply_text(text)
+    return next_step - 1
+
+
+def validate_station_input(text: str):
+    """ Надстройка над проверкой ввода на кириллицу. Если проверка не пройдена - пробрасывается ошибка значения """
+    if not language_input_validation(text):
+        raise ValueError(message_format_error)
+
+
+async def base_step_notification(update: Update, context: CallbackContext, next_step: int):
+    """ Базовый step-класс, собирающий в себя общую функциональность"""
+    try:
+        log_user_message(update, context)
+        await update.message.reply_chat_action(ChatAction.TYPING)
+
+        if await check_stop(update, context):
+            return ConversationHandler.END
+
+    except Exception as e:
+        return await base_error_handler(update, e, next_step, message_error)

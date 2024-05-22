@@ -1,69 +1,38 @@
 from telegram import *
-from telegram.ext import *
 from telegram.constants import *
-from Bot.Setting import (message_success, message_failure, CALLBACK_ACTIVE_TASK, notification_confirm_inline_buttons,
-                         admin_username)
+from telegram.ext import *
+
 from Bot.Other import *
-from Bot.API import *
+from Bot.Setting import (CALLBACK_ACTIVE_TASK, admin_username)
 
 
 def get_car_types_text(car_types: list) -> str:
-    """ Converting an car types array to a string like "купе, плацкарт, св """
-    result = ""
-    for car_type in car_types:
-        if car_type == 1:
-            result = result + "Сидячий, "
-        elif car_type == 2:
-            result = result + "Плацкарт, "
-        elif car_type == 3:
-            result = result + "Купе, "
-        elif car_type == 4:
-            result = result + "СВ"
-    return result
+    """ Convert a list of car types to a comma-separated string like "купе, плацкарт, св". """
+    car_type_map = {1: "Сидячий", 2: "Плацкарт", 3: "Купе", 4: "СВ"}
+    return ", ".join([car_type_map[car_type] for car_type in car_types if car_type in car_type_map])
 
 
 async def active_task_handler(update: Update, context: CallbackContext):
     """ Начало взаимодействия по клику на inline-кнопку 'Список активных задач' """
-    init = update.callback_query.data
-    user_id = update.callback_query.message.chat.id
     try:
-        if init != str(CALLBACK_ACTIVE_TASK):
-            await update.callback_query.message.reply_text(text="Что-то пошло не так, обратитесь к администратору бота "
-                                                           + admin_username)
+        if update.callback_query.data != str(CALLBACK_ACTIVE_TASK):
+            await update.callback_query.message.reply_text(
+                text=f"Что-то пошло не так, обратитесь к администратору бота {admin_username}")
             return ConversationHandler.END
 
+        user_id = update.callback_query.message.chat.id
         active_tasks = await get_active_task_by_user_id(user_id)
-        if active_tasks is None or not active_tasks:
+
+        if not active_tasks:
             await update.callback_query.message.reply_text("У вас нет активных задач")
-        else:
-            # Send message for user include task info
-            await update.callback_query.message.reply_text(text="Обратите внимание, в данном разделе не отображаются "
-                                                                "устаревшие задания поиск по которым более не "
-                                                                "актуален.",
-                                                           parse_mode=ParseMode.HTML)
-            for task in active_tasks:
-                callback = "active_task_callback" + str(task["id"])
-                # Init keyboard
-                keyboard = InlineKeyboardMarkup(inline_keyboard=[[
-                    InlineKeyboardButton(text='Остановить поиск по задаче', callback_data=callback)]])
+            return ConversationHandler.END
 
-                text = ("Задача №" + "<strong>" + str(task["id"]) + "</strong>"
-                        + "\nСтанция отправления: " + "<strong>" + task["departureStation"] + "</strong>"
-                        + "\nСтанция прибытия: " + "<strong>" + task["arrivalStation"] + "</strong>"
-                        + "\nДата отправления: " + "<strong>" + task["dateFromString"] + "</strong>"
-                        + "\nВремя отправления: " + "<strong>" + task["timeFrom"] + "</strong>"
-                        + "\nКоличество мест: " + "<strong>" + str(task["numberSeats"]) + "</strong>" )
-
-                car_types_text = get_car_types_text(task["carTypes"])
-                #В старых задачах не выбраны типы вагонов
-                #TODO: по прошествии времени станет неактуально
-                if car_types_text != "":
-                    text = text + "\nТип вагона: " + "<strong>" + car_types_text + "</strong>"
-
-                # Send message for user include task info
-                await update.callback_query.message.reply_text(text=text, reply_markup=keyboard,
-                                                               parse_mode=ParseMode.HTML)
-
+        # Send message for user include task info
+        await update.callback_query.message.reply_text(text="Обратите внимание, в данном разделе не отображаются "
+                                                            "устаревшие задания поиск по которым более не актуален.",
+                                                       parse_mode=ParseMode.HTML)
+        for task in active_tasks:
+            await send_task_info(update, task)
         return 1
 
     except Exception as e:
@@ -72,28 +41,50 @@ async def active_task_handler(update: Update, context: CallbackContext):
         return ConversationHandler.END
 
 
+async def send_task_info(update: Update, task: dict):
+    """Send task information to the user."""
+    task_id = task.get("id")
+    car_types_text = get_car_types_text(task.get("carTypes", []))
+    callback = f"active_task_callback{task_id}"
+    keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(text='Остановить поиск по задаче', callback_data=callback)]])
+
+    task_info = (f"Задача № <strong> {task_id} </strong>"
+                 f"Станция отправления: <strong> {task['departureStation']} </strong>\n"
+                 f"Станция прибытия: <strong> {task['arrivalStation']} </strong>\n"
+                 f"Дата отправления: <strong> {task['dateFromString']} </strong>\n"
+                 f"Время отправления: <strong> {task['timeFrom']} </strong>\n"
+                 f"Количество мест: <strong> {str(task['numberSeats'])} </strong>\n")
+
+    # В старых задачах не выбраны типы вагонов
+    # TODO: по прошествии времени станет неактуально
+    if car_types_text:
+        task_info += f"\nТип вагона: <strong> {car_types_text} </strong>"
+    # TODO
+
+    await update.callback_query.message.reply_text(text=task_info, reply_markup=keyboard, parse_mode=ParseMode.HTML)
+
+
 async def one_step_active_task(update: Update, context: CallbackContext):
     query = update.callback_query.data
-    text_message_html = update.callback_query.message.text_html
-    task_number = int(''.join(filter(str.isdigit, query)))
     try:
         if "active_task_callback" not in query:  # Если нажали куда-то не туда - выходим из диалога
             return ConversationHandler.END
+
+        task_number = int(''.join(filter(str.isdigit, query)))
         if task_number is None:
-            print('ERROR: task_number is none')
-            await update.callback_query.message.reply_text(text=message_error)  # TODO: Добавить к каждой ошибке ее номер?
-            return ConversationHandler.END
+            raise ValueError("ERROR: task_number is none")
 
         response = await delete_task_by_id(task_number)
         if response is None:
-            print('ERROR stopped task number: ' + str(task_number))
-            await update.callback_query.message.reply_text(text=message_error)
-            return ConversationHandler.END
-        await update.callback_query.edit_message_text(text_message_html + "\n Остановлена", parse_mode=ParseMode.HTML)
-        await update.callback_query.message.reply_text("Задача №" + "<strong>" + str(task_number) + "</strong>"
-                                                       + " успешно остановлена.", parse_mode=ParseMode.HTML)
+            raise ValueError(f"ERROR stopped task number: {str(task_number)}")
+
+        await update.callback_query.edit_message_text(f"{update.callback_query.message.text_html} \n Остановлена",
+                                                      parse_mode=ParseMode.HTML)
+        await update.callback_query.message.reply_text(
+            text=f"Задача № <strong> {str(task_number)} </strong> успешно остановлена.", parse_mode=ParseMode.HTML)
         return 1
 
     except Exception as e:
         print(e)
-        raise e
+        await update.callback_query.message.reply_text(text=message_error)
+        return ConversationHandler.END

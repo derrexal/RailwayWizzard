@@ -27,7 +27,6 @@ def date_limits_validate(input_date_text, station_from, station_to, station_from
         available_time = get_available_times(station_from, station_to, station_from_name, station_to_name, date_from)
         if len(available_time) == 0:
             return None
-
         input_date = datetime.strptime(input_date_text, '%d.%m.%Y')
         # купить билет на вчера, очевидно, нельзя
         if input_date.date() < datetime.now().date():
@@ -87,6 +86,7 @@ def time_check_validate(input_time, station_from, station_to, station_from_name,
 
     try:
         available_time = get_available_times(station_from, station_to, station_from_name, station_to_name, date_from)
+        # TODO: вынести это в get_available_times(). Осторожно, его используют еще и в других местах
         if len(available_time) == 0:
             raise Exception("Сервис: get_available_times вернул пустой ответ")
         for time in available_time:

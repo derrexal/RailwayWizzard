@@ -1,7 +1,5 @@
 import datetime
 from telegram import *
-from telegram.ext import *
-from telegram.constants import *
 from Bot.Setting import *
 from Bot.validators import *
 from Bot.Other import *
@@ -29,10 +27,6 @@ def create_car_type_button(car_type: CarType) -> InlineKeyboardButton:
     return InlineKeyboardButton(text=f"{emoji} {car_type.value[0]}", callback_data=f"callback_{car_type.name.lower()}")
 
 
-#init
-car_type_inline_buttons = generate_car_type_buttons()
-
-
 def set_default_car_types():
     global car_types
     global car_type_inline_buttons
@@ -47,13 +41,16 @@ def set_default_car_types():
     car_type_inline_buttons = generate_car_type_buttons()
 
 
+#init
+car_type_inline_buttons = generate_car_type_buttons()
+
+
 async def notification_handler(update: Update, context: CallbackContext):
     """ Начало взаимодействия по клику на inline-кнопку 'Уведомление' """
+    next_step = 1
     try:
         if update.callback_query.data != CALLBACK_NOTIFICATION:
-            await update.callback_query.message.reply_text(
-                text=f"Что-то пошло не так, обратитесь к администратору бота {admin_username}")
-            return ConversationHandler.END
+            raise Exception('ERROR CONCAT CALLBACK QUERY')
         await update.callback_query.message.reply_text(text="Обратите внимание, по умолчанию не приходят уведомления о "
                                                             "местах для инвалидов. Если вам необходимо получать "
                                                             "уведомления и в таком случае - пожалуйста, обратитесь к "
@@ -63,18 +60,16 @@ async def notification_handler(update: Update, context: CallbackContext):
         await update.callback_query.message.reply_text(
             text="Укажите <strong>станцию отправления</strong>.\nНапример, <code>Москва</code>",
             parse_mode=ParseMode.HTML)
-        return 1
+        return next_step
 
     except Exception as e:
-        print(e)
-        await update.callback_query.message.reply_text(text=message_error, parse_mode=ParseMode.HTML)
-        raise
+        await base_error_handler(update, e, next_step, message_error)
 
 
 async def first_step_notification(update: Update, context: CallbackContext):
     next_step = 2
     try:
-        await base_step_notification(update, context, next_step)
+        await base_step_notification(update, context)
         validate_station_input(update.message.text)
 
         station_code = await station_validate(update.message.text)
@@ -103,14 +98,15 @@ async def second_step_notification(update: Update, context: CallbackContext):
     next_step = 3
     tomorrow = (datetime.now(moscow_tz) + timedelta(days=1)).strftime("%d.%m.%Y")
     try:
-        await base_step_notification(update, context, next_step)
+        await base_step_notification(update, context)
         validate_station_input(update.message.text)
 
         station_code = await station_validate(update.message.text)
         if station_code is None:
-            await update.message.reply_text("Такой станции на сайте РЖД не котируется.\n"
-                                            "Укажите станцию прибытия\n"
-                                            "Например, <code>Курск</code>")
+            await update.message.reply_text(text="Такой станции на сайте РЖД не котируется.\n"
+                                                 "Укажите станцию прибытия\n"
+                                                 "Например, <code>Курск</code>",
+                                            parse_mode=ParseMode.HTML)
             return next_step - 1
 
         context.user_data[1] = update.message.text.upper()
@@ -126,7 +122,7 @@ async def second_step_notification(update: Update, context: CallbackContext):
         return next_step
 
     except ValueError as e:
-        return await base_error_handler(update, e, next_step, message_format_error)
+        return await base_error_handler(update, e, next_step, message_format_error, True)
 
     except Exception as e:
         return await base_error_handler(update, e, next_step, message_error)
@@ -136,7 +132,7 @@ async def third_step_notification(update: Update, context: CallbackContext):
     next_step = 4
     tomorrow = (datetime.now(moscow_tz) + timedelta(days=1)).strftime("%d.%m.%Y")
     try:
-        await base_step_notification(update, context, next_step)
+        await base_step_notification(update, context)
 
         date_and_date_json = date_format_validate(update.message.text)
 
@@ -177,7 +173,7 @@ async def fourth_step_notification(update: Update, context: CallbackContext):
     global car_type_inline_buttons
     next_step = 5
     try:
-        await base_step_notification(update, context, next_step)
+        await base_step_notification(update, context)
 
         # обрабатываем время отправления
         input_time = update.message.text
@@ -219,7 +215,7 @@ async def fourth_step_notification(update: Update, context: CallbackContext):
 async def fifth_step_notification(update: Update, context: CallbackContext):
     next_step = 6
     try:
-        await base_step_notification(update, context, next_step)
+        await base_step_notification(update, context)
 
         # обрабатываем количество мест которое ввел пользователь
         input_amount_seats = update.message.text
@@ -332,7 +328,6 @@ async def seventh_step_notification(update: Update, context: CallbackContext):
 
 
 async def send_notification_data_to_robot(update: Update, context: CallbackContext):
-
     # TODO: вынести UserId в context
     record_json = {
         "DepartureStation": context.user_data[0],
@@ -348,31 +343,4 @@ async def send_notification_data_to_robot(update: Update, context: CallbackConte
         return await create_and_get_id_notification_task(record_json)
 
     except Exception as e:
-        await update.message.reply_text(message_error)
         raise e
-
-
-async def base_error_handler(update: Update, e: Exception, next_step: int, text: str) -> int:
-    """ Базовый обработчик ошибок для step функций"""
-    print(e)
-    await update.message.reply_text(text)
-    return next_step - 1
-
-
-def validate_station_input(text: str):
-    """ Надстройка над проверкой ввода на кириллицу. Если проверка не пройдена - пробрасывается ошибка значения """
-    if not language_input_validation(text):
-        raise ValueError(message_format_error)
-
-
-async def base_step_notification(update: Update, context: CallbackContext, next_step: int):
-    """ Базовый step-класс, собирающий в себя общую функциональность"""
-    try:
-        log_user_message(update, context)
-        await update.message.reply_chat_action(ChatAction.TYPING)
-
-        if await check_stop(update, context):
-            return ConversationHandler.END
-
-    except Exception as e:
-        return await base_error_handler(update, e, next_step, message_error)

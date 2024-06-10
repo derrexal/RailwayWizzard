@@ -1,4 +1,5 @@
 from telegram import *
+from Bot.Other import base_error_handler
 from Bot.Setting import CALLBACK_SUPPORT, message_error
 from Bot.API import *
 
@@ -20,7 +21,5 @@ async def help_handler(update, context):
         await add_user(update.message.from_user['id'], update.message.from_user['username'])
 
     except Exception as e:
-        print(e)
-        await update.message.reply_text(message_error)
-        raise
+        return await base_error_handler(update, e, 1, message_error)
 

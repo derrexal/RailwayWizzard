@@ -1,5 +1,4 @@
 from telegram import *
-from telegram.constants import *
 from telegram.ext import *
 
 from Bot.Other import *
@@ -14,6 +13,7 @@ def get_car_types_text(car_types: list) -> str:
 
 async def active_task_handler(update: Update, context: CallbackContext):
     """ Начало взаимодействия по клику на inline-кнопку 'Список активных задач' """
+    next_step = 1
     try:
         if update.callback_query.data != str(CALLBACK_ACTIVE_TASK):
             await update.callback_query.message.reply_text(
@@ -33,39 +33,43 @@ async def active_task_handler(update: Update, context: CallbackContext):
                                                        parse_mode=ParseMode.HTML)
         for task in active_tasks:
             await send_task_info(update, task)
-        return 1
+        return next_step
 
     except Exception as e:
-        print(e)
-        await update.callback_query.message.reply_text(text=message_error)
-        return ConversationHandler.END
+        return await base_error_handler(update, e, next_step, message_error)
 
 
 async def send_task_info(update: Update, task: dict):
     """Send task information to the user."""
-    task_id = task.get("id")
-    car_types_text = get_car_types_text(task.get("carTypes", []))
-    callback = f"active_task_callback{task_id}"
-    keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(text='Остановить поиск по задаче', callback_data=callback)]])
 
-    task_info = (f"Задача № <strong> {task_id} </strong>"
-                 f"Станция отправления: <strong> {task['departureStation']} </strong>\n"
-                 f"Станция прибытия: <strong> {task['arrivalStation']} </strong>\n"
-                 f"Дата отправления: <strong> {task['dateFromString']} </strong>\n"
-                 f"Время отправления: <strong> {task['timeFrom']} </strong>\n"
-                 f"Количество мест: <strong> {str(task['numberSeats'])} </strong>\n")
+    try:
+        task_id = task.get("id")
+        car_types_text = get_car_types_text(task.get("carTypes", []))
+        callback = f"active_task_callback{task_id}"
+        keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(text='Остановить поиск по задаче', callback_data=callback)]])
 
-    # В старых задачах не выбраны типы вагонов
-    # TODO: по прошествии времени станет неактуально
-    if car_types_text:
-        task_info += f"\nТип вагона: <strong> {car_types_text} </strong>"
-    # TODO
+        task_info = (f"Задача № <strong> {task_id} </strong>"
+                     f"Станция отправления: <strong> {task['departureStation']} </strong>\n"
+                     f"Станция прибытия: <strong> {task['arrivalStation']} </strong>\n"
+                     f"Дата отправления: <strong> {task['dateFromString']} </strong>\n"
+                     f"Время отправления: <strong> {task['timeFrom']} </strong>\n"
+                     f"Количество мест: <strong> {str(task['numberSeats'])} </strong>\n")
 
-    await update.callback_query.message.reply_text(text=task_info, reply_markup=keyboard, parse_mode=ParseMode.HTML)
+        # В старых задачах не выбраны типы вагонов
+        # TODO: по прошествии времени станет неактуально
+        if car_types_text:
+            task_info += f"\nТип вагона: <strong> {car_types_text} </strong>"
+        # TODO
+
+        await update.callback_query.message.reply_text(text=task_info, reply_markup=keyboard, parse_mode=ParseMode.HTML)
+
+    except Exception as e:
+        return await base_error_handler(update, e, 1, message_error)
 
 
 async def one_step_active_task(update: Update, context: CallbackContext):
     query = update.callback_query.data
+    next_step = 1
     try:
         if "active_task_callback" not in query:  # Если нажали куда-то не туда - выходим из диалога
             return ConversationHandler.END
@@ -82,9 +86,7 @@ async def one_step_active_task(update: Update, context: CallbackContext):
                                                       parse_mode=ParseMode.HTML)
         await update.callback_query.message.reply_text(
             text=f"Задача № <strong> {str(task_number)} </strong> успешно остановлена.", parse_mode=ParseMode.HTML)
-        return 1
+        return next_step
 
     except Exception as e:
-        print(e)
-        await update.callback_query.message.reply_text(text=message_error)
-        return ConversationHandler.END
+        return await base_error_handler(update, e, next_step, message_error)

@@ -1,6 +1,6 @@
 from datetime import datetime, date, timedelta
 
-from Bot.Setting import moscow_tz
+from Bot.Setting import moscow_tz, message_format_error
 from RZD import API
 from bs4 import BeautifulSoup
 from Bot.API import *
@@ -38,7 +38,6 @@ def date_limits_validate(input_date_text, station_from, station_to, station_from
             return None
         return input_date  # возвращаю это только чтобы не было None. Нигде не используется
     except Exception as e:
-        print(e)
         raise e
 
 
@@ -62,7 +61,6 @@ def date_format_validate(input_date_text):
     except ValueError:
         return None
     except Exception as e:
-        print(e)
         raise e
 
 
@@ -74,7 +72,6 @@ def time_format_validate(input_time) -> bool:
     except ValueError:
         return False
     except Exception as e:
-        print(e)
         raise e
 
 
@@ -95,7 +92,6 @@ def time_check_validate(input_time, station_from, station_to, station_from_name,
         return available_time
 
     except Exception as e:
-        print(e)
         raise e
 
 
@@ -122,7 +118,6 @@ def get_available_times(station_from, station_to, station_from_name, station_to_
                     available_time.append(time_railway_str)
         return available_time
     except Exception as e:
-        print(e)
         raise e
 
 
@@ -133,8 +128,14 @@ def language_input_validation(input_station) -> bool:
         return not alphabet.isdisjoint(input_station.lower())
 
     except Exception as e:
-        print(e)
         raise e
+
+
+def validate_station_input(text: str):
+    """ Надстройка над проверкой ввода на кириллицу. Если проверка не пройдена - пробрасывается ошибка значения """
+    if not language_input_validation(text):
+        raise ValueError(message_format_error)
+
 
 
 async def station_validate(input_station):
@@ -159,5 +160,4 @@ async def station_validate(input_station):
                 return city['c']
         return None
     except Exception as e:
-        print(e)
         raise e

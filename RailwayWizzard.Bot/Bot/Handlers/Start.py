@@ -1,5 +1,5 @@
 from Bot.API import *
-from telegram.ext import ConversationHandler
+from Bot.Other import base_error_handler
 from Bot.Setting import message_error, message_start, start_inline_keyboards
 
 
@@ -13,9 +13,7 @@ async def start_buttons_handler(update, context):
                        update.message.from_user['username'])
 
     except Exception as e:
-        print(e)
-        await update.message.reply_text(message_error)
-        return ConversationHandler.END
+        return await base_error_handler(update, e, 1, message_error)
 
 
 async def start_buttons(update, context):
@@ -29,6 +27,5 @@ async def start_buttons(update, context):
                        update.callback_query.message.chat.username)
 
     except Exception as e:
-        print(e)
-        await update.message.reply_text(message_error)
-        return ConversationHandler.END
+        return await base_error_handler(update, e, 1, message_error)
+

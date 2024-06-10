@@ -10,6 +10,7 @@ def main():
     loop.run_until_complete(server.run())
     loop.close()
 
+
 if __name__ == '__main__':
     Thread(target=main).start()
     TelegramBot.run()

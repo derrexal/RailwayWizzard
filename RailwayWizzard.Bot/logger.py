@@ -1,5 +1,5 @@
 import logging
-import uuid
+from nanoid import generate
 
 logger = logging.getLogger()
 
@@ -18,7 +18,8 @@ def set_logger(__name__):
 
 def get_unique_uuid_error() -> str:
     """ Генерирует UUID в формате строки"""
-    return str(uuid.uuid4())
+    number_alphabet = '0123456789'
+    return str(generate(number_alphabet,4))
 
 
 set_logger(__name__)

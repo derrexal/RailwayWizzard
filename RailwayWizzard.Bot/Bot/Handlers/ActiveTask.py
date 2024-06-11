@@ -49,7 +49,7 @@ async def send_task_info(update: Update, task: dict):
         callback = f"active_task_callback{task_id}"
         keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(text='Остановить поиск по задаче', callback_data=callback)]])
 
-        task_info = (f"Задача № <strong> {task_id} </strong>"
+        task_info = (f"Задача № <strong> {task_id} </strong>\n"
                      f"Станция отправления: <strong> {task['departureStation']} </strong>\n"
                      f"Станция прибытия: <strong> {task['arrivalStation']} </strong>\n"
                      f"Дата отправления: <strong> {task['dateFromString']} </strong>\n"
@@ -59,7 +59,7 @@ async def send_task_info(update: Update, task: dict):
         # В старых задачах не выбраны типы вагонов
         # TODO: по прошествии времени станет неактуально
         if car_types_text:
-            task_info += f"\nТип вагона: <strong> {car_types_text} </strong>"
+            task_info += f"Тип вагона: <strong> {car_types_text} </strong>"
         # TODO
 
         await update.callback_query.message.reply_text(text=task_info, reply_markup=keyboard, parse_mode=ParseMode.HTML)

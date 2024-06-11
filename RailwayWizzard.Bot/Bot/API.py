@@ -25,8 +25,8 @@ async def create_and_get_id_notification_task(record_json):
         status = response.status_code
         print('NotificationTask/CreateAndGetId ' + str(status) + ' ')
         if status != 200:
-            raise Exception("Не удалось создать задачу. Ошибка записи в БД")
-        print('NotificationTask/CreateAndGetId ' + str(response.status_code) + ' ' + response.text)
+            raise Exception(f"Не удалось создать задачу. Ошибка записи в БД. Подробности:{response.text} {response.status_code}")
+        print(f"NotificationTask/CreateAndGetId {str(response.status_code)} {response.text}")
         return response.text  # ID записи в БД
     except Exception as e:
         raise e
@@ -39,7 +39,7 @@ async def add_station_info(record_station_info):
         response = requests.post(API_URL + 'StationInfo/CreateOrUpdate', json=myObj)
     except Exception as e:
         raise e
-    print('StationName/CreateOrUpdate ' + str(response.status_code) + ' ' + response.text)
+    print(f"StationName/CreateOrUpdate {str(response.status_code)} {response.text}")
 
 
 async def get_express_code_station_by_name(station_info_name):
@@ -49,7 +49,7 @@ async def get_express_code_station_by_name(station_info_name):
     try:
         response = requests.get(API_URL + 'StationInfo/GetByName', json=myObj)
         status = response.status_code
-        print('StationInfo/GetByName ' + str(status) + ' ' + response.text)
+        print(f"StationInfo/GetByName {str(status)} {response.text}")
         if status == 200:
             return response.json()['expressCode']
         return None
@@ -64,7 +64,7 @@ async def get_active_task_by_user_id(user_id):
     try:
         response = requests.get(API_URL + 'NotificationTask/GetActiveByUser', params=myObj)
         status = response.status_code
-        print('NotificationTask/GetActiveByUser' + str(status) + ' ' + response.text)
+        print(f"NotificationTask/GetActiveByUser {str(status)} {response.text}")
         if status == 200:
             return response.json()
         return None
@@ -73,30 +73,15 @@ async def get_active_task_by_user_id(user_id):
 
 
 async def delete_task_by_id(task_id):
-    """ Останавливает задачу по ее айди """
+    """ Останавливает(Устанавливает статус Остановлен) задачу по ее айди """
     myObj = {'idNotificationTask': task_id}
 
     try:
         response = requests.get(API_URL + 'NotificationTask/SetIsStopped', params=myObj)
         status = response.status_code
-        print('NotificationTask/SetIsStopped' + str(status) + ' ' + response.text)
+        print(f"NotificationTask/SetIsStopped {str(status)} {response.text}")
         if status == 200:
             return response.json()
         return None
-    except Exception as e:
-        raise e
-
-
-async def set_is_stopped_notification_task(id_notification_task):
-    """ Устанавливает статус 'Остановлен' для конкретного таска"""
-    myObj = {'idNotificationTask': id_notification_task}
-
-    try:
-        response = requests.get(API_URL + 'NotificationTask/SetIsStopped', json=myObj)
-        status = response.status_code
-        print('NotificationTask/SetIsStopped' + str(status) + ' ' + response.text)
-        if status == 200:
-            return True
-        return False
     except Exception as e:
         raise e

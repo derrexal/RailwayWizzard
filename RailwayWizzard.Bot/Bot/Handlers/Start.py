@@ -1,5 +1,5 @@
 from Bot.API import *
-from Bot.Other import base_error_handler
+from Bot.Base import base_error_handler
 from Bot.Setting import message_error, message_start, start_inline_keyboards
 
 

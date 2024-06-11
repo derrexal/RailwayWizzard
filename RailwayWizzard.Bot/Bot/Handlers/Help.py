@@ -1,5 +1,5 @@
 from telegram import *
-from Bot.Other import base_error_handler
+from Bot.Base import base_error_handler
 from Bot.Setting import CALLBACK_SUPPORT, message_error
 from Bot.API import *
 

@@ -3,6 +3,7 @@ from telegram import *
 from Bot.Setting import *
 from Bot.validators import *
 from Bot.Other import *
+from Bot.Base import *
 from Bot.API import *
 
 car_types = {

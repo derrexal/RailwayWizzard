@@ -2,6 +2,7 @@ from telegram import *
 from telegram.ext import *
 
 from Bot.Other import *
+from Bot.Base import *
 from Bot.Setting import (CALLBACK_ACTIVE_TASK, admin_username)
 
 

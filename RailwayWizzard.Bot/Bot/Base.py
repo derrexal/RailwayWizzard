@@ -5,15 +5,11 @@ from telegram.constants import ParseMode
 from logger import get_unique_uuid_error, logger
 
 
-async def base_error_handler(update: Update, e: Exception, next_step: int, text: str, is_custom_error=True) -> int:
+async def base_error_handler(update: Update, e: Exception, next_step: int, message_to_user: str) -> int:
     """ Базовый обработчик ошибок для step функций"""
-    message_to_log = e
-    message_to_user = text
-    #выставил по умолчанию тру так как не вспомнил для чего этот флаг вообще нужен
-    if is_custom_error:
-        error_uuid = get_unique_uuid_error()
-        message_to_log = f"ERROR [{error_uuid}] {e} "
-        message_to_user = f"{text} <code>{error_uuid}</code>"
+    error_uuid = get_unique_uuid_error()
+    message_to_log = f"ERROR [{error_uuid}] {e} "
+    message_to_user = f"{message_to_user} <code>{error_uuid}</code>"
 
     logger.error(message_to_log)
     await update.callback_query.message.reply_text(text=message_to_user,
@@ -21,5 +17,4 @@ async def base_error_handler(update: Update, e: Exception, next_step: int, text:
     if next_step == 1:
         return ConversationHandler.END
     return next_step - 1
-
 

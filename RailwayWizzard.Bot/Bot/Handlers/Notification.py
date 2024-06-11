@@ -123,7 +123,7 @@ async def second_step_notification(update: Update, context: CallbackContext):
         return next_step
 
     except ValueError as e:
-        return await base_error_handler(update, e, next_step, message_format_error, True)
+        return await base_error_handler(update, e, next_step, message_format_error)
 
     except Exception as e:
         return await base_error_handler(update, e, next_step, message_error)

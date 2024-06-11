@@ -261,11 +261,11 @@ async def sixth_step_notification(update: Update, context: CallbackContext):
             # Выбранные пользователем типы вагонов записываем в строку для отображения
             # и наполняем массив для отправки на сервер
             car_types_text = ''
-            car_types_list = []
+            car_types_list = [] #schema: [1,2,3,4]
             for car_type, selected in car_types.items():
                 if selected:
                     car_types_text += f"{car_type.value[0]}, "
-                    car_types_list.append(car_type.value[1])
+                    car_types_list.append(list(CarType).index(car_type) + 1) #порядковый номер элемента в enum`е CarType
 
             if not car_types_list:
                 message_warning = "Необходимо выбрать хотя бы 1 тип вагона"

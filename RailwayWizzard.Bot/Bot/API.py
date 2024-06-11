@@ -15,7 +15,7 @@ async def add_user(idTg, username):
         raise e
     print('Users/CreateOrUpdate' + str(response.status_code) + ' ' + response.text)
 
-
+#TODO: вынести это в один общий метод - много повторений, выяснилось
 async def create_and_get_id_notification_task(record_json):
     """ Отправляет информацию о созданном таске в АПИ чтобы та сохранила в БД и отдала нам ID записи"""
     try:
@@ -26,6 +26,7 @@ async def create_and_get_id_notification_task(record_json):
         print('NotificationTask/CreateAndGetId ' + str(status) + ' ')
         if status != 200:
             raise Exception(f"Не удалось создать задачу. Ошибка записи в БД. Подробности:{response.text} {response.status_code}")
+        #TODO: вынести это в Exception
         print(f"NotificationTask/CreateAndGetId {str(response.status_code)} {response.text}")
         return response.text  # ID записи в БД
     except Exception as e:

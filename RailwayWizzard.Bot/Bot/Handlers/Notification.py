@@ -341,6 +341,7 @@ async def send_notification_data_to_robot(update: Update, context: CallbackConte
     }
 
     try:
+        print(record_json)
         return await create_and_get_id_notification_task(record_json)
 
     except Exception as e:

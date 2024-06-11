@@ -265,7 +265,7 @@ async def sixth_step_notification(update: Update, context: CallbackContext):
             for car_type, selected in car_types.items():
                 if selected:
                     car_types_text += f"{car_type.value[0]}, "
-                    car_types_list.append(car_type.value[0])
+                    car_types_list.append(car_type.value[1])
 
             if not car_types_list:
                 message_warning = "Необходимо выбрать хотя бы 1 тип вагона"

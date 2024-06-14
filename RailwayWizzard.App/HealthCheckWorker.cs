@@ -24,7 +24,7 @@ namespace RailwayWizzard.App
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+                _logger.LogInformation($"{nameof(HealthCheckWorker)} running at: {DateTimeOffset.Now}");
 
                 await DoWork();
 
@@ -74,5 +74,12 @@ namespace RailwayWizzard.App
                 throw; 
             }
         }
+
+        public override async Task StopAsync(CancellationToken cancellationToken)
+        {
+            _logger.LogInformation($"{nameof(HealthCheckWorker)} stopped at: {DateTimeOffset.Now}");
+            await base.StopAsync(cancellationToken);
+        }
+
     }
 }

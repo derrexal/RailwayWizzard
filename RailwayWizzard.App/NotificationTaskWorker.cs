@@ -33,7 +33,7 @@ namespace RailwayWizzard.App
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+                _logger.LogInformation($"{nameof(NotificationTaskWorker)} running at: {DateTimeOffset.Now}");
 
                 await DoWork();
                 //TODO: Все-таки хочется, чтобы работа по задаче началась непосредственно после создания
@@ -55,7 +55,7 @@ namespace RailwayWizzard.App
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error in Worker {ex}");
+                _logger.LogError($"Error in {nameof(NotificationTaskWorker)} {ex}");
                 throw; 
             }
             
@@ -63,7 +63,7 @@ namespace RailwayWizzard.App
         
         public override async Task StopAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation($"Worker stopped at: {DateTimeOffset.Now}");
+            _logger.LogInformation($"{nameof(NotificationTaskWorker)} stopped at: {DateTimeOffset.Now}");
             await base.StopAsync(cancellationToken);
         }
     }

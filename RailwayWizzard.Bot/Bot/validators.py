@@ -137,15 +137,14 @@ def validate_station_input(text: str):
         raise ValueError(message_format_error)
 
 
-
 async def station_validate(input_station):
     try:
         input_station = input_station.upper()
 
         # Если в базе есть станция с таким именем
-        expressCode = await get_express_code_station_by_name(input_station)
-        if not expressCode is None:
-            return expressCode
+        express_code = await get_express_code_station_by_name(input_station)
+        if not express_code is None:
+            return express_code
         # Иначе
         result_json = API.get_stations(input_station)
         if result_json is None:
@@ -153,7 +152,7 @@ async def station_validate(input_station):
 
         # Записываем информацию о станциях в базу
         for city in result_json:
-            await add_station_info(city)
+            await create_station_info(city)
 
         for city in result_json:
             if city['n'] == input_station:

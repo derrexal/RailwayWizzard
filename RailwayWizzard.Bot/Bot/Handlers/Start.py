@@ -9,8 +9,8 @@ async def start_buttons_handler(update, context):
         await update.message.reply_text(message_start,
                                         reply_markup=start_inline_keyboards)
 
-        await add_user(update.message.from_user['id'],
-                       update.message.from_user['username'])
+        await create_user(update.message.from_user['id'],
+                          update.message.from_user['username'])
 
     except Exception as e:
         return await base_error_handler(update, e, 1, message_error)
@@ -23,8 +23,8 @@ async def start_buttons(update, context):
         await context.bot.send_message(chat_id=chat_id,
                                        text='\U0001F441 Добро пожаловать на борт',
                                        reply_markup=start_inline_keyboards)
-        await add_user(update.callback_query.message.chat.id,
-                       update.callback_query.message.chat.username)
+        await create_user(update.callback_query.message.chat.id,
+                          update.callback_query.message.chat.username)
 
     except Exception as e:
         return await base_error_handler(update, e, 1, message_error)

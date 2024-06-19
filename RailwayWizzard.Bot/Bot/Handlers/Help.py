@@ -18,7 +18,7 @@ async def help_handler(update, context):
             '\U0001F4D8 Создано при поддержке прекрасной лапшичной BỔ и английского портера.\n',
             reply_markup=inline_buttons)
 
-        await add_user(update.message.from_user['id'], update.message.from_user['username'])
+        await create_user(update.message.from_user['id'], update.message.from_user['username'])
 
     except Exception as e:
         return await base_error_handler(update, e, 1, message_error)

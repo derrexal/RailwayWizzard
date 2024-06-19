@@ -13,6 +13,7 @@ from Bot.Other import unknown_handler
 from Bot.Setting import CALLBACK_NOTIFICATION, CALLBACK_ACTIVE_TASK
 
 import os
+from logger import logger
 
 # Получаем токен из файла .env в текущей директории
 load_dotenv()
@@ -26,17 +27,17 @@ async def send_message_to_user(user_id, message):
     global application
     try:
         await application.bot.send_message(user_id, message, parse_mode=ParseMode.HTML)
-        print("Пользователю " + str(user_id) + " отправлено сообщение:\n" + str(message))
+        logger.info("Пользователю " + str(user_id) + " отправлено сообщение:\n" + str(message))
     except Forbidden as eF:
-        print("Пользователь " + str(user_id) + " заблокировал бота\n" + eF.message)
+        logger.info("Пользователь " + str(user_id) + " заблокировал бота\n" + eF.message)
         raise eF
     except Exception as e:
-        print(e)
+        logger.info(e)
         raise
   
 
 def run():
-    print("INFO:        Bot started")
+    logger.info("Bot started")
     try:
         application.add_handler(conv_handler_notification)
         application.add_handler(conv_handler_active_task)
@@ -49,8 +50,7 @@ def run():
         application.run_polling()
 
     except Exception as e:
-        print(e)
-        return None
+        logger.error(e)
 
 
 conv_handler_notification = ConversationHandler(

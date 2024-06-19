@@ -5,6 +5,8 @@ from Bot.validators import *
 from Bot.Other import *
 from Bot.Base import *
 from Bot.API import *
+from Bot.Data.NotificationTaskData import NotificationTaskData
+
 
 car_types = {
     CarType.SEDENTARY: True,
@@ -330,19 +332,18 @@ async def seventh_step_notification(update: Update, context: CallbackContext):
 
 async def send_notification_data_to_robot(update: Update, context: CallbackContext):
     # TODO: вынести UserId в context
-    record_json = {
-        "DepartureStation": context.user_data[0],
-        "ArrivalStation": context.user_data[1],
-        "DateFrom": context.user_data[2],
-        "TimeFrom": context.user_data[3],
-        "UserId": update.callback_query.message.chat.id,
-        "CarTypes": context.user_data[5],
-        "NumberSeats": context.user_data[33]
-    }
+    notification_task_data = NotificationTaskData(
+        DepartureStation=context.user_data[0],
+        ArrivalStation=context.user_data[1],
+        DateFrom=context.user_data[2],
+        TimeFrom=context.user_data[3],
+        UserId=update.callback_query.message.chat.id,
+        CarTypes=context.user_data[5],
+        NumberSeats=context.user_data[33]
+    )
 
     try:
-        print(record_json)
-        return await create_and_get_id_notification_task(record_json)
+        return await create_and_get_id_notification_task(notification_task_data)
 
     except Exception as e:
         raise e

@@ -1,106 +1,98 @@
-import requests
+import aiohttp
+from aiohttp import ClientResponse
+
 from logger import logger
+from Bot.Data.NotificationTaskData import NotificationTaskData
 
 
-API_URL = "http://railwaywizzardapp:80/"
+API_URL = "http://railwaywizzardapp:80"
+
+
+async def make_request(method, endpoint, json_data=None, params=None) -> ClientResponse:
+    """
+    Базовый метод для выполнения асинхронного HTTP-запроса.
+
+    Args:
+        method (str): HTTP метод запроса ('GET' или 'POST').
+        endpoint (str): Конечная точка API (относительный URL).
+        json_data (dict, optional): Данные для отправки в теле запроса в формате JSON. По умолчанию None.
+        params (dict, optional): Параметры для отправки в URL запроса. По умолчанию None.
+
+    Returns:
+        aiohttp.ClientResponse: Ответ от сервера, если запрос был успешным.
+
+    Raises:
+        aiohttp.ClientError: Исключение, если произошла ошибка во время выполнения запроса.
+        aiohttp.HttpProcessingError: Исключение, если статус код ответа не является успешным (2xx).
+    """
+    url = f"{API_URL}/{endpoint}"
+    try:
+        async with aiohttp.ClientSession() as session:
+            if method == 'POST':
+                async with session.post(url, json=json_data) as response:
+                    text = await response.text()
+                    logger.info(f'{endpoint} {response.status} {text}')
+                    response.raise_for_status()
+                    return response
+            elif method == 'GET':
+                async with session.get(url, json=json_data, params=params) as response:
+                    text = await response.text()
+                    logger.info(f'{endpoint} {response.status} {text}')
+                    response.raise_for_status()
+                    return response
+            else:
+                raise Exception(f'Invalid method {method}')
+    except Exception as e:
+        logger.error(f'Error in {endpoint}: {str(e)}')
+        raise e
 
 
 async def create_user(id_tg, username):
     """ Добавляет пользователя в БД """
-    end_point_url = 'Users/CreateOrUpdate'
+    endpoint = 'Users/CreateOrUpdate'
     json_data = {'IdTg': id_tg, 'Username': username}
-
-    try:
-        response = requests.post(API_URL + end_point_url, json=json_data)
-        logger.info(f'{end_point_url} {str(response.status_code)} {response.text}')
-        if response.status_code != 200:
-            raise Exception(f'{end_point_url} {str(response.status_code)} {response.text}')
-
-    except Exception as e:
-        raise e
+    await make_request('POST', endpoint, json_data=json_data)
 
 
 async def create_station_info(record_station_info):
-    """ Создает сущность StationInfo """
-    end_point_url = 'StationInfo/CreateOrUpdate'
+    """Создает сущность StationInfo"""
+    endpoint = 'StationInfo/CreateOrUpdate'
     json_data = {'ExpressCode': record_station_info['c'], 'StationName': record_station_info['n']}
-
-    try:
-        response = requests.post(API_URL + end_point_url, json=json_data)
-        logger.info(f'{end_point_url} {str(response.status_code)} {response.text}')
-        if response.status_code != 200:
-            raise Exception(f'{end_point_url} {str(response.status_code)} {response.text}')
-
-    except Exception as e:
-        raise e
+    await make_request('POST', endpoint, json_data=json_data)
 
 
-# TODO: если ответ не 200 - выбрасывать Exception# TODO: если ответ не 200 - выбрасывать Exception
-#TODO: вынести это в один общий метод - много повторений, выяснилось
-# TODO: где правильнее формировать данные для запроса. Здесь или выше по стеку?
-async def create_and_get_id_notification_task(record_json):
-    """ Создает задачу и отдает ее ID"""
-    end_point_url = 'NotificationTask/CreateAndGetId'
-
-    try:
-        response = requests.post(API_URL + end_point_url, json=record_json)
-        logger.info(f'{end_point_url} {str(response.status_code)} {response.text}')
-        if response.status_code != 200:
-            raise Exception(f'{end_point_url} {str(response.status_code)} {response.text}')
-        return response.text  # ID записи в БД
-
-    except Exception as e:
-        raise e
+async def create_and_get_id_notification_task(notification_task_data: NotificationTaskData):
+    """Создает задачу и отдает ее ID"""
+    endpoint = 'NotificationTask/CreateAndGetId'
+    json_data = notification_task_data.__dict__  # Преобразование объекта в словарь
+    logger.info(json_data)
+    response = await make_request('POST', endpoint, json_data=json_data)
+    return await response.text()  # ID записи в БД
 
 
 async def get_express_code_station_by_name(station_info_name):
-    """ Возвращает expressCode сущности StationInfo по полю Name """
-    end_point_url = 'StationInfo/GetByName'
+    """Возвращает expressCode сущности StationInfo по полю Name"""
+    endpoint = 'StationInfo/GetByName'
     json_data = {'StationName': station_info_name}
-
-    try:
-        response = requests.get(API_URL + end_point_url, json=json_data)
-        logger.info(f'{end_point_url} {str(response.status_code)} {response.text}')
-        if response.status_code == 000: #TODO: Какой код присылает сервер в случае если ничего не нашел?
-            return None
-        elif response.status_code != 200:
-            raise Exception(f'{end_point_url} {str(response.status_code)} {response.text}')
-        return response.json()['expressCode']
-
-    except Exception as e:
-        raise e
+    response = await make_request('GET', endpoint, json_data=json_data)
+    if response.status == 204:
+        return None
+    return (await response.json())['expressCode']
 
 
 async def get_active_task_by_user_id(user_id):
-    """ Возвращает активные задачи конкретного пользователя"""
-    end_point_url = 'NotificationTask/GetActiveByUser'
-    json_data = {'userId': user_id}
-
-    try:
-        response = requests.get(API_URL + end_point_url, params=json_data)
-        logger.info(f'{end_point_url} {str(response.status_code)} {response.text}')
-        if response.status_code == 000:
-            return None
-        elif response.status_code != 200:
-            raise Exception(f'{end_point_url} {str(response.status_code)} {response.text}')
-        return response.json()
-
-    except Exception as e:
-        raise e
+    """Возвращает активные задачи конкретного пользователя"""
+    endpoint = 'NotificationTask/GetActiveByUser'
+    params = {'userId': user_id}
+    response = await make_request('GET', endpoint, params=params)
+    if response.status == 404:
+        return None
+    return await response.json()
 
 
 async def delete_task_by_id(task_id):
-    """ Останавливает(Устанавливает статус Остановлен) задачу по ее ID """
-    end_point_url = 'NotificationTask/SetIsStopped'
-    json_data = {'idNotificationTask': task_id}
-
-    try:
-        response = requests.get(API_URL + end_point_url, params=json_data)
-        logger.info(f'{end_point_url} {str(response.status_code)} {response.text}')
-
-        if response.status_code != 200:
-            raise ValueError(f'{end_point_url} {str(response.status_code)} {response.text} {str(task_id)}')
-        return response.json()
-
-    except Exception as e:
-        raise e
+    """Останавливает (Устанавливает статус Остановлен) задачу по ее ID"""
+    endpoint = 'NotificationTask/SetIsStopped'
+    params = {'idNotificationTask': task_id}
+    response = await make_request('GET', endpoint, params=params)
+    return await response.json()

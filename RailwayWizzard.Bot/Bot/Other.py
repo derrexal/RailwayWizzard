@@ -5,11 +5,11 @@ from telegram.ext import CallbackContext, ConversationHandler
 from telegram.constants import ChatAction
 
 
-def log_user_message(update, context):
+def log_user_message(update):
     answer = update.message.text
-    idTg = update.message.from_user['id']
+    id_tg = update.message.from_user['id']
     username = update.message.from_user['username']
-    print('User: {} ID: {} Message:{}'.format(username, idTg, answer))
+    logger.info('User: {} ID: {} Message:{}'.format(username, id_tg, answer))
 
 
 async def check_stop(update, context):
@@ -28,13 +28,13 @@ async def stop(update, context):
 
 async def unknown_handler(update, context):
     await update.message.reply_text('Неизвестная команда')
-    log_user_message(update, context)
+    log_user_message(update)
 
 
 async def base_step_notification(update: Update, context: CallbackContext):
     """ Базовый step-класс, собирающий в себя общую функциональность"""
     try:
-        log_user_message(update, context)
+        log_user_message(update)
         await update.message.reply_chat_action(ChatAction.TYPING)
 
         if await check_stop(update, context):

@@ -77,7 +77,7 @@ async def one_step_active_task(update: Update, context: CallbackContext):
 
         task_number = int(''.join(filter(str.isdigit, query)))
         if task_number is None:
-            raise ValueError("ERROR: task_number is none")
+            raise ValueError(f"ERROR: task_number:{task_number} is none")
 
         response = await delete_task_by_id(task_number)
         if response is None:

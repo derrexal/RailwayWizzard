@@ -29,10 +29,10 @@ async def send_message_to_user(user_id, message):
         await application.bot.send_message(user_id, message, parse_mode=ParseMode.HTML)
         logger.info("Пользователю " + str(user_id) + " отправлено сообщение:\n" + str(message))
     except Forbidden as eF:
-        logger.info("Пользователь " + str(user_id) + " заблокировал бота\n" + eF.message)
+        logger.warning("Пользователь " + str(user_id) + " заблокировал бота\n" + eF.message)
         raise eF
     except Exception as e:
-        logger.info(e)
+        logger.error(e)
         raise
   
 

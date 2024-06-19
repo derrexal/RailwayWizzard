@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Body
+from fastapi import FastAPI, Body, HTTPException
 from fastapi.responses import HTMLResponse
 import uvicorn
 from Bot.TelegramBot import send_message_to_user
@@ -9,12 +9,10 @@ app = FastAPI()
 
 @app.post("/api/sendMessageForUser")
 async def send_message(data=Body()):
-    if data is not None:
-        user_id = data["userId"]
-        message = data["message"]
-        await send_message_to_user(user_id, message)
-    else:
-        logger.info("Ошибка получения данных")
+    if data is None:
+        logger.error("Ошибка получения данных")
+        raise HTTPException(status_code=400,detail="Not Value")
+    await send_message_to_user(data["userId"], data["message"])
 
 
 async def run():

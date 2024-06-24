@@ -79,7 +79,7 @@ namespace RailwayWizzard.App.Controllers
             {
                 var notificationTasksQuery = _context.NotificationTask
                 .Where(u => u.IsActual)
-                .Where(u=>u.IsStopped==false)
+                .Where(u=>!u.IsStopped)
                 .Where(u => u.UserId == userId)
                 .AsNoTracking();
 

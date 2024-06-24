@@ -130,7 +130,7 @@ namespace RailwayWizzard.Robot.App
                     Thread.Sleep(1000 * 30); //пол минуты
                     result = await _robot.GetFreeSeatsOnTheTrain(inputNotificationTask);
                 }
-                while (result.Count == 0);
+                while (!result.Any());
             }
             catch { throw; }
 

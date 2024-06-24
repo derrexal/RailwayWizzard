@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Abp.Extensions;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RailwayWizzard.Core;
 using RailwayWizzard.Robot.Core;
@@ -32,8 +33,7 @@ namespace RailwayWizzard.Robot.App
                 var textResponse = await GetTrainInformationByParameters(inputNotificationTask);
                 //TODO: нужно смапить в DTO чтобы этот огромный объект не таскать по памяти
                 RootBigBrother myDeserializedClass = JsonConvert.DeserializeObject<RootBigBrother>(textResponse);
-                if (myDeserializedClass == null) { throw new NullReferenceException($"Сервис РЖД при запросе списка свободных мест вернул пустой ответ. Ответ:{textResponse}"); }
-                if (myDeserializedClass.Trains.Count == 0) { throw new NullReferenceException($"Сервис РЖД при запросе списка свободных мест вернул ответ в котором нет поездок. Ответ:{textResponse}"); }
+                if (!myDeserializedClass.Trains.Any()) { throw new NullReferenceException($"Сервис РЖД при запросе списка свободных мест вернул ответ в котором нет поездок. Ответ:{textResponse}"); }
                 //вытаскиваем свободные места по запрашиваемому рейсу
                 var currentRoute = GetCurrentRouteFromResponse(myDeserializedClass, inputNotificationTask);
                 var result = SupportingMethod(currentRoute);
@@ -85,7 +85,7 @@ namespace RailwayWizzard.Robot.App
                 response.EnsureSuccessStatusCode();
 
                 var textResponse = await response.Content.ReadAsStringAsync();
-                if (textResponse == null || textResponse == "") { throw new Exception("Сервис РЖД при запросе списка свободных мест вернул пустой ответ"); }
+                if (textResponse.IsNullOrEmpty()) { throw new Exception("Сервис РЖД при запросе списка свободных мест вернул пустой ответ"); }
                 return textResponse;
             }
             catch { throw; }
@@ -175,7 +175,7 @@ namespace RailwayWizzard.Robot.App
                 //Из всей строки получаем только значение
                 var keyValuePairs = res.Split(':').ToList();
                 var result = keyValuePairs.LastOrDefault();
-                if (result == null) throw new HttpRequestException($"Не удалось распарсить ответ от Касперского:\n{textResponse}");
+                if (result is null) throw new HttpRequestException($"Не удалось распарсить ответ от Касперского:\n{textResponse}");
                 
                 result = result.Remove(result.Length - 1);
                 result = result.Remove(0, 1);

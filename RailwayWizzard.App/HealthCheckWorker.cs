@@ -59,7 +59,7 @@ namespace RailwayWizzard.App
                     await _botApi.SendMessageForAdminAsync(message);
                 }
 
-                if (freeSeats.Count == 0)
+                if (!freeSeats.Any())
                 {
                     message = $"[{this.GetType().Name}] В ходе проверки доступности не обнаружено свободных мест на рейс: \n{testNotificationTask.ToCustomString()}\n\nВремя выполнения метода: {executionTime} мс";
                     _logger.LogInformation(message);

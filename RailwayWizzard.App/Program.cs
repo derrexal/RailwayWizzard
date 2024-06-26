@@ -30,7 +30,6 @@ namespace RailwayWizzard.App
 
             builder.Services.AddHostedService<NotificationTaskWorker>();
             builder.Services.AddHostedService<HealthCheckWorker>();
-            //builder.Services.AddHostedService<MosRuWorker>();
 
             builder.Services.AddLogging(options =>
             {

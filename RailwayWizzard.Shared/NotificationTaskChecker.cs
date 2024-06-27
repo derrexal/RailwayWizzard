@@ -1,5 +1,4 @@
 ﻿using System.Globalization;
-using System.Threading;
 using Microsoft.EntityFrameworkCore;
 using RailwayWizzard.Core;
 using RailwayWizzard.EntityFrameworkCore.Data;
@@ -64,13 +63,11 @@ namespace RailwayWizzard.Shared
         /// <returns></returns>
         public async Task<IList<NotificationTask>> GetActiveNotificationTasks()
         {
-            await using (var context = await _contextFactory.CreateDbContextAsync())
-            {
-                var notificationTasks = await context.NotificationTask
-                    .Where(t => t.IsActual == true)
-                    .ToListAsync();
-                return notificationTasks;
-            }
+            await using var context = await _contextFactory.CreateDbContextAsync();
+            var notificationTasks = await context.NotificationTask
+                .Where(t => t.IsActual == true)
+                .ToListAsync();
+            return notificationTasks;
         }
 
         /// <summary>
@@ -103,13 +100,9 @@ namespace RailwayWizzard.Shared
         /// <returns></returns>
         public async Task<IList<NotificationTask>> GetNotificationTasksForWork()
         {
-            try
-            {
-                var notWorkedNotificationTasks = await GetNotWorkedNotificationTasks();
-                var result = await FillsStationCodes(notWorkedNotificationTasks);
-                return result;
-            }
-            catch { throw; }
+            var notWorkedNotificationTasks = await GetNotWorkedNotificationTasks();
+            var result = await FillsStationCodes(notWorkedNotificationTasks);
+            return result;
         }
 
         /// <summary>
@@ -119,19 +112,13 @@ namespace RailwayWizzard.Shared
         /// <returns></returns>
         public async Task<IList<NotificationTask>> FillsStationCodes(IList<NotificationTask> notificationTasks)
         {
-            try
+            foreach (var task in notificationTasks)
             {
-                foreach (var task in notificationTasks)
-                {
-                    await using (var context = await _contextFactory.CreateDbContextAsync())
-                    {
-                        task.ArrivalStationCode = (await context.StationInfo.FirstOrDefaultAsync(s => s.StationName == task.ArrivalStation))!.ExpressCode;
-                        task.DepartureStationCode = (await context.StationInfo.FirstOrDefaultAsync(s => s.StationName == task.DepartureStation))!.ExpressCode;
-                    }
-                }
-                return notificationTasks;
+                await using var context = await _contextFactory.CreateDbContextAsync();
+                task.ArrivalStationCode = (await context.StationInfo.FirstOrDefaultAsync(s => s.StationName == task.ArrivalStation))!.ExpressCode;
+                task.DepartureStationCode = (await context.StationInfo.FirstOrDefaultAsync(s => s.StationName == task.DepartureStation))!.ExpressCode;
             }
-            catch { throw; }
+            return notificationTasks;
         }
     }
 }

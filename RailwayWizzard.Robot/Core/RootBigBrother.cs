@@ -10,9 +10,9 @@
 
     public class CarGroup
     {
-        public List<string> Carriers { get; } = new List<string>();
-        public List<string> CarrierDisplayNames { get; } = new List<string>();
-        public List<string> ServiceClasses { get; } = new List<string>();
+        public List<string> Carriers { get; } = new();
+        public List<string> CarrierDisplayNames { get; } = new();
+        public List<string> ServiceClasses { get; } = new();
         public double? MinPrice { get; set; }
         public double? MaxPrice { get; set; }
         public string CarType { get; set; }
@@ -28,27 +28,27 @@
         public int? MixedCabinQuantity { get; set; }
         public bool? IsSaleForbidden { get; set; }
         public string AvailabilityIndication { get; set; }
-        public List<string> CarDescriptions { get; } = new List<string>();
+        public List<string> CarDescriptions { get; } = new();
         public string ServiceClassNameRu { get; set; }
         public string ServiceClassNameEn { get; set; }
-        public List<string> InternationalServiceClasses { get; } = new List<string>();
-        public List<double?> ServiceCosts { get; } = new List<double?>();
+        public List<string> InternationalServiceClasses { get; } = new();
+        public List<double?> ServiceCosts { get; } = new();
         public bool? IsBeddingSelectionPossible { get; set; }
-        public List<string> BoardingSystemTypes { get; } = new List<string>();
+        public List<string> BoardingSystemTypes { get; } = new();
         public bool? HasElectronicRegistration { get; set; }
         public bool? HasGenderCabins { get; set; }
         public bool? HasPlaceNumeration { get; set; }
         public bool? HasPlacesNearPlayground { get; set; }
         public bool? HasPlacesNearPets { get; set; }
-        public bool HasPlacesForDisabledPersons { get; set; } //был nullable
+        public bool HasPlacesForDisabledPersons { get; set; }
         public bool? HasPlacesNearBabies { get; set; }
-        public List<AvailableBaggageType> AvailableBaggageTypes { get; } = new List<AvailableBaggageType>();
+        public List<AvailableBaggageType> AvailableBaggageTypes { get; } = new();
         public bool? HasNonRefundableTariff { get; set; }
-        public List<Discount> Discounts { get; } = new List<Discount>();
-        public List<object> AllowedTariffs { get; } = new List<object>();
+        public List<Discount> Discounts { get; } = new();
+        public List<object> AllowedTariffs { get; } = new();
         public string InfoRequestSchema { get; set; }
-        public int TotalPlaceQuantity { get; set; } //был nullable
-        public List<string> PlaceReservationTypes { get; } = new List<string>();
+        public int TotalPlaceQuantity { get; set; }
+        public List<string> PlaceReservationTypes { get; } = new();
         public bool? IsThreeHoursReservationAvailable { get; set; }
         public bool? IsMealOptionPossible { get; set; }
         public bool? IsAdditionalMealOptionPossible { get; set; }
@@ -112,7 +112,7 @@
     {
         public string OriginStationCode { get; set; }
         public string DestinationStationCode { get; set; }
-        public List<Train> Trains { get; } = new List<Train>();
+        public List<Train> Trains { get; } = new();
         public object ClientFeeCalculation { get; set; }
         public object AgentFeeCalculation { get; set; }
         public string OriginCode { get; set; }
@@ -135,15 +135,15 @@
 
     public class Train
     {
-        public List<CarGroup> CarGroups { get; } = new List<CarGroup>();
+        public List<CarGroup> CarGroups { get; } = new();
         public bool? IsFromSchedule { get; set; }
         public bool? IsTourPackagePossible { get; set; }
         public int? CarTransportationsFreePlacesCount { get; set; }
         public object ActualMovement { get; set; }
         public object CategoryId { get; set; }
         public object ScheduleId { get; set; }
-        public List<string> BaggageCarsThreads { get; } = new List<string>();
-        public List<string> CarTransportationCoachesThreads { get; } = new List<string>();
+        public List<string> BaggageCarsThreads { get; } = new();
+        public List<string> CarTransportationCoachesThreads { get; } = new();
         public string Provider { get; set; }
         public bool? IsWaitListAvailable { get; set; }
         public bool? HasElectronicRegistration { get; set; }
@@ -151,8 +151,8 @@
         public bool? HasDynamicPricingCars { get; set; }
         public bool? HasTwoStoreyCars { get; set; }
         public bool? HasSpecialSaleMode { get; set; }
-        public List<string> Carriers { get; } = new List<string>();
-        public List<string> CarrierDisplayNames { get; } = new List<string>();
+        public List<string> Carriers { get; } = new();
+        public List<string> CarrierDisplayNames { get; } = new();
         public int? Id { get; set; }
         public bool? IsBranded { get; set; }
         public string TrainNumber { get; set; }
@@ -176,14 +176,14 @@
         public FinalStationInfo FinalStationInfo { get; set; }
         public string FinalTrainStationCode { get; set; }
         public string FinalTrainStationCnsiCode { get; set; }
-        public List<string> DestinationNames { get; } = new List<string>();
-        public List<string> FinalStationNames { get; } = new List<string>();
+        public List<string> DestinationNames { get; } = new();
+        public List<string> FinalStationNames { get; } = new();
         public DateTime? DepartureDateTime { get; set; }
         public DateTime? LocalDepartureDateTime { get; set; }
         public DateTime? ArrivalDateTime { get; set; }
         public DateTime? LocalArrivalDateTime { get; set; }
-        public List<DateTime?> ArrivalDateTimes { get; } = new List<DateTime?>();
-        public List<DateTime?> LocalArrivalDateTimes { get; } = new List<DateTime?>();
+        public List<DateTime?> ArrivalDateTimes { get; } = new();
+        public List<DateTime?> LocalArrivalDateTimes { get; } = new();
         public DateTime? DepartureDateFromFormingStation { get; set; }
         public int? DepartureStopTime { get; set; }
         public int? ArrivalStopTime { get; set; }
@@ -191,21 +191,19 @@
         public int? TripDistance { get; set; }
         public bool? IsSuburban { get; set; }
         public bool? IsComponent { get; set; }
-        public List<string> CarServices { get; } = new List<string>();
+        public List<string> CarServices { get; } = new();
         public bool? IsSaleForbidden { get; set; }
         public bool? IsTicketPrintRequiredForBoarding { get; set; }
         public string BookingSystem { get; set; }
         public bool? IsVrStorageSystem { get; set; }
         public string PlacesStorageType { get; set; }
-        public List<string> BoardingSystemTypes { get; } = new List<string>();
+        public List<string> BoardingSystemTypes { get; } = new();
         public object TrainBrandCode { get; set; }
-        public List<string> TrainClassNames { get; } = new List<string>();
+        public List<string> TrainClassNames { get; } = new();
         public string ServiceProvider { get; set; }
         public string DestinationStationName { get; set; }
         public string OriginStationName { get; set; }
         public bool? IsPlaceRangeAllowed { get; set; }
         public bool? IsTrainRouteAllowed { get; set; }
     }
-
-
 }

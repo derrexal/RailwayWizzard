@@ -30,13 +30,9 @@ public class BotApi : IBotApi
         using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, API_BOT_SEND_MESSAGE_URL);
         request.Content = JsonContent.Create(messageToUser);
 
-        try
-        {
-            var response = await httpClient.SendAsync(request);
-            if (response.StatusCode != HttpStatusCode.OK)
-                throw new Exception($"Метод отправки сообщения пользователю:{userId} завершился с кодом:{response.StatusCode}");
-        }
-        catch{ throw; }
+        var response = await httpClient.SendAsync(request);
+        if (response.StatusCode != HttpStatusCode.OK)
+            throw new Exception($"Метод отправки сообщения пользователю:{userId} завершился с кодом:{response.StatusCode}");
     }
     
     /// <summary>
@@ -46,15 +42,9 @@ public class BotApi : IBotApi
     /// <returns></returns>
     public async Task SendMessageForAdminAsync(string message)
     {
-        try
-        {
-            var adminIdString = _configuration.GetSection("Telegram").GetSection("AdminId").Value;
-            if (string.IsNullOrEmpty(adminIdString)) throw new Exception("Не задан телеграм ID администратора");
-            long adminId = Convert.ToInt64(adminIdString);
-            await SendMessageForUserAsync(message, adminId);
-        }
-        catch { throw; }
-
+        var adminIdString = _configuration.GetSection("Telegram").GetSection("AdminId").Value;
+        if (string.IsNullOrEmpty(adminIdString)) throw new Exception("Не задан телеграм ID администратора");
+        long adminId = Convert.ToInt64(adminIdString);
+        await SendMessageForUserAsync(message, adminId);
     }
-
 }

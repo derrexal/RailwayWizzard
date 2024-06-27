@@ -1,5 +1,6 @@
 ﻿namespace RailwayWizzard.Robot.App;
 
+
 /// <summary>
 /// Описывает методы взаимодействия с ботом
 /// </summary>

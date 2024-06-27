@@ -43,7 +43,6 @@ namespace RailwayWizzard.App
                 DateFrom = DateTime.Today.AddDays(30),
                 CarTypes = new List<CarTypeEnum>{CarTypeEnum.Sedentary, CarTypeEnum.ReservedSeat, CarTypeEnum.Compartment, CarTypeEnum.Luxury}
             };
-            string message;
             try
             {
                 //Время выполнения метода
@@ -52,6 +51,7 @@ namespace RailwayWizzard.App
                 watch.Stop();
                 var executionTime = watch.ElapsedMilliseconds;
 
+                string message;
                 if (executionTime > 15000)
                 {
                     message = $"[{this.GetType().Name}] В ходе проверки доступности на примере рейса {testNotificationTask.ToCustomString()} \nпревышено время выполнения: {executionTime} мс";
@@ -59,7 +59,7 @@ namespace RailwayWizzard.App
                     await _botApi.SendMessageForAdminAsync(message);
                 }
 
-                if (!freeSeats.Any())
+                if (freeSeats.Count==0)
                 {
                     message = $"[{this.GetType().Name}] В ходе проверки доступности не обнаружено свободных мест на рейс: \n{testNotificationTask.ToCustomString()}\n\nВремя выполнения метода: {executionTime} мс";
                     _logger.LogInformation(message);

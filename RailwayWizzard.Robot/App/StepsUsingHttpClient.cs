@@ -123,16 +123,12 @@ namespace RailwayWizzard.Robot.App
         private async Task<List<string>> GetFreeSeats(NotificationTask inputNotificationTask)
         {
             List<string> result;
-            try
+            do
             {
-                do
-                {
-                    Thread.Sleep(1000 * 30); //пол минуты
-                    result = await _robot.GetFreeSeatsOnTheTrain(inputNotificationTask);
-                }
-                while (!result.Any());
+                Thread.Sleep(1000 * 30); //пол минуты
+                result = await _robot.GetFreeSeatsOnTheTrain(inputNotificationTask);
             }
-            catch { throw; }
+            while (result.Count==0);
 
             return result;
         }

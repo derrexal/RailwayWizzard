@@ -1,4 +1,6 @@
 ﻿using RailwayWizzard.Core;
+
+
 namespace RailwayWizzard.Robot.App
 {
     /// <summary>

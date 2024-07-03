@@ -22,26 +22,21 @@ namespace RailwayWizzard.App.Controllers
             _logger = logger;
         }
 
-
         [HttpPost("CreateAndGetId")]
         public async Task<IActionResult> CreateAndGetId(NotificationTask stationInfo)
         {
             if (ModelState.IsValid)
-            {
-                stationInfo.CreationTime = DateTime.Now;
-                stationInfo.IsActual = true;
-                stationInfo.IsWorked = false;
-                stationInfo.IsStopped = false;
-                _context.Add(stationInfo);
+                return BadRequest("Request param is no valid");
+            
+            stationInfo.CreationTime = DateTime.Now;
+            stationInfo.IsActual = true;
+            stationInfo.IsWorked = false;
+            stationInfo.IsStopped = false;
+            _context.Add(stationInfo);
 
-                await _context.SaveChangesAsync();
-                
-                _logger.LogTrace($"Success create NotificationTask. Id:{stationInfo.Id} UserId:{stationInfo.UserId}");
-                                              
-                return Ok(stationInfo.Id);
-            }
-
-            return BadRequest("Request param is no valid");
+            await _context.SaveChangesAsync();
+            _logger.LogTrace($"Success create NotificationTask. Id:{stationInfo.Id} UserId:{stationInfo.UserId}");
+            return Ok(stationInfo.Id);
         }
 
         /// <summary>
@@ -54,18 +49,17 @@ namespace RailwayWizzard.App.Controllers
         public async Task<IActionResult> SetIsStopped(int idNotificationTask)
         {
             if (ModelState.IsValid)
-            {
-                var currentTask = await _context.NotificationTask.FirstOrDefaultAsync(t => t.Id==idNotificationTask);
-                
-                if (currentTask is null) { return BadRequest($"Error search task from Id:{idNotificationTask}"); }
-                
-                currentTask.IsStopped = true;
-                currentTask!.IsWorked = false;
-                
-                await _context.SaveChangesAsync();
-                return Ok(currentTask.Id);
-            }
-            return BadRequest("Request param is no valid");
+                return BadRequest("Request param is no valid");
+            
+            var currentTask = await _context.NotificationTask.FirstOrDefaultAsync(t => t.Id==idNotificationTask);
+            
+            if (currentTask is null) { return BadRequest($"Error search task from Id:{idNotificationTask}"); }
+            
+            currentTask.IsStopped = true;
+            currentTask!.IsWorked = false;
+            
+            await _context.SaveChangesAsync();
+            return Ok(currentTask.Id);
         }
 
         /// <summary>
@@ -76,28 +70,25 @@ namespace RailwayWizzard.App.Controllers
         public async Task<IList<NotificationTask>> GetActiveByUser(long userId)
         {
             if (ModelState.IsValid)
+                throw new Exception("Request param is no valid");
+            var notificationTasksQuery = _context.NotificationTask
+            .Where(u => u.IsActual)
+            .Where(u=>!u.IsStopped)
+            .Where(u => u.UserId == userId)
+            .AsNoTracking();
+
+            var notificationTasks = await notificationTasksQuery.Select(u => new NotificationTask
             {
-                var notificationTasksQuery = _context.NotificationTask
-                .Where(u => u.IsActual)
-                .Where(u=>!u.IsStopped)
-                .Where(u => u.UserId == userId)
-                .AsNoTracking();
+                Id = u.Id,
+                ArrivalStation = u.ArrivalStation,
+                DepartureStation = u.DepartureStation,
+                TimeFrom = u.TimeFrom,
+                CarTypes = u.CarTypes,
+                NumberSeats = u.NumberSeats,
+                DateFromString = u.DateFrom.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture)
+            }).ToListAsync();
 
-                var notificationTasks = await notificationTasksQuery.Select(u => new NotificationTask
-                {
-                    Id = u.Id,
-                    ArrivalStation = u.ArrivalStation,
-                    DepartureStation = u.DepartureStation,
-                    TimeFrom = u.TimeFrom,
-                    CarTypes = u.CarTypes,
-                    NumberSeats = u.NumberSeats,
-                    DateFromString = u.DateFrom.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture)
-                }).ToListAsync();
-
-                return notificationTasks;
-
-            }
-            throw new Exception("Request param is no valid");
+            return notificationTasks;
         }
     }
 }

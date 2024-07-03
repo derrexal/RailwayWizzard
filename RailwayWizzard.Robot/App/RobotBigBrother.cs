@@ -22,7 +22,7 @@ namespace RailwayWizzard.Robot.App
         }
 
         /// <summary>
-        /// Получение свободных мест в запрашиваемом рейсе
+        /// Получение информации о свободных мест в запрашиваемом рейсе
         /// </summary>
         /// <param name="inputNotificationTask"></param>
         /// <returns></returns>
@@ -39,7 +39,7 @@ namespace RailwayWizzard.Robot.App
         }
 
         /// <summary>
-        /// Получение информации об рейсах по запрашиваемым параметрам
+        /// Получение информации о рейсах по запрашиваемым параметрам
         /// </summary>
         /// <param name="inputNotificationTask"></param>
         /// <returns></returns>
@@ -84,7 +84,7 @@ namespace RailwayWizzard.Robot.App
         }
 
         /// <summary>
-        /// Из ответа по рейсам в запрашиваемый день вытаскивает свободные места по запрашиваемому рейсу
+        /// Получение информации о свободных местах в запрашиваемый день по запрашиваемому рейсу
         /// </summary>
         /// <param name="root"></param>
         /// <param name="departureTime"></param>
@@ -154,6 +154,7 @@ namespace RailwayWizzard.Robot.App
                 HttpClient client = new HttpClient();
                 using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
                 using HttpResponseMessage response = await client.SendAsync(request);
+                response.EnsureSuccessStatusCode();
                 var textResponse = await response.Content.ReadAsStringAsync();
                 
                 //вытаскиваем из ответа строку со Ksid

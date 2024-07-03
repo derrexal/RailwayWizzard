@@ -22,31 +22,27 @@ namespace RailwayWizzard.App.Controllers
         }
 
         [HttpGet("GetByName")]
-        public async Task<StationInfo?> GetByName(StationInfo stationInfo)
-        {
-            return await _context.StationInfo.FirstOrDefaultAsync(s=>s.StationName==stationInfo.StationName);
-        }
+        public async Task<StationInfo?> GetByName(StationInfo stationInfo) => 
+            await _context.StationInfo.FirstOrDefaultAsync(s=>s.StationName==stationInfo.StationName);
+        
 
         [HttpPost("CreateOrUpdate")]
         public async Task<IActionResult> CreateOrUpdate(StationInfo stationInfo)
         {
             if (ModelState.IsValid)
+                return BadRequest("Request param is no valid");
+            var currentStationInfo = await _context.StationInfo.FirstOrDefaultAsync(u => u.ExpressCode == stationInfo.ExpressCode);
+            if (currentStationInfo is null)
+                _context.Add(stationInfo);
+            else
             {
-                var currentStationInfo = await _context.StationInfo.FirstOrDefaultAsync(u => u.ExpressCode == stationInfo.ExpressCode);
-                if (currentStationInfo is null)
-                    _context.Add(stationInfo);
-                else
-                {
-                    currentStationInfo.StationName= stationInfo.StationName;
-                    currentStationInfo.ExpressCode = stationInfo.ExpressCode;
-                    _context.Update(currentStationInfo);
-                }
-                await _context.SaveChangesAsync();
-                _logger.LogTrace($"Success create or update StationInfo. StationName:{stationInfo.StationName} ExpressCode:{stationInfo.ExpressCode}");
-                return Ok("Success StationInfo CreateOrUpdate");
+                currentStationInfo.StationName= stationInfo.StationName;
+                currentStationInfo.ExpressCode = stationInfo.ExpressCode;
+                _context.Update(currentStationInfo);
             }
-
-            return BadRequest("Request param is no valid");
+            await _context.SaveChangesAsync();
+            _logger.LogTrace($"Success create or update StationInfo. StationName:{stationInfo.StationName} ExpressCode:{stationInfo.ExpressCode}");
+            return Ok("Success StationInfo CreateOrUpdate");
         }
     }
 }

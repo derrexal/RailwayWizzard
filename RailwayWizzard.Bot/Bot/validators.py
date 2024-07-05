@@ -155,8 +155,9 @@ async def station_validate(input_station):
             await create_station_info(city)
 
         for city in result_json:
-            if city['n'] == input_station:
-                return city['c']
+            city = city['n'].upper()
+            if city == input_station:
+                return city
         return None
     except Exception as e:
         raise e

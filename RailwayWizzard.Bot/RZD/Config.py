@@ -1,10 +1,3 @@
-# Этот словарь наполняю по мере необходимости
-# Возможно эти IP станут неактуальны
-proxies = {
-    'https': 'https://utCwtG:h7krbG@46.3.196.72:9541',
-    'http': 'https://utCwtG:h7krbG@46.3.196.72:9541'
-}
-#User-Agent должен быть нормальным!
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/62.0',
     'Host': 'ticket.rzd.ru',

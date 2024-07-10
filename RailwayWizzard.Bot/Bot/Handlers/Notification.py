@@ -71,11 +71,13 @@ async def notification_handler(update: Update, context: CallbackContext):
 
 async def first_step_notification(update: Update, context: CallbackContext):
     next_step = 2
+    expected_station_name = update.message.text.upper()
     try:
         await base_step_notification(update, context)
-        validate_station_input(update.message.text)
+        if not language_input_validation(expected_station_name):
+            raise ValueError(message_format_error)
 
-        station_code = await station_validate(update.message.text)
+        station_code = await station_validate(expected_station_name)
         if station_code is None:
             await update.message.reply_text(text="Такой станции на сайте РЖД не котируется.\n"
                                                  "Укажите <strong>станцию отправления</strong>.\n"
@@ -83,7 +85,7 @@ async def first_step_notification(update: Update, context: CallbackContext):
                                             parse_mode=ParseMode.HTML)
             return next_step - 1
 
-        context.user_data[0] = update.message.text.upper()
+        context.user_data[0] = expected_station_name
         context.user_data[10] = station_code
         await update.message.reply_text(text="Укажите <strong>станцию прибытия</strong>.\n"
                                              "Например, <code>Курск</code>",
@@ -99,12 +101,14 @@ async def first_step_notification(update: Update, context: CallbackContext):
 
 async def second_step_notification(update: Update, context: CallbackContext):
     next_step = 3
+    expected_station_name = update.message.text.upper()
     tomorrow = (datetime.now(moscow_tz) + timedelta(days=1)).strftime("%d.%m.%Y")
     try:
         await base_step_notification(update, context)
-        validate_station_input(update.message.text)
+        if not language_input_validation(expected_station_name):
+            raise ValueError(message_format_error)
 
-        station_code = await station_validate(update.message.text)
+        station_code = await station_validate(expected_station_name)
         if station_code is None:
             await update.message.reply_text(text="Такой станции на сайте РЖД не котируется.\n"
                                                  "Укажите станцию прибытия\n"
@@ -112,7 +116,7 @@ async def second_step_notification(update: Update, context: CallbackContext):
                                             parse_mode=ParseMode.HTML)
             return next_step - 1
 
-        context.user_data[1] = update.message.text.upper()
+        context.user_data[1] = expected_station_name
         context.user_data[11] = station_code
 
         if context.user_data[0] == context.user_data[1]:

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using RailwayWizzard.B2B;
 using RailwayWizzard.EntityFrameworkCore.Data;
 using RailwayWizzard.Robot.App;
 using RailwayWizzard.Shared;
@@ -20,6 +21,7 @@ namespace RailwayWizzard.App
             builder.Services.AddTransient<IBotApi, BotApi>();
             builder.Services.AddTransient<IRobot, RobotBigBrother>();
             builder.Services.AddTransient<ISteps, StepsUsingHttpClient>();
+            builder.Services.AddTransient<IPassRzd, PassRzd>();
 
             builder.Services.AddDbContextFactory<RailwayWizzardAppContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("RailwayWizzardAppContext") 
@@ -44,7 +46,7 @@ namespace RailwayWizzard.App
             var factory = app.Services.GetRequiredService<IDbContextFactory<RailwayWizzardAppContext>>();
             using(var context = factory.CreateDbContext())
             {
-                //Applying migrations to run programm
+                //Applying migrations to run program
                 context.Database.Migrate();
                 //Before Run Program Update field IsWorked default value (false)
                 context.NotificationTask.ExecuteUpdate(t =>
@@ -58,6 +60,7 @@ namespace RailwayWizzard.App
             app.MapControllers();
 
             app.Run();
+
             //TODO: Удалить неиспользуемые ссылки в проектах
         }
     }

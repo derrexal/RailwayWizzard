@@ -1,6 +1,6 @@
 from datetime import datetime, date, timedelta
 
-from Bot.Setting import moscow_tz, message_format_error
+from Bot.Setting import moscow_tz
 from RZD import API
 from bs4 import BeautifulSoup
 from Bot.API import *
@@ -66,6 +66,7 @@ def date_format_validate(input_date_text):
 
 def time_format_validate(input_time) -> bool:
     """ Проверка времени, введенного пользователем на валидность """
+
     try:
         datetime.strptime(input_time, '%H:%M')
         return True
@@ -80,9 +81,9 @@ def time_check_validate(input_time, station_from, station_to, station_from_name,
     Проверяет время введенное пользователем на наличие его в списке рейсов на запрошенный день.
     Возвращает список доступных, если время некорректно
     """
-
     try:
         available_time = get_available_times(station_from, station_to, station_from_name, station_to_name, date_from)
+        # available_time = get_available_times(station_from, station_to, station_from_name, station_to_name, date_from)
         # TODO: вынести это в get_available_times(). Осторожно, его используют еще и в других местах
         if len(available_time) == 0:
             raise Exception("Сервис: get_available_times вернул пустой ответ")
@@ -96,12 +97,12 @@ def time_check_validate(input_time, station_from, station_to, station_from_name,
 
 
 def get_available_times(station_from, station_to, station_from_name, station_to_name, date_from) -> list:
-    """ Получает список доступного времени для бронирования в выбранный день """
-
+    """ Получает списком доступное время для бронирования в выбранный день """
     available_time = []
     today_time = datetime.now(moscow_tz).time().strftime('%H:%M')
 
     try:
+
         response_text = API.get_schedule(station_from, station_to, station_from_name, station_to_name, date_from)
         soup = BeautifulSoup(response_text, 'html.parser')
         table = soup.find('table', class_='basicSched_trainsInfo_table')
@@ -122,37 +123,34 @@ def get_available_times(station_from, station_to, station_from_name, station_to_
 
 
 def language_input_validation(input_station) -> bool:
-    """ Проверка ввода на русские символы и цифры """
+    """ Проверка ввода на русские символы
+    @param input_station: имя станции(UPPER)
+    @return: Имя станции содержит только допустимые символы или нет?
+    """
     try:
-        alphabet = set('абвгдеёжзийклмнопрстуфхцчшщъыьэюя')
-        return not alphabet.isdisjoint(input_station.lower())
+        alphabet = set('АБВГДЕЁЖЗИЙКЛМНОПРСТУФЧЦЧШЩЪЫЬЭЮЯ')
+        return not alphabet.isdisjoint(input_station)
 
     except Exception as e:
         raise e
 
 
-def validate_station_input(text: str):
-    """ Надстройка над проверкой ввода на кириллицу. Если проверка не пройдена - пробрасывается ошибка значения """
-    if not language_input_validation(text):
-        raise ValueError(message_format_error)
+async def station_validate(input_station: object) -> object:
+    """
 
-
-async def station_validate(input_station):
+    @rtype: object
+    """
     try:
-        input_station = input_station.upper()
-
+        input_station = input_station
         # Если в базе есть станция с таким именем - возвращаем express_code
         express_code = await get_express_code_station_by_name(input_station)
         if not express_code is None:
             return express_code
-        # Иначе ищем его с использованием внешнего API
-        result_json = API.get_stations(input_station)
-        if result_json is None:
-            return None
 
-        # Записываем информацию о станциях в базу
-        for city in result_json:
-            await create_station_info(city)
+        # Иначе ищем его с использованием внешнего API
+        result_json = get_stations(input_station)
+        if result_json is []:
+            return None
 
         for city in result_json:
             city = city['n'].upper()

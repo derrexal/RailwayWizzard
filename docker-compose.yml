@@ -24,7 +24,7 @@ services:
     ports:
       - ":5433"
     volumes:
-      - ./postgres-data:/var/lib/postgresql/data
+      - ./postgres-data:/var/lib/postgresql/data1
     command: -p 5433
     networks:
       - my-network

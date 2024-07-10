@@ -38,6 +38,7 @@ async def make_request(method, endpoint, json_data=None, params=None) -> ClientR
                 async with session.get(url, json=json_data, params=params) as response:
                     text = await response.text()
                     logger.info(f'{endpoint} {response.status} {text}')
+                    #todo: не работает проверка статус кода
                     response.raise_for_status()
                     return response
             else:
@@ -45,6 +46,34 @@ async def make_request(method, endpoint, json_data=None, params=None) -> ClientR
     except Exception as e:
         logger.error(f'Error in {endpoint}: {str(e)}')
         raise e
+
+
+async def station_validate(input_station):
+    """  """
+    endpoint = 'BTwoB/GetStationValidate'
+    params = {'inputStation': input_station}
+    response = await make_request('GET', endpoint, params=params)
+    return await response.json()#[]
+
+
+async def get_stations(input_station):
+    """  """
+    endpoint = 'BTwoB/GetStations'
+    params = {'inputStation': input_station}
+    response = await make_request('GET', endpoint, params=params)
+    return await response.json()#[]
+
+
+async def get_available_times(station_from_name, station_to_name, date):
+    """  """
+    endpoint = 'BTwoB/GetAvailableTimes'
+    json_data = {
+        'StationFrom': station_from_name,
+        'StationTo': station_to_name,
+        'Date': date
+    }
+    response = await make_request('GET', endpoint, json_data=json_data)
+    return await response.text()
 
 
 async def create_user(id_tg, username):

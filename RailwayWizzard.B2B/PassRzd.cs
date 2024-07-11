@@ -163,20 +163,27 @@ namespace RailwayWizzard.B2B
         {
             //Ищем станцию по полному соответствию
             var station = await GetStationInfo(stationName);
-            if(station is not null) { return new List<StationInfo> { station }; }
+            if (station is not null) return new List<StationInfo> { station}; 
 
             //Ищем станцию по НЕполному соответствию
             var stations = await GetStationsInfo(stationName);
             return stations;
         }
 
+        /// <summary>
+        /// Добавляет в таблицу AppStationInfo новые записи
+        /// </summary>
+        /// <param name="rootStations"></param>
+        /// <returns></returns>
         private async Task CreateStationsInfoAsync(List<RootStations> rootStations)
         {
-            await _context.StationInfo.AddRangeAsync(rootStations.Select(s => new StationInfo()
-            {
-                ExpressCode = s.c,
-                StationName = s.n
-            }));
+            foreach (var rootStation in rootStations)
+                if(await _context.StationInfo.AnyAsync(s=>s.StationName==rootStation.n))
+                    await _context.StationInfo.AddAsync(new StationInfo
+                        {
+                            ExpressCode = rootStation.c,
+                            StationName = rootStation.n,
+                        });
             await _context.SaveChangesAsync();
         }
     }

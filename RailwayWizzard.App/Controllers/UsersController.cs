@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using RailwayWizzard.Core;
 using RailwayWizzard.EntityFrameworkCore.Data;
 
-
+//TODO: заменить все IsValid на FromBody
 namespace RailwayWizzard.App.Controllers
 {
     [ApiController]
@@ -26,8 +26,9 @@ namespace RailwayWizzard.App.Controllers
         [HttpPost("CreateOrUpdate")]
         public async Task<IActionResult> CreateOrUpdate(User user)
         {
-            if (ModelState.IsValid)
-                return BadRequest("Request param is no valid");
+            if (!ModelState.IsValid)
+                return BadRequest($"Request param is no valid: {ModelState}");
+            
             var currentUser = await _context.User.FirstOrDefaultAsync(u=>u.IdTg == user.IdTg);
             if (currentUser is null)
                 _context.Add(user);
@@ -37,6 +38,7 @@ namespace RailwayWizzard.App.Controllers
                 currentUser.Username = user.Username;
                 _context.Update(currentUser);
             }
+
             await _context.SaveChangesAsync();
             _logger.LogTrace($"Success create or update User. IdTg:{user.IdTg} Username:{user.Username}");
             return Ok("Success User Create");

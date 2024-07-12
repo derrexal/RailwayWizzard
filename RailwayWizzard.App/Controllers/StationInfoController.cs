@@ -29,8 +29,8 @@ namespace RailwayWizzard.App.Controllers
         [HttpPost("CreateOrUpdate")]
         public async Task<IActionResult> CreateOrUpdate(StationInfo stationInfo)
         {
-            if (ModelState.IsValid)
-                return BadRequest("Request param is no valid");
+            if (!ModelState.IsValid)
+                return BadRequest($"Request param is no valid: {ModelState}");
             var currentStationInfo = await _context.StationInfo.FirstOrDefaultAsync(u => u.ExpressCode == stationInfo.ExpressCode);
             if (currentStationInfo is null)
                 _context.Add(stationInfo);

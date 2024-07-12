@@ -25,9 +25,9 @@ namespace RailwayWizzard.App.Controllers
         [HttpPost("CreateAndGetId")]
         public async Task<IActionResult> CreateAndGetId(NotificationTask stationInfo)
         {
-            if (ModelState.IsValid)
-                return BadRequest("Request param is no valid");
-            
+            if (!ModelState.IsValid)
+                return BadRequest($"Request param is no valid: {ModelState}");
+
             stationInfo.CreationTime = DateTime.Now;
             stationInfo.IsActual = true;
             stationInfo.IsWorked = false;
@@ -48,9 +48,9 @@ namespace RailwayWizzard.App.Controllers
         [HttpGet("SetIsStopped")]
         public async Task<IActionResult> SetIsStopped(int idNotificationTask)
         {
-            if (ModelState.IsValid)
-                return BadRequest("Request param is no valid");
-            
+            if (!ModelState.IsValid)
+                return BadRequest($"Request param is no valid: {ModelState}");
+
             var currentTask = await _context.NotificationTask.FirstOrDefaultAsync(t => t.Id==idNotificationTask);
             
             if (currentTask is null) { return BadRequest($"Error search task from Id:{idNotificationTask}"); }
@@ -69,8 +69,9 @@ namespace RailwayWizzard.App.Controllers
         [HttpGet("GetActiveByUser")]
         public async Task<IList<NotificationTask>> GetActiveByUser(long userId)
         {
-            if (ModelState.IsValid)
-                throw new Exception("Request param is no valid");
+            if (!ModelState.IsValid)
+                throw new Exception($"Request param is no valid: {ModelState}");
+
             var notificationTasksQuery = _context.NotificationTask
             .Where(u => u.IsActual)
             .Where(u=>!u.IsStopped)

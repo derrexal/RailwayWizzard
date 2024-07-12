@@ -18,7 +18,7 @@ namespace RailwayWizzard.App.Controllers
         public async Task<IActionResult> GetStations(string inputStation)
         {
             if (!ModelState.IsValid)
-                return BadRequest("Request param is no valid");
+                return BadRequest($"Request param is no valid: {ModelState}");
 
             return Ok(await _passRzd.GetStations(inputStation));
         }
@@ -27,7 +27,7 @@ namespace RailwayWizzard.App.Controllers
         public async Task<IActionResult> GetAvailableTimes(ScheduleDto scheduleDto)
         {
             if (!ModelState.IsValid)
-                return BadRequest("Request param is no valid");
+                return BadRequest($"Request param is no valid: {ModelState}");
 
             //подготовка данных
             scheduleDto.StationFrom = scheduleDto.StationFrom.ToUpper();
@@ -41,7 +41,7 @@ namespace RailwayWizzard.App.Controllers
         public async Task<IActionResult> GetStationValidate(string inputStation)
         {
             if (!ModelState.IsValid)
-                return BadRequest("Request param is no valid");
+                return BadRequest($"Request param is no valid: {ModelState}");
 
             return Ok(await _passRzd.StationValidate(inputStation));
         }

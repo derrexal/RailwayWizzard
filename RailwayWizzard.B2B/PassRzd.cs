@@ -133,7 +133,7 @@ namespace RailwayWizzard.B2B
             if(stations.Count==0) return null;
 
             //Ищем среди полученных по АПИ нашу искомую станцию
-            var station = stations.SingleOrDefault(s => s.n == stationName);
+            var station = stations.SingleOrDefault(s => s.n.ToUpper() == stationName);
             if(station is not null) { return new StationInfo{ExpressCode = station.c, StationName = station.n}; }
 
             return null;
@@ -154,7 +154,7 @@ namespace RailwayWizzard.B2B
             var stations = await GetStations(stationName);
             if (stations.Count == 0) return new List<StationInfo>();
             return stations
-                .Where(s => s.n.Contains(stationName))
+                .Where(s => s.n.ToUpper().Contains(stationName))
                 .Select(s => new StationInfo { ExpressCode = s.c, StationName = s.n })
                 .ToList();
         }

@@ -6,14 +6,9 @@ from Bot.Setting import message_error, message_start, start_inline_keyboards
 async def start_buttons_handler(update, context):
     """ Создаёт начальные inline-кнопки """
     try:
-        #TEST
-        await station_validate('москва')
-        #TEST
-        await update.message.reply_text(message_start,
-                                        reply_markup=start_inline_keyboards)
+        await create_user(update.message.from_user['id'], update.message.from_user['username'])
 
-        await create_user(update.message.from_user['id'],
-                          update.message.from_user['username'])
+        await update.message.reply_text(message_start, reply_markup=start_inline_keyboards)
 
     except Exception as e:
         return await base_error_handler(update, e, 1, message_error)

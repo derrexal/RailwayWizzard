@@ -72,25 +72,35 @@ async def notification_handler(update: Update, context: CallbackContext):
 async def first_step_notification(update: Update, context: CallbackContext):
     next_step = 2
     expected_station_name = update.message.text.upper()
+
     try:
         await base_step_notification(update, context)
-        if not language_input_validation(expected_station_name):
-            raise ValueError(message_format_error)
+        language_input_validation(expected_station_name)
 
-        station_code = await station_validate(expected_station_name)
-        if station_code is None:
+        stations = await station_validate(expected_station_name)
+        if len(stations) == 0:
             await update.message.reply_text(text="Такой станции на сайте РЖД не котируется.\n"
                                                  "Укажите <strong>станцию отправления</strong>.\n"
                                                  "Например, <code>Москва</code>",
                                             parse_mode=ParseMode.HTML)
             return next_step - 1
-
-        context.user_data[0] = expected_station_name
-        context.user_data[10] = station_code
+        elif len(stations) > 1:
+            message_text = "По вашему запросу найдено несколько станций:\n"
+            for station in stations:
+                station_name = station['stationName']
+                message_text += f"<code>{station_name}</code>\n"
+            message_text += "Пожалуйста укажите название станции в соответствие с предлагаемыми"
+            await update.message.reply_text(text=message_text, parse_mode=ParseMode.HTML)
+            return next_step - 1
+        elif len(stations) == 1:
+            station = stations[0]
+            context.user_data[0] = station['stationName']
+            context.user_data[10] = station['expressCode']
         await update.message.reply_text(text="Укажите <strong>станцию прибытия</strong>.\n"
                                              "Например, <code>Курск</code>",
                                         parse_mode=ParseMode.HTML)
         return next_step
+        raise Exception("Непредвиденная ошибка в методе обработки станции")
 
     except ValueError as e:
         return await base_error_handler(update, e, next_step, message_format_error)
@@ -102,31 +112,43 @@ async def first_step_notification(update: Update, context: CallbackContext):
 async def second_step_notification(update: Update, context: CallbackContext):
     next_step = 3
     expected_station_name = update.message.text.upper()
-    tomorrow = (datetime.now(moscow_tz) + timedelta(days=1)).strftime("%d.%m.%Y")
+
     try:
         await base_step_notification(update, context)
-        if not language_input_validation(expected_station_name):
-            raise ValueError(message_format_error)
+        language_input_validation(expected_station_name)
 
-        station_code = await station_validate(expected_station_name)
-        if station_code is None:
-            await update.message.reply_text(text="Такой станции на сайте РЖД не котируется.\n"
+        if expected_station_name == context.user_data[0]:
+            await update.message.reply_text("Станции не могут совпадать"
                                                  "Укажите станцию прибытия\n"
                                                  "Например, <code>Курск</code>",
                                             parse_mode=ParseMode.HTML)
             return next_step - 1
 
-        context.user_data[1] = expected_station_name
-        context.user_data[11] = station_code
-
-        if context.user_data[0] == context.user_data[1]:
-            await update.message.reply_text("Станции не могут совпадать")
+        stations = await station_validate(expected_station_name)
+        if len(stations) == 0:
+            await update.message.reply_text(text="Такой станции на сайте РЖД не котируется.\n"
+                                                 "Укажите станцию прибытия\n"
+                                                 "Например, <code>Курск</code>",
+                                            parse_mode=ParseMode.HTML)
             return next_step - 1
-
+        elif len(stations) > 1:
+            message_text = "По вашему запросу найдено несколько станций:\n"
+            for station in stations:
+                station_name = station['stationName']
+                message_text += f"<code>{station_name}</code>\n"
+            message_text += "Пожалуйста укажите название станции в соответствие с предлагаемыми"
+            await update.message.reply_text(text=message_text, parse_mode=ParseMode.HTML)
+            return next_step - 1
+        elif len(stations) == 1:
+            station = stations[0]
+            context.user_data[1] = station['stationName']
+            context.user_data[11] = station['expressCode']
+            tomorrow = (datetime.now(moscow_tz) + timedelta(days=1)).strftime("%d.%m.%Y")
         await update.message.reply_text(text="Укажите <strong>дату отправления</strong>.\n"
                                              f"Например, <code>{tomorrow}</code>",
                                         parse_mode=ParseMode.HTML)
         return next_step
+        raise Exception("Непредвиденная ошибка в методе обработки станции")
 
     except ValueError as e:
         return await base_error_handler(update, e, next_step, message_format_error)

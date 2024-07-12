@@ -1,9 +1,10 @@
+import json
+
 import aiohttp
 from aiohttp import ClientResponse
 
 from logger import logger
 from Bot.Data.NotificationTaskData import NotificationTaskData
-
 
 API_URL = "http://railwaywizzardapp:80"
 
@@ -48,12 +49,12 @@ async def make_request(method, endpoint, json_data=None, params=None) -> ClientR
         raise e
 
 
-async def station_validate(input_station):
+async def station_validate(input_station) -> list:
     """  """
     endpoint = 'BTwoB/GetStationValidate'
     params = {'inputStation': input_station}
     response = await make_request('GET', endpoint, params=params)
-    return await response.json()#[]
+    return await response.json()  # [{"expressCode":2000000,"stationName":"МОСКВА","id":4}]
 
 
 async def get_stations(input_station):
@@ -61,7 +62,7 @@ async def get_stations(input_station):
     endpoint = 'BTwoB/GetStations'
     params = {'inputStation': input_station}
     response = await make_request('GET', endpoint, params=params)
-    return await response.json()#[]
+    return await response.json()  #[]
 
 
 async def get_available_times(station_from_name, station_to_name, date):

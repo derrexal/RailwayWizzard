@@ -122,40 +122,14 @@ def get_available_times(station_from, station_to, station_from_name, station_to_
         raise e
 
 
-def language_input_validation(input_station) -> bool:
-    """ Проверка ввода на русские символы
+def language_input_validation(input_station):
+    """
+    Проверка ввода на допустимые символы
     @param input_station: имя станции(UPPER)
-    @return: Имя станции содержит только допустимые символы или нет?
     """
-    try:
-        alphabet = set('АБВГДЕЁЖЗИЙКЛМНОПРСТУФЧЦЧШЩЪЫЬЭЮЯ')
-        return not alphabet.isdisjoint(input_station)
-
-    except Exception as e:
-        raise e
-
-
-async def station_validate(input_station: object) -> object:
-    """
-
-    @rtype: object
-    """
-    try:
-        input_station = input_station
-        # Если в базе есть станция с таким именем - возвращаем express_code
-        express_code = await get_express_code_station_by_name(input_station)
-        if not express_code is None:
-            return express_code
-
-        # Иначе ищем его с использованием внешнего API
-        result_json = get_stations(input_station)
-        if result_json is []:
-            return None
-
-        for city in result_json:
-            city = city['n'].upper()
-            if city == input_station:
-                return city
-        return None
-    except Exception as e:
-        raise e
+    alphabet = set('[].,- '
+                   '0123456789'
+                   'АБВГДЕЁЖЗИЙКЛМНОПРСТУФЧЦЧШЩЪЫЬЭЮЯ')
+    input_station_set = set(input_station)
+    if not input_station_set.issubset(alphabet):
+        raise ValueError(message_format_error)

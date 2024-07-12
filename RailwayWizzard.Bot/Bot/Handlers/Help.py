@@ -14,11 +14,11 @@ async def help_handler(update, context):
                     url='telegram.me/derrexal')]])
 
     try:
+        await create_user(update.message.from_user['id'], update.message.from_user['username'])
+
         await update.message.reply_text(
             '\U0001F4D8 Создано при поддержке прекрасной лапшичной BỔ и английского портера.\n',
             reply_markup=inline_buttons)
-
-        await create_user(update.message.from_user['id'], update.message.from_user['username'])
 
     except Exception as e:
         return await base_error_handler(update, e, 1, message_error)

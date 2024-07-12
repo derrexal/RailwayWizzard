@@ -7,7 +7,6 @@ from Bot.Base import *
 from Bot.API import *
 from Bot.Data.NotificationTaskData import NotificationTaskData
 
-
 car_types = {
     CarType.SEDENTARY: True,
     CarType.RESERVED_SEAT: True,
@@ -171,9 +170,11 @@ async def third_step_notification(update: Update, context: CallbackContext):
                                                  f"Например, <code>{tomorrow}</code>",
                                             parse_mode=ParseMode.HTML)
             return next_step - 1
-        if date_limits_validate(update.message.text, context.user_data[10], context.user_data[11],
-                                context.user_data[0], context.user_data[1], date_and_date_json['date_text']) is None:
-            await update.message.reply_text("На указанную дату билеты не продаются")
+
+        date_limits = await date_limits_validate(update.message.text, context.user_data[0],
+                                                 context.user_data[1], date_and_date_json['date_text'])
+        if date_limits is None:
+            await update.message.reply_text("По указанному маршруту на указанную дату билеты не продаются")
             await update.message.reply_text(text="Укажите <strong>дату отправления</strong>.\n"
                                                  f"Например, <code>{tomorrow}</code>",
                                             parse_mode=ParseMode.HTML)
@@ -181,11 +182,7 @@ async def third_step_notification(update: Update, context: CallbackContext):
         context.user_data[2] = date_and_date_json['date']  # Дата в формате даты
         context.user_data[22] = date_and_date_json['date_text']  # Дата в формате строки
 
-        available_time = time_check_validate(
-            '00:00',  # заглушка для получения списка времен доступных для бронирования
-            context.user_data[10], context.user_data[11],
-            context.user_data[0], context.user_data[1],
-            context.user_data[22])
+        available_time = await time_check_validate(context.user_data[0], context.user_data[1], context.user_data[22])
 
         await update.message.reply_text(text="Укажите <strong>время отправления</strong>\n"
                                              "Доступное время для бронирования:\n" +
@@ -206,11 +203,8 @@ async def fourth_step_notification(update: Update, context: CallbackContext):
 
         # обрабатываем время отправления
         input_time = update.message.text
-        available_time = time_check_validate(
-            input_time,
-            context.user_data[10], context.user_data[11],
-            context.user_data[0], context.user_data[1],
-            context.user_data[22])
+        available_time = await time_check_validate(context.user_data[0], context.user_data[1],
+                                                   context.user_data[22], input_time)
 
         if not time_format_validate(input_time):
             await update.message.reply_text("Формат времени должен быть hh:mm ")

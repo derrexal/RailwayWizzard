@@ -74,7 +74,7 @@ async def get_available_times(station_from_name, station_to_name, date):
         'Date': date
     }
     response = await make_request('GET', endpoint, json_data=json_data)
-    return await response.text()
+    return await response.json()
 
 
 async def create_user(id_tg, username):

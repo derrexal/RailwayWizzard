@@ -34,8 +34,7 @@ namespace RailwayWizzard.App.Controllers
             scheduleDto.StationTo = scheduleDto.StationTo.ToUpper();
 
             return Ok(await _passRzd.GetAvailableTimes(scheduleDto));
-            //Перенес оба метода из RZD АПИ в контроллер, проверил - все воркед. Осталось только удалить из бота и заменить все необходимые места. А так же возможно вынести и другую логику в робота
-        }
+        }   
 
         [HttpGet("GetStationValidate")]
         public async Task<IActionResult> GetStationValidate(string inputStation)

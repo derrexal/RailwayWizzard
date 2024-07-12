@@ -1,6 +1,6 @@
 from telegram import *
 from Bot.Base import base_error_handler
-from Bot.Setting import CALLBACK_SUPPORT, message_error
+from Bot.Setting import CALLBACK_SUPPORT
 from Bot.API import *
 
 
@@ -21,5 +21,5 @@ async def help_handler(update, context):
             reply_markup=inline_buttons)
 
     except Exception as e:
-        return await base_error_handler(update, e, 1, message_error)
+        return await base_error_handler(update, e, 1)
 

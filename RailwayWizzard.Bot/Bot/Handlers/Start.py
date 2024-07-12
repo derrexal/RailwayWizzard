@@ -1,6 +1,6 @@
 from Bot.API import *
 from Bot.Base import base_error_handler
-from Bot.Setting import message_error, message_start, start_inline_keyboards
+from Bot.Setting import message_start, start_inline_keyboards
 
 
 async def start_buttons_handler(update, context):
@@ -11,7 +11,7 @@ async def start_buttons_handler(update, context):
         await update.message.reply_text(message_start, reply_markup=start_inline_keyboards)
 
     except Exception as e:
-        return await base_error_handler(update, e, 1, message_error)
+        return await base_error_handler(update, e, 1)
 
 
 async def start_buttons(update, context):
@@ -25,5 +25,5 @@ async def start_buttons(update, context):
                           update.callback_query.message.chat.username)
 
     except Exception as e:
-        return await base_error_handler(update, e, 1, message_error)
+        return await base_error_handler(update, e, 1)
 

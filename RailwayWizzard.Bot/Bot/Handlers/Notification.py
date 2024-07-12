@@ -66,7 +66,7 @@ async def notification_handler(update: Update, context: CallbackContext):
         return next_step
 
     except Exception as e:
-        await base_error_handler(update, e, next_step, message_error)
+        await base_error_handler(update, e, next_step)
 
 
 async def first_step_notification(update: Update, context: CallbackContext):
@@ -106,7 +106,7 @@ async def first_step_notification(update: Update, context: CallbackContext):
         return await base_error_handler(update, e, next_step, message_format_error)
 
     except Exception as e:
-        return await base_error_handler(update, e, next_step, message_error)
+        return await base_error_handler(update, e, next_step)
 
 
 async def second_step_notification(update: Update, context: CallbackContext):
@@ -154,7 +154,7 @@ async def second_step_notification(update: Update, context: CallbackContext):
         return await base_error_handler(update, e, next_step, message_format_error)
 
     except Exception as e:
-        return await base_error_handler(update, e, next_step, message_error)
+        return await base_error_handler(update, e, next_step)
 
 
 async def third_step_notification(update: Update, context: CallbackContext):
@@ -195,7 +195,7 @@ async def third_step_notification(update: Update, context: CallbackContext):
         return next_step
 
     except Exception as e:
-        return await base_error_handler(update, e, next_step, message_error)
+        return await base_error_handler(update, e, next_step)
 
 
 async def fourth_step_notification(update: Update, context: CallbackContext):
@@ -238,7 +238,7 @@ async def fourth_step_notification(update: Update, context: CallbackContext):
             return next_step - 1
 
     except Exception as e:
-        return await base_error_handler(update, e, next_step, message_error)
+        return await base_error_handler(update, e, next_step)
 
 
 async def fifth_step_notification(update: Update, context: CallbackContext):
@@ -274,7 +274,7 @@ async def fifth_step_notification(update: Update, context: CallbackContext):
             return next_step - 1
 
     except Exception as e:
-        return await base_error_handler(update, e, next_step, message_error)
+        return await base_error_handler(update, e, next_step)
 
 
 async def sixth_step_notification(update: Update, context: CallbackContext):
@@ -322,7 +322,7 @@ async def sixth_step_notification(update: Update, context: CallbackContext):
                 await update.callback_query.edit_message_reply_markup(car_type_inline_buttons)
                 return next_step - 1
     except Exception as e:
-        return await base_error_handler(update, e, next_step, message_error)
+        return await base_error_handler(update, e, next_step)
 
 
 async def seventh_step_notification(update: Update, context: CallbackContext):
@@ -353,7 +353,7 @@ async def seventh_step_notification(update: Update, context: CallbackContext):
         if await check_stop(update, context):
             return ConversationHandler.END
     except Exception as e:
-        return await base_error_handler(update, e, next_step, message_error)
+        return await base_error_handler(update, e, next_step)
 
 
 async def send_notification_data_to_robot(update: Update, context: CallbackContext):

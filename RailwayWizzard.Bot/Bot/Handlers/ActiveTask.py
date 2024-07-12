@@ -37,7 +37,7 @@ async def active_task_handler(update: Update, context: CallbackContext):
         return next_step
 
     except Exception as e:
-        return await base_error_handler(update, e, next_step, message_error)
+        return await base_error_handler(update, e, next_step)
 
 
 async def send_task_info(update: Update, task: dict):
@@ -65,7 +65,7 @@ async def send_task_info(update: Update, task: dict):
         await update.callback_query.message.reply_text(text=task_info, reply_markup=keyboard, parse_mode=ParseMode.HTML)
 
     except Exception as e:
-        return await base_error_handler(update, e, 1, message_error)
+        return await base_error_handler(update, e, 1)
 
 
 async def one_step_active_task(update: Update, context: CallbackContext):
@@ -90,4 +90,4 @@ async def one_step_active_task(update: Update, context: CallbackContext):
         return next_step
 
     except Exception as e:
-        return await base_error_handler(update, e, next_step, message_error)
+        return await base_error_handler(update, e, next_step)

@@ -96,10 +96,10 @@ async def first_step_notification(update: Update, context: CallbackContext):
             station = stations[0]
             context.user_data[0] = station['stationName']
             context.user_data[10] = station['expressCode']
-        await update.message.reply_text(text="Укажите <strong>станцию прибытия</strong>.\n"
-                                             "Например, <code>Курск</code>",
-                                        parse_mode=ParseMode.HTML)
-        return next_step
+            await update.message.reply_text(text="Укажите <strong>станцию прибытия</strong>.\n"
+                                                 "Например, <code>Курск</code>",
+                                            parse_mode=ParseMode.HTML)
+            return next_step
         raise Exception("Непредвиденная ошибка в методе обработки станции")
 
     except ValueError as e:
@@ -119,8 +119,8 @@ async def second_step_notification(update: Update, context: CallbackContext):
 
         if expected_station_name == context.user_data[0]:
             await update.message.reply_text("Станции не могут совпадать"
-                                                 "Укажите станцию прибытия\n"
-                                                 "Например, <code>Курск</code>",
+                                            "Укажите станцию прибытия\n"
+                                            "Например, <code>Курск</code>",
                                             parse_mode=ParseMode.HTML)
             return next_step - 1
 
@@ -144,10 +144,10 @@ async def second_step_notification(update: Update, context: CallbackContext):
             context.user_data[1] = station['stationName']
             context.user_data[11] = station['expressCode']
             tomorrow = (datetime.now(moscow_tz) + timedelta(days=1)).strftime("%d.%m.%Y")
-        await update.message.reply_text(text="Укажите <strong>дату отправления</strong>.\n"
-                                             f"Например, <code>{tomorrow}</code>",
-                                        parse_mode=ParseMode.HTML)
-        return next_step
+            await update.message.reply_text(text="Укажите <strong>дату отправления</strong>.\n"
+                                                 f"Например, <code>{tomorrow}</code>",
+                                            parse_mode=ParseMode.HTML)
+            return next_step
         raise Exception("Непредвиденная ошибка в методе обработки станции")
 
     except ValueError as e:
@@ -289,11 +289,12 @@ async def sixth_step_notification(update: Update, context: CallbackContext):
             # Выбранные пользователем типы вагонов записываем в строку для отображения
             # и наполняем массив для отправки на сервер
             car_types_text = ''
-            car_types_list = [] #schema: [1,2,3,4]
+            car_types_list = []  #schema: [1,2,3,4]
             for car_type, selected in car_types.items():
                 if selected:
                     car_types_text += f"{car_type.value[0]}, "
-                    car_types_list.append(list(CarType).index(car_type) + 1) #порядковый номер элемента в enum`е CarType
+                    car_types_list.append(
+                        list(CarType).index(car_type) + 1)  #порядковый номер элемента в enum`е CarType
 
             if not car_types_list:
                 message_warning = "Необходимо выбрать хотя бы 1 тип вагона"
@@ -301,6 +302,7 @@ async def sixth_step_notification(update: Update, context: CallbackContext):
                     await update.callback_query.edit_message_text(message_warning, reply_markup=car_type_inline_buttons)
                 return 6
 
+            context.user_data[4] = update.callback_query.message.chat.id
             context.user_data[5] = car_types_list
             await update.callback_query.edit_message_text(
                 text="Пожалуйста, проверьте введенные данные:"
@@ -357,16 +359,14 @@ async def seventh_step_notification(update: Update, context: CallbackContext):
 
 
 async def send_notification_data_to_robot(update: Update, context: CallbackContext):
-    # TODO: вынести UserId в context
     notification_task_data = NotificationTaskData(
         DepartureStation=context.user_data[0],
         ArrivalStation=context.user_data[1],
         DateFrom=context.user_data[2],
         TimeFrom=context.user_data[3],
-        UserId=update.callback_query.message.chat.id,
+        UserId=context.user_data[4],  # TODO:Проверить
         CarTypes=context.user_data[5],
-        NumberSeats=context.user_data[33]
-    )
+        NumberSeats=context.user_data[33])
 
     try:
         return await create_and_get_id_notification_task(notification_task_data)

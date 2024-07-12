@@ -1,6 +1,7 @@
 from datetime import datetime, date, timedelta
 
-from Bot.Setting import moscow_tz
+import logger
+from Bot.Setting import moscow_tz, message_format_error
 from RZD import API
 from bs4 import BeautifulSoup
 from Bot.API import *
@@ -27,16 +28,16 @@ def date_limits_validate(input_date_text, station_from, station_to, station_from
         available_time = get_available_times(station_from, station_to, station_from_name, station_to_name, date_from)
         if len(available_time) == 0:
             return None
-        input_date = datetime.strptime(input_date_text, '%d.%m.%Y')
+        input_date = datetime.strptime(input_date_text, '%d.%m.%Y').date()
         # купить билет на вчера, очевидно, нельзя
-        if input_date.date() < datetime.now().date():
+        if input_date < datetime.now().date():
             return None
         # 90 суток от текущей даты - окончание срока продажи билетов на поезда по России
-        # 120 суток от текущей даты - на позда "Красная стрела", "Экспресс"
+        # 120 суток от текущей даты - на поезда "Красная стрела", "Экспресс"
         # и на летний период для поездов "Сапсан", "Невский экспресс", "Премиум", "Океан"
-        if input_date.date() >= datetime.now().date() + timedelta(120):
+        if input_date >= datetime.now().date() + timedelta(120):
             return None
-        return input_date  # возвращаю это только чтобы не было None. Нигде не используется
+        return "input_date"  # Возвращаю это только чтобы не было None. Нигде не используется
     except Exception as e:
         raise e
 
@@ -83,7 +84,6 @@ def time_check_validate(input_time, station_from, station_to, station_from_name,
     """
     try:
         available_time = get_available_times(station_from, station_to, station_from_name, station_to_name, date_from)
-        # available_time = get_available_times(station_from, station_to, station_from_name, station_to_name, date_from)
         # TODO: вынести это в get_available_times(). Осторожно, его используют еще и в других местах
         if len(available_time) == 0:
             raise Exception("Сервис: get_available_times вернул пустой ответ")

@@ -4,7 +4,7 @@ import server
 from Bot import TelegramBot
 
 
-#TODO: есть статья на хабре в которой показан другой способ параллельного запуска бота и сервера (https://habr.com/ru/articles/709314/)
+#TODO: другой способ параллельного запуска бота и сервера (https://habr.com/ru/articles/709314/)
 def main():
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)

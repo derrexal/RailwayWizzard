@@ -53,14 +53,12 @@ namespace RailwayWizzard.App
                     t.SetProperty(t => t.IsWorked, false));
             }
 
-            // Configure the HTTP request pipeline.
 
             app.UseAuthorization();
 
             app.MapControllers();
 
             app.Run();
-
             //TODO: Удалить неиспользуемые ссылки в проектах
         }
     }

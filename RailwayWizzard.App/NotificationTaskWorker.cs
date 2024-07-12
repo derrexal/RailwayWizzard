@@ -11,7 +11,8 @@ namespace RailwayWizzard.App
         private readonly IRobot _robot;
         private readonly IBotApi _botApi;
         private readonly IChecker _checker;
-        private readonly ILogger _logger;
+        private readonly ILogger<NotificationTaskWorker> _logger;
+        private readonly ILogger<StepsUsingHttpClient> _stepsLogger;
         private readonly IDbContextFactory<RailwayWizzardAppContext> _contextFactory;
         private const int timeInterval = 1000 * 60 * 10; //»нтервал запуска (10 мин)
 
@@ -20,12 +21,14 @@ namespace RailwayWizzard.App
             IBotApi botApi,
             IChecker checker,
             ILogger<NotificationTaskWorker> logger, 
+            ILogger<StepsUsingHttpClient> stepsLogger, 
             IDbContextFactory<RailwayWizzardAppContext> contextFactory)
         {
             _robot = robot;
             _botApi = botApi;
             _checker = checker;
             _logger = logger;
+            _stepsLogger = stepsLogger;
             _contextFactory = contextFactory;
         }
 
@@ -42,6 +45,7 @@ namespace RailwayWizzard.App
             }
         }
 
+        //TODO: переделать это безобразие
         private async Task DoWork()
         {
             try
@@ -49,7 +53,7 @@ namespace RailwayWizzard.App
                 var currentNotificationTasks = await _checker.GetNotificationTasksForWork();
                 foreach (var task in currentNotificationTasks)
                 {
-                    new StepsUsingHttpClient(_robot,_botApi,_checker,_logger, _contextFactory).Notification(task);
+                    new StepsUsingHttpClient(_robot,_botApi,_checker, _stepsLogger, _contextFactory).Notification(task);
                     _logger.LogTrace($"Run Task:{task.Id} in Thread:{Thread.CurrentThread.ManagedThreadId}");
                 }
             }

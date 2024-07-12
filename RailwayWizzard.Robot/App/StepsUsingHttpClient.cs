@@ -12,14 +12,14 @@ namespace RailwayWizzard.Robot.App
         private readonly IRobot _robot;
         private readonly IBotApi _botApi;
         private readonly IChecker _checker;
-        private readonly ILogger _logger;
+        private readonly ILogger<StepsUsingHttpClient> _logger;
         private readonly IDbContextFactory<RailwayWizzardAppContext> _contextFactory;
         
         public StepsUsingHttpClient(
             IRobot robot,
             IBotApi botApi,
             IChecker checker,
-            ILogger logger, 
+            ILogger<StepsUsingHttpClient> logger, 
             IDbContextFactory<RailwayWizzardAppContext> contextFactory)
         {
             _robot = robot;
@@ -38,7 +38,7 @@ namespace RailwayWizzard.Robot.App
             int count = 1;
             string railwayDataText = inputNotificationTask.ToCustomString();
             string messageNotification = $"Задача: {inputNotificationTask.Id} Попытка: {count} Рейс: {railwayDataText}";
-
+            
             try
             {
                 await using (var context = await _contextFactory.CreateDbContextAsync())

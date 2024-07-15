@@ -14,14 +14,6 @@ namespace RailwayWizzard.App.Controllers
         public BTwoBController(IPassRzd passRzd) =>
             _passRzd = passRzd;
 
-        [HttpGet("GetStations")]
-        public async Task<IActionResult> GetStations(string inputStation)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest($"Request param is no valid: {ModelState}");
-
-            return Ok(await _passRzd.GetStations(inputStation));
-        }
 
         [HttpGet("GetAvailableTimes")]
         public async Task<IActionResult> GetAvailableTimes(ScheduleDto scheduleDto)

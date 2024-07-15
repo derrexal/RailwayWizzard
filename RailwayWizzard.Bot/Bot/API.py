@@ -1,5 +1,3 @@
-import json
-
 import aiohttp
 from aiohttp import ClientResponse
 
@@ -57,14 +55,6 @@ async def station_validate(input_station) -> list:
     return await response.json()  # [{"expressCode":2000000,"stationName":"МОСКВА","id":4}]
 
 
-async def get_stations(input_station):
-    """  """
-    endpoint = 'BTwoB/GetStations'
-    params = {'inputStation': input_station}
-    response = await make_request('GET', endpoint, params=params)
-    return await response.json()  #[]
-
-
 async def get_available_times(station_from_name, station_to_name, date):
     """  """
     endpoint = 'BTwoB/GetAvailableTimes'
@@ -84,13 +74,6 @@ async def create_user(id_tg, username):
     await make_request('POST', endpoint, json_data=json_data)
 
 
-async def create_station_info(record_station_info):
-    """Создает сущность StationInfo"""
-    endpoint = 'StationInfo/CreateOrUpdate'
-    json_data = {'ExpressCode': record_station_info['c'], 'StationName': record_station_info['n']}
-    await make_request('POST', endpoint, json_data=json_data)
-
-
 async def create_and_get_id_notification_task(notification_task_data: NotificationTaskData):
     """Создает задачу и отдает ее ID"""
     endpoint = 'NotificationTask/CreateAndGetId'
@@ -98,16 +81,6 @@ async def create_and_get_id_notification_task(notification_task_data: Notificati
     logger.info(json_data)
     response = await make_request('POST', endpoint, json_data=json_data)
     return await response.text()  # ID записи в БД
-
-
-async def get_express_code_station_by_name(station_info_name):
-    """Возвращает expressCode сущности StationInfo по полю Name"""
-    endpoint = 'StationInfo/GetByName'
-    json_data = {'StationName': station_info_name}
-    response = await make_request('GET', endpoint, json_data=json_data)
-    if response.status == 204:
-        return None
-    return (await response.json())['expressCode']
 
 
 async def get_active_task_by_user_id(user_id):

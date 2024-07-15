@@ -59,7 +59,6 @@ namespace RailwayWizzard.App
             app.MapControllers();
 
             app.Run();
-            //TODO: Удалить неиспользуемые ссылки в проектах
         }
     }
 }

@@ -217,9 +217,7 @@ async def fourth_step_notification(update: Update, context: CallbackContext):
 
         if available_time is True:
             context.user_data[3] = input_time
-            await update.message.reply_text(text="Укажите минимальное количество мест в поезде, "
-                                                 "на которое вам необходимо создать уведомление.\n"
-                                                 "Если не знаете что указать, напишите цифру 1")
+            await update.message.reply_text(text=message_min_count_seats)
             return next_step
 
         else:
@@ -256,15 +254,11 @@ async def fifth_step_notification(update: Update, context: CallbackContext):
                 await update.message.reply_text(
                     text="Ошибка. Вы ввели число более 10 или менее 1. Если вы действительно хотите создать задачу на "
                          f"появление 10 мест одновременно, пожалуйста, обратитесь к администратору бота {admin_username}")
-                await update.message.reply_text(text="Укажите минимальное количество мест в поезде, "
-                                                     "на которое вам необходимо создать уведомление.\n"
-                                                     "Если не знаете что указать, напишите цифру 1")
+                await update.message.reply_text(text=message_min_count_seats)
                 return next_step - 1
         else:
             await update.message.reply_text(text="Необходимо ввести цифру")
-            await update.message.reply_text(text="Укажите минимальное количество мест в поезде, "
-                                                 "на которое вам необходимо создать уведомление.\n"
-                                                 "Если не знаете что указать, напишите цифру 1")
+            await update.message.reply_text(text=message_min_count_seats)
             return next_step - 1
 
     except Exception as e:

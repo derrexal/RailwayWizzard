@@ -4,6 +4,8 @@ from Bot.Handlers.Start import *
 from telegram.ext import CallbackContext, ConversationHandler
 from telegram.constants import ChatAction
 
+from logger import logger
+
 
 def log_user_message(update):
     answer = update.message.text
@@ -39,7 +41,7 @@ async def base_step_notification(update: Update, context: CallbackContext):
 
         if await check_stop(update, context):
             return ConversationHandler.END
-
+        return
     except Exception as e:
         raise e
 

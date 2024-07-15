@@ -73,7 +73,10 @@ async def first_step_notification(update: Update, context: CallbackContext):
     expected_station_name = update.message.text.upper()
 
     try:
-        await base_step_notification(update, context)
+        base_check = await base_step_notification(update, context)
+        if base_check is not None:
+            return base_check
+
         language_input_validation(expected_station_name)
 
         stations = await API.station_validate(expected_station_name)
@@ -113,7 +116,10 @@ async def second_step_notification(update: Update, context: CallbackContext):
     expected_station_name = update.message.text.upper()
 
     try:
-        await base_step_notification(update, context)
+        base_check = await base_step_notification(update, context)
+        if base_check is not None:
+            return base_check
+
         language_input_validation(expected_station_name)
 
         if expected_station_name == context.user_data[0]:
@@ -160,7 +166,9 @@ async def third_step_notification(update: Update, context: CallbackContext):
     next_step = 4
     tomorrow = (datetime.now(moscow_tz) + timedelta(days=1)).strftime("%d.%m.%Y")
     try:
-        await base_step_notification(update, context)
+        base_check = await base_step_notification(update, context)
+        if base_check is not None:
+            return base_check
 
         date_and_date_json = date_format_validate(update.message.text)
 
@@ -199,7 +207,9 @@ async def fourth_step_notification(update: Update, context: CallbackContext):
     global car_type_inline_buttons
     next_step = 5
     try:
-        await base_step_notification(update, context)
+        base_check = await base_step_notification(update, context)
+        if base_check is not None:
+            return base_check
 
         # обрабатываем время отправления
         input_time = update.message.text
@@ -236,7 +246,9 @@ async def fourth_step_notification(update: Update, context: CallbackContext):
 async def fifth_step_notification(update: Update, context: CallbackContext):
     next_step = 6
     try:
-        await base_step_notification(update, context)
+        base_check = await base_step_notification(update, context)
+        if base_check is not None:
+            return base_check
 
         # обрабатываем количество мест которое ввел пользователь
         input_amount_seats = update.message.text
@@ -323,6 +335,9 @@ async def seventh_step_notification(update: Update, context: CallbackContext):
     next_step = 7
 
     try:
+        base_check = await base_step_notification(update, context)
+        if base_check is not None:
+            return base_check
 
         if query_data == str(CALLBACK_DATA_CORRECT_NOTIFICATION):
             notification_data_id = await send_notification_data_to_robot(update, context)

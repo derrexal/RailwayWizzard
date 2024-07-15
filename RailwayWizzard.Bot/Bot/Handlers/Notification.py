@@ -165,12 +165,13 @@ async def second_step_notification(update: Update, context: CallbackContext):
 async def third_step_notification(update: Update, context: CallbackContext):
     next_step = 4
     tomorrow = (datetime.now(moscow_tz) + timedelta(days=1)).strftime("%d.%m.%Y")
+    expected_date = update.message.text
     try:
         base_check = await base_step_notification(update, context)
         if base_check is not None:
             return base_check
 
-        date_and_date_json = date_format_validate(update.message.text)
+        date_and_date_json = date_format_validate(expected_date)
 
         if date_and_date_json is None:
             await update.message.reply_text("Формат даты должен быть dd.mm.yyyy")
@@ -179,7 +180,7 @@ async def third_step_notification(update: Update, context: CallbackContext):
                                             parse_mode=ParseMode.HTML)
             return next_step - 1
 
-        date_limits = await date_limits_validate(update.message.text, context.user_data[0],
+        date_limits = await date_limits_validate(expected_date, context.user_data[0],
                                                  context.user_data[1], date_and_date_json['date_text'])
         if date_limits is None:
             await update.message.reply_text("По указанному маршруту на указанную дату билеты не продаются")
@@ -206,17 +207,17 @@ async def third_step_notification(update: Update, context: CallbackContext):
 async def fourth_step_notification(update: Update, context: CallbackContext):
     global car_type_inline_buttons
     next_step = 5
+    expected_input_time = update.message.text
     try:
         base_check = await base_step_notification(update, context)
         if base_check is not None:
             return base_check
 
         # обрабатываем время отправления
-        input_time = update.message.text
         available_time = await time_check_validate(context.user_data[0], context.user_data[1],
-                                                   context.user_data[22], input_time)
+                                                   context.user_data[22], expected_input_time)
 
-        if not time_format_validate(input_time):
+        if not time_format_validate(expected_input_time):
             await update.message.reply_text("Формат времени должен быть hh:mm ")
             await update.message.reply_text(text="Укажите <strong>время отправления</strong>\n"
                                                  "Доступное время для бронирования:\n" +
@@ -226,7 +227,7 @@ async def fourth_step_notification(update: Update, context: CallbackContext):
             return next_step - 1
 
         if available_time is True:
-            context.user_data[3] = input_time
+            context.user_data[3] = expected_input_time
             await update.message.reply_text(text=message_min_count_seats)
             return next_step
 
@@ -245,17 +246,17 @@ async def fourth_step_notification(update: Update, context: CallbackContext):
 
 async def fifth_step_notification(update: Update, context: CallbackContext):
     next_step = 6
+    expected_amount_seats = update.message.text
     try:
         base_check = await base_step_notification(update, context)
         if base_check is not None:
             return base_check
 
         # обрабатываем количество мест которое ввел пользователь
-        input_amount_seats = update.message.text
-        if input_amount_seats.isdigit():
-            input_amount_seats = int(input_amount_seats)
-            if MAX_NUMBER_SEATS >= input_amount_seats > 0:
-                context.user_data[33] = input_amount_seats
+        if expected_amount_seats.isdigit():
+            expected_amount_seats = int(expected_amount_seats)
+            if MAX_NUMBER_SEATS >= expected_amount_seats > 0:
+                context.user_data[33] = expected_amount_seats
                 set_default_car_types()
                 await update.message.reply_text(
                     text="Выберите тип вагона который вас интересует.\n"
@@ -335,39 +336,30 @@ async def seventh_step_notification(update: Update, context: CallbackContext):
     next_step = 7
 
     try:
-        base_check = await base_step_notification(update, context)
-        if base_check is not None:
-            return base_check
-
-        if query_data == str(CALLBACK_DATA_CORRECT_NOTIFICATION):
-            notification_data_id = await send_notification_data_to_robot(update, context)
-            # TODO: Зачем
+        if query_data == str(CALLBACK_DATA_CORRECT_NOTIFICATION):  # Уведомление успешно создано
+            notification_data_id = await send_notification_data_to_robot(context)  # Отправляем данные о задаче в app
             update_text_message = (message_success + "<strong>" + notification_data_id + "</strong>" + ".\n\n"
                                    + str(text_message_html)[str(text_message_html).find("Станция отправления"):])
             await update.callback_query.edit_message_text(update_text_message, parse_mode=ParseMode.HTML)
 
-            # Возвращаемся в главное меню
-            await start_buttons(update, context)
-            return ConversationHandler.END
-        elif query_data == str(CALLBACK_DATA_INCORRECT_NOTIFICATION):
+        elif query_data == str(CALLBACK_DATA_INCORRECT_NOTIFICATION):  # Создание уведомления отменено
             await update.callback_query.edit_message_text(text_message)
             await update.callback_query.message.reply_text(text=message_failure)
-            # Возвращаемся в главное меню
-            await start_buttons(update, context)
-            return ConversationHandler.END
-        if await check_stop(update, context):
-            return ConversationHandler.END
+
+        await start_buttons(update, context)  # Возвращаемся в главное меню
+        return ConversationHandler.END
+
     except Exception as e:
         return await base_error_handler(update, e, next_step)
 
 
-async def send_notification_data_to_robot(update: Update, context: CallbackContext):
+async def send_notification_data_to_robot(context: CallbackContext):
     notification_task_data = NotificationTaskData(
         DepartureStation=context.user_data[0],
         ArrivalStation=context.user_data[1],
         DateFrom=context.user_data[2],
         TimeFrom=context.user_data[3],
-        UserId=context.user_data[4],  # TODO:Проверить
+        UserId=context.user_data[4],
         CarTypes=context.user_data[5],
         NumberSeats=context.user_data[33])
 

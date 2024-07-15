@@ -37,7 +37,7 @@ async def send_message_to_user(user_id, message):
   
 
 def run():
-    logger.info("Bot started")
+    logger.info("Bot started...")
     try:
         application.add_handler(conv_handler_notification)
         application.add_handler(conv_handler_active_task)

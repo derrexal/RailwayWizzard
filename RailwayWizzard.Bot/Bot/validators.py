@@ -1,8 +1,7 @@
 from datetime import datetime, date, timedelta
 
-import logger
 from Bot.Setting import message_format_error
-from Bot.API import *
+from Bot import API
 
 
 # TODO: объединить проверки по группам(время, дата, город) и в каждом методе (условно main_date_validate)
@@ -34,7 +33,7 @@ async def date_limits_validate(input_date_text, station_from_name, station_to_na
             return None
 
         # Если на указанную дату уже нет билетов (н-р сегодня в 23:59)
-        available_time = await get_available_times(station_from_name, station_to_name, date_from)
+        available_time = await API.get_available_times(station_from_name, station_to_name, date_from)
         if len(available_time) == 0:
             return None
 
@@ -85,7 +84,7 @@ async def time_check_validate(station_from_name, station_to_name, date_from, inp
     Возвращает список доступных, если время некорректно
     """
     try:
-        available_time = await get_available_times(station_from_name, station_to_name, date_from)
+        available_time = await API.get_available_times(station_from_name, station_to_name, date_from)
         if len(available_time) == 0:
             raise Exception("Сервис: get_available_times вернул пустой ответ")
 

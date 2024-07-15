@@ -1,5 +1,4 @@
 from telegram import *
-from telegram.ext import *
 
 from Bot.Other import *
 from Bot.Base import *
@@ -22,7 +21,7 @@ async def active_task_handler(update: Update, context: CallbackContext):
             return ConversationHandler.END
 
         user_id = update.callback_query.message.chat.id
-        active_tasks = await get_active_task_by_user_id(user_id)
+        active_tasks = await API.get_active_task_by_user_id(user_id)
 
         if not active_tasks:
             await update.callback_query.message.reply_text("У вас нет активных задач")
@@ -79,7 +78,7 @@ async def one_step_active_task(update: Update, context: CallbackContext):
         if task_number is None:
             raise ValueError(f"ERROR: task_number:{task_number} is none")
 
-        response = await delete_task_by_id(task_number)
+        response = await API.delete_task_by_id(task_number)
         if response is None:
             raise ValueError(f"ERROR stopped task number: {str(task_number)}")
 

@@ -4,7 +4,7 @@ from Bot.Setting import *
 from Bot.validators import *
 from Bot.Other import *
 from Bot.Base import *
-from Bot.API import *
+from Bot import API
 from Bot.Data.NotificationTaskData import NotificationTaskData
 
 car_types = {
@@ -76,7 +76,7 @@ async def first_step_notification(update: Update, context: CallbackContext):
         await base_step_notification(update, context)
         language_input_validation(expected_station_name)
 
-        stations = await station_validate(expected_station_name)
+        stations = await API.station_validate(expected_station_name)
         if len(stations) == 0:
             await update.message.reply_text(text="Такой станции на сайте РЖД не котируется.\n"
                                                  "Укажите <strong>станцию отправления</strong>.\n"
@@ -123,7 +123,7 @@ async def second_step_notification(update: Update, context: CallbackContext):
                                             parse_mode=ParseMode.HTML)
             return next_step - 1
 
-        stations = await station_validate(expected_station_name)
+        stations = await API.station_validate(expected_station_name)
         if len(stations) == 0:
             await update.message.reply_text(text="Такой станции на сайте РЖД не котируется.\n"
                                                  "Укажите станцию прибытия\n"
@@ -363,7 +363,7 @@ async def send_notification_data_to_robot(update: Update, context: CallbackConte
         NumberSeats=context.user_data[33])
 
     try:
-        return await create_and_get_id_notification_task(notification_task_data)
+        return await API.create_and_get_id_notification_task(notification_task_data)
 
     except Exception as e:
         raise e

@@ -1,7 +1,7 @@
 from telegram import *
 from Bot.Base import base_error_handler
 from Bot.Setting import CALLBACK_SUPPORT
-from Bot.API import *
+from Bot import API
 
 
 async def help_handler(update, context):
@@ -14,7 +14,7 @@ async def help_handler(update, context):
                     url='telegram.me/derrexal')]])
 
     try:
-        await create_user(update.message.from_user['id'], update.message.from_user['username'])
+        await API.create_user(update.message.from_user['id'], update.message.from_user['username'])
 
         await update.message.reply_text(
             '\U0001F4D8 Создано при поддержке прекрасной лапшичной BỔ и английского портера.\n',

@@ -332,19 +332,18 @@ async def seventh_step_notification(update: Update, context: CallbackContext):
     global car_type_inline_buttons
     query_data = update.callback_query.data
     text_message_html = update.callback_query.message.text_html
-    text_message = update.callback_query.message.text
+    body_text_task = str(text_message_html)[str(text_message_html).find("Станция отправления"):]
     next_step = 7
 
     try:
         if query_data == str(CALLBACK_DATA_CORRECT_NOTIFICATION):  # Уведомление успешно создано
             notification_data_id = await send_notification_data_to_robot(context)  # Отправляем данные о задаче в app
-            update_text_message = (message_success + "<strong>" + notification_data_id + "</strong>" + ".\n\n"
-                                   + str(text_message_html)[str(text_message_html).find("Станция отправления"):])
+            update_text_message = (message_success + "<strong>" + notification_data_id + "</strong>" + ".\n\n" + body_text_task)
             await update.callback_query.edit_message_text(update_text_message, parse_mode=ParseMode.HTML)
 
         elif query_data == str(CALLBACK_DATA_INCORRECT_NOTIFICATION):  # Создание уведомления отменено
-            await update.callback_query.edit_message_text(text_message)
-            await update.callback_query.message.reply_text(text=message_failure)
+            update_text_message = (message_cancel + "\n" + body_text_task)
+            await update.callback_query.edit_message_text(update_text_message)
 
         await start_buttons(update, context)  # Возвращаемся в главное меню
         return ConversationHandler.END

@@ -4,10 +4,6 @@ from Bot.Setting import MESSAGE_FORMAT_ERROR
 from Bot import API
 
 
-# TODO: объединить проверки по группам(время, дата, город) и в каждом методе (условно main_date_validate)
-#  возвращать сообщение, которое мы напечатаем юзеру. Улучшим читабельность кода бота
-
-
 def json_serial(obj):
     """JSON serializer for objects not serializable by default json code"""
     """ Вспомогательная функция форматирующая дату в JSON """
@@ -16,25 +12,31 @@ def json_serial(obj):
     raise TypeError("Type %s not serializable" % type(obj))
 
 
-# TODO: эту проверку можно упростить и уточнить одновременно.
-# Отправить запрос к АПИ для получения списка поездок на этот день
-# И если таких нет - значит и билет купить нельзя - значит и валидацию не проходит
-async def date_limits_validate(input_date_text, station_from_name, station_to_name, date_from):
+async def date_limits_validate(input_date_text, available_times):
+    """
+    Валидация даты, введенной пользователем.
+    Проверяется на допустимые границы:
+    - введенная дата уже в прошлом
+    - 90 суток от текущей даты - окончание срока продажи билетов на поезда по России
+    - 120 суток от текущей даты - на поезда "Красная стрела", "Экспресс" и на летний период
+        для поездов "Сапсан", "Невский экспресс", "Премиум", "Океан"
+    Сравнивается со списком поездок на этот день.
+    Если таких нет - значит и билет купить нельзя - значит и валидацию не проходит
+    @param input_date_text: Дата введенная пользователем
+    @param available_times: Список доступных рейсов на запрошенный день
+    @return: Результат валидации
+    """
     try:
         input_date = datetime.strptime(input_date_text, '%d.%m.%Y').date()
         today_date = datetime.now().date()
-        # купить билет на вчера, очевидно, нельзя
+
         if input_date < today_date:
             return None
-        # 90 суток от текущей даты - окончание срока продажи билетов на поезда по России
-        # 120 суток от текущей даты - на поезда "Красная стрела", "Экспресс"
-        # и на летний период для поездов "Сапсан", "Невский экспресс", "Премиум", "Океан"
+
         if input_date >= today_date + timedelta(120):
             return None
 
-        # Если на указанную дату уже нет билетов (н-р сегодня в 23:59)
-        available_time = await API.get_available_times(station_from_name, station_to_name, date_from)
-        if len(available_time) == 0:
+        if len(available_times) == 0:
             return None
 
         return True
@@ -67,8 +69,11 @@ def date_format_validate(input_date_text):
 
 
 def time_format_validate(input_time) -> bool:
-    """ Проверка времени, введенного пользователем на валидность """
-
+    """
+    Валидация времени, введенного пользователем на соответствие формату
+    @param input_time: Время отправления
+    @return: Результат валидации
+    """
     try:
         datetime.strptime(input_time, '%H:%M')
         return True
@@ -78,33 +83,40 @@ def time_format_validate(input_time) -> bool:
         raise e
 
 
-async def time_check_validate(station_from_name, station_to_name, date_from, input_time='00:00'):
+async def get_times(station_from_name, station_to_name, date_from):
     """
-    Проверяет время введенное пользователем на наличие его в списке рейсов на запрошенный день.
-    Возвращает список доступных, если время некорректно
+    Получает список доступного для бронирования времени. Если таковых нет - возвращает exception
+    @param station_from_name: Станция отправления
+    @param station_to_name: Станция прибытия
+    @param date_from: Дата отправления
+    @return: Список доступных рейсов на запрошенный день
     """
     try:
-        available_time = await API.get_available_times(station_from_name, station_to_name, date_from)
-        if len(available_time) == 0:
+        available_times = await API.get_available_times(station_from_name, station_to_name, date_from)
+        if len(available_times) == 0:
             raise Exception("Сервис: get_available_times вернул пустой ответ")
-
-        if input_time == '00:00':
-            return available_time
-
-        for time in available_time:
-            if time == input_time:
-                return True
-
-        return available_time
-
+        return available_times
     except Exception as e:
         raise e
 
 
+async def time_check_validate(input_time, available_times) -> bool:
+    """ Валидация времени введенное пользователем на наличие его в списке рейсов на запрошенный день.
+    @rtype: Boolean
+    @param input_time: Время отправления
+    @param available_times: Список доступных рейсов на запрошенный день
+    @return: Результат валидации
+    """
+    for time in available_times:
+        if time == input_time:
+            return True
+    return False
+
+
 def language_input_validation(input_station):
     """
-    Проверка ввода на допустимые символы
-    @param input_station: имя станции(UPPER)
+    Проверка ввода на допустимые символы. Если проверка не пройдена - бросается Exception
+    @param input_station: Название станции(UPPER)
     """
     alphabet = set('[].,- '
                    '0123456789'

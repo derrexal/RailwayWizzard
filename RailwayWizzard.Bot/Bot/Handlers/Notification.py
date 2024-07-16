@@ -183,23 +183,23 @@ async def third_step_notification(update: Update, context: CallbackContext):
                                             parse_mode=ParseMode.HTML)
             return next_step - 1
 
-        date_limits = await date_limits_validate(expected_date, context.user_data[0],
-                                                 context.user_data[1], date_and_date_json['date_text'])
+        # Получаем доступное время для бронирования
+        available_times = await get_times(context.user_data[0], context.user_data[1], date_and_date_json['date_text'])
+        date_limits = await date_limits_validate(expected_date, available_times)
         if date_limits is None:
             await update.message.reply_text("По указанному маршруту на указанную дату билеты не продаются")
             await update.message.reply_text(text="Укажите <strong>дату отправления</strong>.\n"
                                                  f"Например, <code>{tomorrow}</code>",
                                             parse_mode=ParseMode.HTML)
             return next_step - 1
+
         context.user_data[2] = date_and_date_json['date']  # Дата в формате даты
         context.user_data[22] = date_and_date_json['date_text']  # Дата в формате строки
-
-        available_time = await time_check_validate(context.user_data[0], context.user_data[1], context.user_data[22])
 
         await update.message.reply_text(text="Укажите <strong>время отправления</strong>\n"
                                              "Доступное время для бронирования:\n" +
                                              '    '.join(
-                                                 '<code>' + str(time) + '</code>' for time in available_time),
+                                                 '<code>' + str(time) + '</code>' for time in available_times),
                                         parse_mode=ParseMode.HTML)
         return next_step
 
@@ -218,29 +218,28 @@ async def fourth_step_notification(update: Update, context: CallbackContext):
             return base_check
 
         # обрабатываем время отправления
-        available_time = await time_check_validate(context.user_data[0], context.user_data[1],
-                                                   context.user_data[22], expected_input_time)
+        available_times = await get_times(context.user_data[0], context.user_data[1], context.user_data[22])
+        validate_time = await time_check_validate(expected_input_time, available_times)
 
         if not time_format_validate(expected_input_time):
             await update.message.reply_text("Формат времени должен быть hh:mm ")
             await update.message.reply_text(text="Укажите <strong>время отправления</strong>\n"
                                                  "Доступное время для бронирования:\n" +
                                                  '    '.join(
-                                                     '<code>' + str(time) + '</code>' for time in available_time),
+                                                     '<code>' + str(time) + '</code>' for time in available_times),
                                             parse_mode=ParseMode.HTML)
             return next_step - 1
 
-        if available_time is True:
+        if validate_time is True:
             context.user_data[3] = expected_input_time
             await update.message.reply_text(text=MESSAGE_MIN_COUNT_SEATS)
             return next_step
-
         else:
             await update.message.reply_text("Не найдено поездки с таким временем")
             await update.message.reply_text(text="Укажите <strong>время отправления</strong>\n"
                                                  "Доступное время для бронирования:\n" +
                                                  '    '.join(
-                                                     '<code>' + str(time) + '</code>' for time in available_time),
+                                                     '<code>' + str(time) + '</code>' for time in available_times),
                                             parse_mode=ParseMode.HTML)
             return next_step - 1
 

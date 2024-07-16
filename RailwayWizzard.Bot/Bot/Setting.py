@@ -26,31 +26,31 @@ CALLBACK_DATA_INCORRECT_NOTIFICATION = 'callback_data_incorrect_notification'
  CALLBACK_CAR_TYPE_SEDENTARY, CALLBACK_CAR_TYPE_RESERVED_SEAT, CALLBACK_CAR_TYPE_COMPARTMENT, CALLBACK_CAR_TYPE_LUXURY,
  CALLBACK_CAR_TYPE_SELECT_ALL, CALLBACK_CAR_TYPE_REMOVE_ALL) = range(9)
 
-moscow_tz = pytz.timezone('Europe/Moscow')
+MOSCOW_TZ = pytz.timezone('Europe/Moscow')
 MAX_NUMBER_SEATS = 10  # ни к чему не привязанное значение, в случае чего увеличить
-admin_username = '@derrexal'
+ADMIN_USERNAME = '@derrexal'
 
-message_format_error = "Недопустимый ввод.\nРазрешается вводить только символы кириллицы и цифры"
-message_success = 'Уведомление о поездке успешно создано. \nЗадача №'
-message_cancel = 'Уведомление о поездке отменено'
-message_start = '\U00002388 Добро пожаловать на борт'
-message_min_count_seats = ("Укажите минимальное количество мест в поезде, "
+MESSAGE_FORMAT_ERROR = "Недопустимый ввод.\nРазрешается вводить только символы кириллицы и цифры"
+MESSAGE_SUCCESS = 'Уведомление о поездке успешно создано. \nЗадача №'
+MESSAGE_CANCEL = 'Уведомление о поездке отменено'
+MESSAGE_START = '\U00002388 Добро пожаловать на борт'
+MESSAGE_MIN_COUNT_SEATS = ("Укажите минимальное количество мест в поезде, "
                            "на которое вам необходимо создать уведомление (От 1 до 10).\n "
                            "Если не знаете что указать, напишите цифру 1")
 
 
-start_inline_keyboards = InlineKeyboardMarkup(
+START_INLINE_KEYBOARDS = InlineKeyboardMarkup(
     inline_keyboard=[
         [InlineKeyboardButton(text='\U00002709 Уведомление об появлении мест',
                               callback_data=str(CALLBACK_NOTIFICATION))],
         [InlineKeyboardButton(text='\U0001F5C2 Список активных задач', callback_data=str(CALLBACK_ACTIVE_TASK))]
     ])
 
-notification_confirm_inline_buttons = InlineKeyboardMarkup([[
+NOTIFICATION_CONFIRM_INLINE_BUTTONS = InlineKeyboardMarkup([[
     InlineKeyboardButton(text='Данные верны', callback_data=str(CALLBACK_DATA_CORRECT_NOTIFICATION)),
     InlineKeyboardButton(text='Отменить создание уведомлений', callback_data=str(CALLBACK_DATA_INCORRECT_NOTIFICATION))
 ]])
 
-footer_menu_car_type_inline_buttons = [
+FOOTER_MENU_CAR_TYPE_INLINE_BUTTONS = [
     InlineKeyboardButton(text='Продолжить', callback_data=str(CALLBACK_CAR_TYPE_CONTINUE)),
 ]

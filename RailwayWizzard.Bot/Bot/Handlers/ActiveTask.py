@@ -2,7 +2,7 @@ from telegram import *
 
 from Bot.Other import *
 from Bot.Base import *
-from Bot.Setting import (CALLBACK_ACTIVE_TASK, admin_username)
+from Bot.Setting import (CALLBACK_ACTIVE_TASK, ADMIN_USERNAME)
 
 
 def get_car_types_text(car_types: list) -> str:
@@ -17,7 +17,7 @@ async def active_task_handler(update: Update, context: CallbackContext):
     try:
         if update.callback_query.data != str(CALLBACK_ACTIVE_TASK):
             await update.callback_query.message.reply_text(
-                text=f"Что-то пошло не так, обратитесь к администратору бота {admin_username}")
+                text=f"Что-то пошло не так, обратитесь к администратору бота {ADMIN_USERNAME}")
             return ConversationHandler.END
 
         user_id = update.callback_query.message.chat.id

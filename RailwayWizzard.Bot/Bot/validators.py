@@ -1,6 +1,6 @@
 from datetime import datetime, date, timedelta
 
-from Bot.Setting import message_format_error
+from Bot.Setting import MESSAGE_FORMAT_ERROR
 from Bot import API
 
 
@@ -111,4 +111,4 @@ def language_input_validation(input_station):
                    'АБВГДЕЁЖЗИЙКЛМНОПРСТУФЧЦЧШЩЪЫЬЭЮЯ')
     input_station_set = set(input_station)
     if not input_station_set.issubset(alphabet):
-        raise ValueError(message_format_error)
+        raise ValueError(MESSAGE_FORMAT_ERROR)

@@ -19,7 +19,7 @@ def generate_car_type_buttons():
     return InlineKeyboardMarkup(
         [[create_car_type_button(CarType.SEDENTARY), create_car_type_button(CarType.RESERVED_SEAT),
           create_car_type_button(CarType.COMPARTMENT), create_car_type_button(CarType.LUXURY)],
-         footer_menu_car_type_inline_buttons])
+         FOOTER_MENU_CAR_TYPE_INLINE_BUTTONS])
 
 
 def create_car_type_button(car_type: CarType) -> InlineKeyboardButton:
@@ -56,7 +56,7 @@ async def notification_handler(update: Update, context: CallbackContext):
         await update.callback_query.message.reply_text(text="Обратите внимание, по умолчанию не приходят уведомления о "
                                                             "местах для инвалидов. Если вам необходимо получать "
                                                             "уведомления и в таком случае - пожалуйста, обратитесь к "
-                                                            f"администратору бота {admin_username}"
+                                                            f"администратору бота {ADMIN_USERNAME}"
                                                             "\n\nДля возврата в главное меню введите /stop")
 
         await update.callback_query.message.reply_text(
@@ -105,7 +105,7 @@ async def first_step_notification(update: Update, context: CallbackContext):
         raise Exception("Непредвиденная ошибка в методе обработки станции")
 
     except ValueError as e:
-        return await base_error_handler(update, e, next_step, message_format_error)
+        return await base_error_handler(update, e, next_step, MESSAGE_FORMAT_ERROR)
 
     except Exception as e:
         return await base_error_handler(update, e, next_step)
@@ -148,7 +148,7 @@ async def second_step_notification(update: Update, context: CallbackContext):
             station = stations[0]
             context.user_data[1] = station['stationName']
             context.user_data[11] = station['expressCode']
-            tomorrow = (datetime.now(moscow_tz) + timedelta(days=1)).strftime("%d.%m.%Y")
+            tomorrow = (datetime.now(MOSCOW_TZ) + timedelta(days=1)).strftime("%d.%m.%Y")
             await update.message.reply_text(text="Укажите <strong>дату отправления</strong>.\n"
                                                  f"Например, <code>{tomorrow}</code>",
                                             parse_mode=ParseMode.HTML)
@@ -156,7 +156,7 @@ async def second_step_notification(update: Update, context: CallbackContext):
         raise Exception("Непредвиденная ошибка в методе обработки станции")
 
     except ValueError as e:
-        return await base_error_handler(update, e, next_step, message_format_error)
+        return await base_error_handler(update, e, next_step, MESSAGE_FORMAT_ERROR)
 
     except Exception as e:
         return await base_error_handler(update, e, next_step)
@@ -164,7 +164,7 @@ async def second_step_notification(update: Update, context: CallbackContext):
 
 async def third_step_notification(update: Update, context: CallbackContext):
     next_step = 4
-    tomorrow = (datetime.now(moscow_tz) + timedelta(days=1)).strftime("%d.%m.%Y")
+    tomorrow = (datetime.now(MOSCOW_TZ) + timedelta(days=1)).strftime("%d.%m.%Y")
     expected_date = update.message.text
     try:
         base_check = await base_step_notification(update, context)
@@ -228,7 +228,7 @@ async def fourth_step_notification(update: Update, context: CallbackContext):
 
         if available_time is True:
             context.user_data[3] = expected_input_time
-            await update.message.reply_text(text=message_min_count_seats)
+            await update.message.reply_text(text=MESSAGE_MIN_COUNT_SEATS)
             return next_step
 
         else:
@@ -266,12 +266,12 @@ async def fifth_step_notification(update: Update, context: CallbackContext):
             else:
                 await update.message.reply_text(
                     text="Ошибка. Вы ввели число более 10 или менее 1. Если вы действительно хотите создать задачу на "
-                         f"появление 10 мест одновременно, пожалуйста, обратитесь к администратору бота {admin_username}")
-                await update.message.reply_text(text=message_min_count_seats)
+                         f"появление 10 мест одновременно, пожалуйста, обратитесь к администратору бота {ADMIN_USERNAME}")
+                await update.message.reply_text(text=MESSAGE_MIN_COUNT_SEATS)
                 return next_step - 1
         else:
             await update.message.reply_text(text="Необходимо ввести цифру")
-            await update.message.reply_text(text=message_min_count_seats)
+            await update.message.reply_text(text=MESSAGE_MIN_COUNT_SEATS)
             return next_step - 1
 
     except Exception as e:
@@ -313,7 +313,7 @@ async def sixth_step_notification(update: Update, context: CallbackContext):
                      f"\nВремя отправления: <strong>{context.user_data[3]}</strong>"
                      f"\nВыбранные типы вагонов: <strong>{car_types_text}</strong>"
                      f"\nКоличество мест: <strong>{str(context.user_data[33])}</strong>",
-                reply_markup=notification_confirm_inline_buttons,
+                reply_markup=NOTIFICATION_CONFIRM_INLINE_BUTTONS,
                 parse_mode=ParseMode.HTML)
             return next_step
 
@@ -338,11 +338,11 @@ async def seventh_step_notification(update: Update, context: CallbackContext):
     try:
         if query_data == str(CALLBACK_DATA_CORRECT_NOTIFICATION):  # Уведомление успешно создано
             notification_data_id = await send_notification_data_to_robot(context)  # Отправляем данные о задаче в app
-            update_text_message = (message_success + "<strong>" + notification_data_id + "</strong>" + ".\n\n" + body_text_task)
+            update_text_message = (MESSAGE_SUCCESS + "<strong>" + notification_data_id + "</strong>" + ".\n\n" + body_text_task)
             await update.callback_query.edit_message_text(update_text_message, parse_mode=ParseMode.HTML)
 
         elif query_data == str(CALLBACK_DATA_INCORRECT_NOTIFICATION):  # Создание уведомления отменено
-            update_text_message = (message_cancel + "\n" + body_text_task)
+            update_text_message = (MESSAGE_CANCEL + "\n" + body_text_task)
             await update.callback_query.edit_message_text(update_text_message)
 
         await start_buttons(update, context)  # Возвращаемся в главное меню

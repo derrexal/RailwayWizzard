@@ -342,8 +342,8 @@ async def seventh_step_notification(update: Update, context: CallbackContext):
             await update.callback_query.edit_message_text(update_text_message, parse_mode=ParseMode.HTML)
 
         elif query_data == str(CALLBACK_DATA_INCORRECT_NOTIFICATION):  # Создание уведомления отменено
-            update_text_message = (MESSAGE_CANCEL + "\n" + body_text_task)
-            await update.callback_query.edit_message_text(update_text_message)
+            update_text_message = (MESSAGE_CANCEL + "\n\n" + body_text_task)
+            await update.callback_query.edit_message_text(update_text_message, parse_mode=ParseMode.HTML)
 
         await start_buttons(update, context)  # Возвращаемся в главное меню
         return ConversationHandler.END

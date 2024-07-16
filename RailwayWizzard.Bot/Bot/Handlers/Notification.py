@@ -56,7 +56,7 @@ async def notification_handler(update: Update, context: CallbackContext):
         await update.callback_query.message.reply_text(text="Обратите внимание, по умолчанию не приходят уведомления о "
                                                             "местах для инвалидов. Если вам необходимо получать "
                                                             "уведомления и в таком случае - пожалуйста, обратитесь к "
-                                                            f"администратору бота {ADMIN_USERNAME}"
+                                                            f"папочке {ADMIN_USERNAME}"
                                                             "\n\nДля возврата в главное меню введите /stop")
 
         await update.callback_query.message.reply_text(

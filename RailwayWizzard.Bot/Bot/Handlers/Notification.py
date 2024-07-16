@@ -69,6 +69,7 @@ async def notification_handler(update: Update, context: CallbackContext):
 
 
 async def first_step_notification(update: Update, context: CallbackContext):
+    """ Обрабатывает станцию отправления """
     next_step = 2
     expected_station_name = update.message.text.upper()
 
@@ -112,6 +113,7 @@ async def first_step_notification(update: Update, context: CallbackContext):
 
 
 async def second_step_notification(update: Update, context: CallbackContext):
+    """ Обрабатывает станцию прибытия """
     next_step = 3
     expected_station_name = update.message.text.upper()
 
@@ -163,6 +165,7 @@ async def second_step_notification(update: Update, context: CallbackContext):
 
 
 async def third_step_notification(update: Update, context: CallbackContext):
+    """ Обрабатывает дату отправления """
     next_step = 4
     tomorrow = (datetime.now(MOSCOW_TZ) + timedelta(days=1)).strftime("%d.%m.%Y")
     expected_date = update.message.text
@@ -205,6 +208,7 @@ async def third_step_notification(update: Update, context: CallbackContext):
 
 
 async def fourth_step_notification(update: Update, context: CallbackContext):
+    """ Обрабатывает время отправления """
     global car_type_inline_buttons
     next_step = 5
     expected_input_time = update.message.text
@@ -245,6 +249,7 @@ async def fourth_step_notification(update: Update, context: CallbackContext):
 
 
 async def fifth_step_notification(update: Update, context: CallbackContext):
+    """ Обрабатывает минимальное количество мест в поезде на которое необходимо создать уведомление"""
     next_step = 6
     expected_amount_seats = update.message.text
     try:
@@ -279,6 +284,7 @@ async def fifth_step_notification(update: Update, context: CallbackContext):
 
 
 async def sixth_step_notification(update: Update, context: CallbackContext):
+    """ Обрабатывает типы вагонов """
     global car_type_inline_buttons
     global car_types
 
@@ -329,6 +335,7 @@ async def sixth_step_notification(update: Update, context: CallbackContext):
 
 
 async def seventh_step_notification(update: Update, context: CallbackContext):
+    """ Обрабатывает решение пользователя о создании задачи """
     global car_type_inline_buttons
     query_data = update.callback_query.data
     text_message_html = update.callback_query.message.text_html

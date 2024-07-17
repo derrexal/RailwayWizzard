@@ -11,9 +11,9 @@
 $ git clone https://github.com/derrexal/RailwayWizzard.git
 ```
 
-Затем Установить *docker* и *docker-compose*
+Установить *docker* и *docker-compose*
 
-После - изменить токен бота в файле 
+Изменить токен бота в файле 
 ```sh
 RailwayWizzard.Bot/Bot/.env
 ```

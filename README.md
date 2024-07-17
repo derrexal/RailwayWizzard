@@ -13,7 +13,10 @@ $ git clone https://github.com/derrexal/RailwayWizzard.git
 
 Затем Установить *docker* и *docker-compose*
 
-После - изменить токен бота в файле RailwayWizzard.Bot/Bot/.env
+После - изменить токен бота в файле 
+```sh
+RailwayWizzard.Bot/Bot/.env
+```
 
 В директории с проектом ввести следующую команду:
    ```sh

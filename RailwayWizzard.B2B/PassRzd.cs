@@ -178,7 +178,7 @@ namespace RailwayWizzard.B2B
         private async Task CreateStationsInfoAsync(List<RootStations> rootStations)
         {
             foreach (var rootStation in rootStations)
-                if(await _context.StationInfo.AnyAsync(s=>s.StationName==rootStation.n))
+                if(await _context.StationInfo.AnyAsync(s=>s.ExpressCode==rootStation.с))
                     await _context.StationInfo.AddAsync(new StationInfo
                         {
                             ExpressCode = rootStation.c,

@@ -21,7 +21,9 @@ namespace RailwayWizzard.B2B
         public async Task<List<RootStations>> GetStations(string inputStation)
         {
             var textResponse = await GetStationsText(inputStation);
+            if (textResponse.IsNullOrEmpty()) { return new List<RootStations>(); }
             var stations = DeserializeStationsText(textResponse);
+
             if (stations.Count>0) await CreateStationsInfoAsync(stations);
             return stations;
         }
@@ -43,7 +45,6 @@ namespace RailwayWizzard.B2B
             using HttpResponseMessage response = await client.SendAsync(request);
             response.EnsureSuccessStatusCode();
             var textResponse = await response.Content.ReadAsStringAsync();
-            if (textResponse.IsNullOrEmpty()) { throw new Exception("Сервис РЖД при запросе информации о станции вернул пустой ответ"); }
             return textResponse;
 ;       }
 
@@ -184,6 +185,7 @@ namespace RailwayWizzard.B2B
                             ExpressCode = rootStation.c,
                             StationName = rootStation.n,
                         });
+                    
             await _context.SaveChangesAsync();
         }
     }

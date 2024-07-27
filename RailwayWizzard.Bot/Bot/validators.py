@@ -120,7 +120,7 @@ def language_input_validation(input_station):
     """
     alphabet = set('[].,- '
                    '0123456789'
-                   'АБВГДЕЁЖЗИЙКЛМНОПРСТУФЧЦЧШЩЪЫЬЭЮЯ')
+                   'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ')
     input_station_set = set(input_station)
     if not input_station_set.issubset(alphabet):
         raise ValueError(MESSAGE_FORMAT_ERROR)

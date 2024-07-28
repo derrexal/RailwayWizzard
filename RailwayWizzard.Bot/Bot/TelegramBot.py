@@ -12,9 +12,9 @@ from Bot.Handlers.Start import start_buttons_handler
 from Bot.Handlers.ActiveTask import active_task_handler, one_step_active_task
 from Bot.Other import unknown_handler
 from Bot.Setting import CALLBACK_NOTIFICATION, CALLBACK_ACTIVE_TASK
-
 import os
 from logger import logger
+
 
 # Получаем токен из файла .env в текущей директории
 load_dotenv()

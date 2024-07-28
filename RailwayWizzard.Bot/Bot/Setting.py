@@ -55,3 +55,4 @@ NOTIFICATION_CONFIRM_INLINE_BUTTONS = InlineKeyboardMarkup([[
 FOOTER_MENU_CAR_TYPE_INLINE_BUTTONS = [
     InlineKeyboardButton(text='Продолжить', callback_data=str(CALLBACK_CAR_TYPE_CONTINUE)),
 ]
+

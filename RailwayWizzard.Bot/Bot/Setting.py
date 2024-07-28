@@ -22,13 +22,14 @@ CALLBACK_DATA_CORRECT_NOTIFICATION = 'callback_data_correct_notification'
 CALLBACK_DATA_INCORRECT_NOTIFICATION = 'callback_data_incorrect_notification'
 
 (CALLBACK_ACTIVE_TASK,
- CALLBACK_RESERVATION, CALLBACK_SUPPORT,
+ CALLBACK_RESERVATION, CALLBACK_SUPPORT, CALLBACK_DONATE
  CALLBACK_CAR_TYPE_SEDENTARY, CALLBACK_CAR_TYPE_RESERVED_SEAT, CALLBACK_CAR_TYPE_COMPARTMENT, CALLBACK_CAR_TYPE_LUXURY,
- CALLBACK_CAR_TYPE_SELECT_ALL, CALLBACK_CAR_TYPE_REMOVE_ALL) = range(9)
+ CALLBACK_CAR_TYPE_SELECT_ALL, CALLBACK_CAR_TYPE_REMOVE_ALL) = range(10)
 
 MOSCOW_TZ = pytz.timezone('Europe/Moscow')
 MAX_NUMBER_SEATS = 10  # ни к чему не привязанное значение, в случае чего увеличить
 ADMIN_USERNAME = '@derrexal'
+DONATE_URL = 'tinkoff.ru/cf/9UaFInZso8K'
 
 MESSAGE_FORMAT_ERROR = "Недопустимый ввод.\nРазрешается вводить только символы кириллицы и цифры"
 MESSAGE_SUCCESS = 'Уведомление о поездке успешно создано. \nЗадача №'

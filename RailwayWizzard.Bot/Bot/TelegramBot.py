@@ -3,6 +3,7 @@ from telegram.error import Forbidden
 from telegram.constants import ParseMode
 from telegram.ext import CommandHandler, MessageHandler, ConversationHandler, CallbackQueryHandler, Application, filters
 from Bot.Handlers.Help import help_handler
+from Bot.Handlers.Donate import donate_handler
 from Bot.Handlers.Notification import (notification_handler,
                                        first_step_notification, second_step_notification, third_step_notification,
                                        fourth_step_notification, sixth_step_notification, seventh_step_notification,
@@ -43,6 +44,7 @@ def run():
         application.add_handler(conv_handler_active_task)
         application.add_handler(CommandHandler('start', start_buttons_handler))
         application.add_handler(CommandHandler('help', help_handler))
+        application.add_handler(CommandHandler('donate', donate_handler))
         application.add_handler(MessageHandler(filters.TEXT
                                                | filters.COMMAND & ~filters.Regex('/start')
                                                & ~filters.Regex('/help'),

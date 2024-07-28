@@ -5,8 +5,7 @@ from Bot import API
 
 
 async def donate_handler(update, context):
-    """ Подсказка для пользователя """
-
+    
     inline_buttons = InlineKeyboardMarkup(
         inline_keyboard=[[InlineKeyboardButton(
                     text='\U0001F4B3 Поддержать проект (СБП)',

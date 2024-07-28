@@ -125,7 +125,7 @@ async def second_step_notification(update: Update, context: CallbackContext):
         language_input_validation(expected_station_name)
 
         if expected_station_name == context.user_data[0]:
-            await update.message.reply_text("Станции не могут совпадать"
+            await update.message.reply_text("Станции не могут совпадать.\n"
                                             "Укажите станцию прибытия\n"
                                             "Например, <code>Курск</code>",
                                             parse_mode=ParseMode.HTML)

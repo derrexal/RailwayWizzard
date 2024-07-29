@@ -29,7 +29,7 @@ CALLBACK_DATA_INCORRECT_NOTIFICATION = 'callback_data_incorrect_notification'
 MOSCOW_TZ = pytz.timezone('Europe/Moscow')
 MAX_NUMBER_SEATS = 10  # ни к чему не привязанное значение, в случае чего увеличить
 ADMIN_USERNAME = '@derrexal'
-DONATE_URL = 'tinkoff.ru/cf/9UaFInZso8K'
+DONATE_URL = 'pay.cloudtips.ru/p/c6b746f7'
 
 MESSAGE_FORMAT_ERROR = "Недопустимый ввод.\nРазрешается вводить только символы кириллицы и цифры"
 MESSAGE_SUCCESS = 'Уведомление о поездке успешно создано. \nЗадача №'

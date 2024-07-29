@@ -37,6 +37,8 @@ namespace RailwayWizzard.App
             // тестовые данные
             NotificationTask testNotificationTask = new NotificationTask
             {
+                DepartureStation = "Москва",
+                ArrivalStation = "Орел",
                 DepartureStationCode = 2000000,
                 ArrivalStationCode = 2000140,
                 TimeFrom = "05:18",

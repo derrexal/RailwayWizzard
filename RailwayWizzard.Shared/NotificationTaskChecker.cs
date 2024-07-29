@@ -106,9 +106,9 @@ namespace RailwayWizzard.Shared
         }
 
         /// <summary>
-        /// Заполняет кода городов отправления и прибытия у сущности 
+        /// Заполняет кода городов отправления и прибытия у заданий
         /// </summary>
-        /// <param name="notificationTasks"></param>
+        /// <param name="notificationTasks">Заданий для которых необходимо заполнить коды городов</param>
         /// <returns></returns>
         public async Task<IList<NotificationTask>> FillsStationCodes(IList<NotificationTask> notificationTasks)
         {

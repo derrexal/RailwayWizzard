@@ -1,7 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using RailwayWizzard.Core;
-using RailwayWizzard.EntityFrameworkCore.Data;
-using Microsoft.EntityFrameworkCore;
 using RailwayWizzard.Shared;
 
 

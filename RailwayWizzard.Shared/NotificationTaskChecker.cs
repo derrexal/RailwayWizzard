@@ -120,5 +120,69 @@ namespace RailwayWizzard.Shared
             }
             return notificationTasks;
         }
+
+        /// <summary>
+        /// Выставляем задаче статус - в работе
+        /// </summary>
+        /// <param name="inputNotificationTask"></param>
+        /// <returns></returns>
+        public async Task SetIsWorkedNotificationTask(NotificationTask inputNotificationTask)
+        {
+            await using (var context = await _contextFactory.CreateDbContextAsync())
+            {
+                var currentNotificationTask = await context.NotificationTask.FirstOrDefaultAsync(t => t.Id == inputNotificationTask.Id);
+                currentNotificationTask!.IsWorked = true;
+                await context.SaveChangesAsync();
+            }
+            await Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Выставляет задаче статус - не актуально и не в работе
+        /// </summary>
+        /// <param name="inputNotificationTask"></param>
+        /// <returns></returns>
+        public async Task SetIsNotActualAndIsNotWorked(NotificationTask inputNotificationTask)
+        {
+            await using (var context = await _contextFactory.CreateDbContextAsync())
+            {
+                var currentNotificationTask = await context.NotificationTask.FirstOrDefaultAsync(t => t.Id == inputNotificationTask.Id);
+                currentNotificationTask!.IsActual = false;
+                currentNotificationTask!.IsWorked = false;
+                await context.SaveChangesAsync();
+            }
+            await Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Выставляет задаче статус - не актуально
+        /// </summary>
+        /// <param name="inputNotificationTask"></param>
+        /// <returns></returns>
+        public async Task SetIsNotWorked(NotificationTask inputNotificationTask)
+        {
+            await using (var context = await _contextFactory.CreateDbContextAsync())
+            {
+                var currentNotificationTask = await context.NotificationTask.FirstOrDefaultAsync(t => t.Id == inputNotificationTask.Id);
+                currentNotificationTask!.IsWorked = false;
+                await context.SaveChangesAsync();
+            }
+            await Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Возвращает для задачи статус флага IsStopped
+        /// </summary>
+        /// <param name="inputNotificationTask"></param>
+        /// <returns></returns>
+        public async Task<bool> GetIsStoppedNotificationTask(NotificationTask inputNotificationTask)
+        {
+            await using (var context = await _contextFactory.CreateDbContextAsync())
+            {
+                var currentNotificationTask = await context.NotificationTask.FirstOrDefaultAsync(t => t.Id == inputNotificationTask.Id);
+                if (currentNotificationTask == null) throw new NullReferenceException($"Не удалось получить задачу. ID:{inputNotificationTask.Id}");
+                return currentNotificationTask.IsStopped;
+            }
+        }
     }
 }

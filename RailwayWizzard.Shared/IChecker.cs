@@ -16,5 +16,13 @@ namespace RailwayWizzard.Shared
         public Task<IList<NotificationTask>> GetNotWorkedNotificationTasks();
         
         public Task<IList<NotificationTask>> GetNotificationTasksForWork();
+
+        public Task SetIsWorkedNotificationTask(NotificationTask inputNotificationTask);
+
+        public Task SetIsNotActualAndIsNotWorked(NotificationTask inputNotificationTask);
+
+        public Task SetIsNotWorked(NotificationTask inputNotificationTask);
+
+        public Task<bool> GetIsStoppedNotificationTask(NotificationTask inputNotificationTask);
     }
 }

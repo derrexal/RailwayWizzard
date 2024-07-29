@@ -13,7 +13,6 @@ namespace RailwayWizzard.App
         private readonly IChecker _checker;
         private readonly ILogger<NotificationTaskWorker> _logger;
         private readonly ILogger<StepsUsingHttpClient> _stepsLogger;
-        private readonly IDbContextFactory<RailwayWizzardAppContext> _contextFactory;
         private const int timeInterval = 1000 * 60 * 10; //Интервал запуска (10 мин)
 
         public NotificationTaskWorker(
@@ -21,15 +20,13 @@ namespace RailwayWizzard.App
             IBotApi botApi,
             IChecker checker,
             ILogger<NotificationTaskWorker> logger, 
-            ILogger<StepsUsingHttpClient> stepsLogger, 
-            IDbContextFactory<RailwayWizzardAppContext> contextFactory)
+            ILogger<StepsUsingHttpClient> stepsLogger)
         {
             _robot = robot;
             _botApi = botApi;
             _checker = checker;
             _logger = logger;
             _stepsLogger = stepsLogger;
-            _contextFactory = contextFactory;
         }
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
@@ -53,7 +50,7 @@ namespace RailwayWizzard.App
                 var currentNotificationTasks = await _checker.GetNotificationTasksForWork();
                 foreach (var task in currentNotificationTasks)
                 {
-                    new StepsUsingHttpClient(_robot,_botApi,_checker, _stepsLogger, _contextFactory).Notification(task);
+                    new StepsUsingHttpClient(_robot,_botApi,_checker, _stepsLogger).Notification(task);
                     _logger.LogTrace($"Run Task:{task.Id} in Thread:{Thread.CurrentThread.ManagedThreadId}");
                 }
             }

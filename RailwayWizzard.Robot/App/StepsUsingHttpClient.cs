@@ -13,20 +13,17 @@ namespace RailwayWizzard.Robot.App
         private readonly IBotApi _botApi;
         private readonly IChecker _checker;
         private readonly ILogger<StepsUsingHttpClient> _logger;
-        private readonly IDbContextFactory<RailwayWizzardAppContext> _contextFactory;
         
         public StepsUsingHttpClient(
             IRobot robot,
             IBotApi botApi,
             IChecker checker,
-            ILogger<StepsUsingHttpClient> logger, 
-            IDbContextFactory<RailwayWizzardAppContext> contextFactory)
+            ILogger<StepsUsingHttpClient> logger)
         {
             _robot = robot;
             _botApi = botApi;
             _checker = checker;
             _logger = logger;
-            _contextFactory = contextFactory;
         }
 
         // TODO: сделать что-то с тем, что пользователи заблокировал бота...
@@ -34,62 +31,33 @@ namespace RailwayWizzard.Robot.App
         // Когда пользователь вновь написал боту (Users/CreateOrUpdate) - выставляем ему статус IsBlocked=false
         public async Task Notification(NotificationTask inputNotificationTask)
         {    
-            // Счетчик успешных попыток
-            int count = 1;
-            string railwayDataText = inputNotificationTask.ToCustomString();
-            string messageNotification = $"Задача: {inputNotificationTask.Id} Попытка: {count} Рейс: {railwayDataText}";
+            
+            int count = 1;  // Счетчик успешных попыток
+            string notificationTaskText = inputNotificationTask.ToCustomString();
+            string logMessage = $"Задача: {inputNotificationTask.Id} Попытка: {count} Рейс: {notificationTaskText}";
             
             try
             {
-                await using (var context = await _contextFactory.CreateDbContextAsync())
-                {
-                    var currentNotificationTask = await context.NotificationTask.FirstOrDefaultAsync(t => t.Id == inputNotificationTask.Id);
-                    currentNotificationTask!.IsWorked = true;
-                    await context.SaveChangesAsync();
-                }
+                await _checker.SetIsWorkedNotificationTask(inputNotificationTask);
 
                 while (true)
                 {
-                    _logger.LogTrace(messageNotification);
+                    _logger.LogTrace(logMessage);
                     
                     //Если во время выполнения задача стала неактуальна
                     if (!_checker.CheckActualNotificationTask(inputNotificationTask))
                     {
-                        await using (var context = await _contextFactory.CreateDbContextAsync())
-                        {
-                            var currentNotificationTask = await context.NotificationTask.FirstOrDefaultAsync(t => t.Id == inputNotificationTask.Id);
-                            currentNotificationTask!.IsActual = false;
-                            currentNotificationTask!.IsWorked = false;
-                            await context.SaveChangesAsync();
-                        }
+                        await _checker.SetIsNotActualAndIsNotWorked(inputNotificationTask);
                         _logger.LogTrace($"Во время выполнения программы задача {inputNotificationTask.Id} " +
-                                         $"стала неактуальна. Подробности задачи:{railwayDataText}");
+                                         $"стала неактуальна. Подробности задачи:{notificationTaskText}");
                         break;
-                    }                    
-
-                    //TODO: Если непосредствено после вызова этого метода пользователь выставит статус "Не актуально"
-                    //TODO: Метод будет зря крутится. 
-                    //TODO: Вынести его внутрянку сюда(ну или хотя бы цикл убрать и проверять здесь? )
-                    //TODO: Придется намного чаще будем ходить в БД чтобы посмотреть статус - но разве ни этого мы добиваемся)
-                    var freeSeats = await GetFreeSeats(inputNotificationTask);
-
-                    //Если задача остановлена пользователем.
-                    //Расположил эту конструкцию перед отправкой сообщения, чтобы наверняка
-                    await using (var context = await _contextFactory.CreateDbContextAsync())
-                    {
-                        var currentNotificationTask = await context.NotificationTask.FirstOrDefaultAsync(t => t.Id == inputNotificationTask.Id);
-                        if (currentNotificationTask!.IsStopped)
-                        {
-                            currentNotificationTask!.IsWorked = false;
-                            await context.SaveChangesAsync();
-                            _logger.LogTrace($"Во время выполнения программы задача {inputNotificationTask.Id} " +
-                                             $"была остановлена пользователем. Подробности задачи:{railwayDataText}");
-                            break;
-                        }
                     }
 
+                    var freeSeats = await GetFreeSeats(inputNotificationTask);
+                    if (freeSeats.Count == 0) break;
+
                     // Формирование текста уведомления о наличии мест
-                    string message = $"{char.ConvertFromUtf32(0x2705)} {railwayDataText}" +
+                    string message = $"{char.ConvertFromUtf32(0x2705)} {notificationTaskText}" +
                                      $"\n{String.Join("\n", freeSeats.ToArray())}" +
                                      "\nОбнаружены свободные места\n";
                     
@@ -101,14 +69,8 @@ namespace RailwayWizzard.Robot.App
             }
             catch (Exception e)
             {
-                await using (var context = await _contextFactory.CreateDbContextAsync())
-                {
-                    var currentNotificationTask = await context.NotificationTask.FirstOrDefaultAsync(t => t.Id == inputNotificationTask.Id);
-                    currentNotificationTask!.IsWorked = false;
-                    await context.SaveChangesAsync();
-                }
-
-                _logger.LogError($"Неизвестная ошибка метода обработки задач. {messageNotification}\n {e}");
+                await _checker.SetIsNotWorked(inputNotificationTask);
+                _logger.LogError($"Неизвестная ошибка метода обработки задач. {logMessage}\n {e}");
                 throw;
             }
         }
@@ -122,10 +84,22 @@ namespace RailwayWizzard.Robot.App
         /// <returns></returns>
         private async Task<List<string>> GetFreeSeats(NotificationTask inputNotificationTask)
         {
-            List<string> result;
+            List<string> result = new();
+            string railwayDataText = inputNotificationTask.ToCustomString();
             do
             {
                 Thread.Sleep(1000 * 30); //пол минуты
+                
+                //Если задача остановлена пользователем - останавливаем поиск
+                var IsStoppedNotificationTask = await _checker.GetIsStoppedNotificationTask(inputNotificationTask);
+                if (IsStoppedNotificationTask)
+                {
+                    await _checker.SetIsNotWorked(inputNotificationTask);
+                    _logger.LogTrace($"Во время выполнения программы задача {inputNotificationTask.Id} " +
+                                        $"была остановлена пользователем. Подробности задачи:{railwayDataText}");
+                    return result;
+                }
+
                 result = await _robot.GetFreeSeatsOnTheTrain(inputNotificationTask);
             }
             while (result.Count==0);

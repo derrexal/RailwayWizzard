@@ -36,7 +36,6 @@ namespace RailwayWizzard.App
                 _logger.LogInformation($"{nameof(NotificationTaskWorker)} running at: {DateTimeOffset.Now}");
 
                 await DoWork();
-                //TODO: Все-таки хочется, чтобы работа по задаче началась непосредственно после создания
 
                 await Task.Delay(runningInterval, cancellationToken);
             }
@@ -49,7 +48,6 @@ namespace RailwayWizzard.App
             {
                 var notificationTasks = await _checker.GetNotificationTasksForWork();
                 foreach (var notificationTask in notificationTasks)
-                    // TODO: запустив эту задачу мы не запустим другие. Как их запустить скопом?
                     tasks.Add(_steps.Notification(notificationTask));
                 await Task.WhenAll(tasks);
             }

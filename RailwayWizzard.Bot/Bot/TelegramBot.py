@@ -33,7 +33,7 @@ async def send_message_to_user(user_id, message):
         logger.warning("Пользователь " + str(user_id) + " заблокировал бота\n" + eF.message)
         raise eF
     except Exception as e:
-        logger.error(e)
+        logger.exception(e)
         raise
   
 
@@ -52,7 +52,7 @@ def run():
         application.run_polling()
 
     except Exception as e:
-        logger.error(e)
+        logger.exception(e)
 
 
 conv_handler_notification = ConversationHandler(

@@ -32,8 +32,7 @@ namespace RailwayWizzard.Robot.App
             if (myDeserializedClass == null) 
                 throw new NullReferenceException ($"Сервис РЖД при запросе списка свободных мест вернул не стандартный ответ. Ответ:{textResponse}");
             if (myDeserializedClass.Trains.Count==0) 
-                return new List<string>();
-                //throw new NullReferenceException($"Сервис РЖД при запросе списка свободных мест вернул ответ в котором нет доступных поездок. Ответ:{textResponse}");
+                throw new NullReferenceException($"Сервис РЖД при запросе списка свободных мест вернул ответ в котором нет доступных поездок. Ответ:{textResponse}");
             //вытаскиваем свободные места по запрашиваемому рейсу
             var currentRoute = GetCurrentRouteFromResponse(myDeserializedClass, inputNotificationTask);
             if (currentRoute.Count == 0) return new List<string>();
@@ -158,7 +157,7 @@ namespace RailwayWizzard.Robot.App
         {
             List<string> result = new();
             foreach(var route in currentRoutes)
-                result.Add($"Класс обслуживания: <strong>{route.CarType}</strong>\nСвободных мест: <strong>{route.TotalPlace}</strong>\n0Цена: <strong> {route.Price}</strong>\n");
+                result.Add($"Класс обслуживания: <strong>{route.CarType}</strong>\nСвободных мест: <strong>{route.TotalPlace}</strong>\nЦена: <strong> {route.Price}</strong>\n");
             return result;
         }
 

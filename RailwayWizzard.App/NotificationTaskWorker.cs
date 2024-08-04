@@ -54,7 +54,6 @@ namespace RailwayWizzard.App
             catch (Exception ex)
             {
                 _logger.LogError($"{nameof(NotificationTaskWorker)} {ex}");
-                throw; 
             }
             
         }

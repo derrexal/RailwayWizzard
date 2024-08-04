@@ -31,13 +31,16 @@ namespace RailwayWizzard.Core
 
         [Description("Типы вагона")]
         public List<CarTypeEnum> CarTypes { get; set; }
+
+        [Range(1, 10)]
+        public short NumberSeats { get; set; }
+
+
         [NotMapped]
         public long ArrivalStationCode { get; set; }
         [NotMapped]
         public long DepartureStationCode { get; set; }
 
-        [Range(1, 10)]
-        public short NumberSeats { get; set; }
         //TODO: вынести в DTO, сделал nulalble так как была ошибка при создании таска из-за отсутствия этого параметра в запросе
         /// <summary>
         /// Дата в формате строки для отправки пользователю
@@ -45,10 +48,8 @@ namespace RailwayWizzard.Core
         [NotMapped]
         public string? DateFromString { get; set; }
 
-        /// <summary>
-        /// Формирование строки из некоторых полей объекта
-        /// </summary>
-        /// <returns></returns>
+        public string? LastResult { get; set; }
+
         public string ToCustomString()
         {
             return $"{DepartureStation} - {ArrivalStation} {TimeFrom} {DateFrom.ToString("dd.MM.yyy", CultureInfo.InvariantCulture)}";

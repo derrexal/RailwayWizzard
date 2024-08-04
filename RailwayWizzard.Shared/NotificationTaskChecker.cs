@@ -108,15 +108,22 @@ namespace RailwayWizzard.Shared
         /// <summary>
         /// Заполняет кода городов отправления и прибытия у заданий
         /// </summary>
-        /// <param name="notificationTasks">Заданий для которых необходимо заполнить коды городов</param>
+        /// <param name="notificationTasks">Задания для которых необходимо заполнить коды городов</param>
         /// <returns></returns>
         public async Task<IList<NotificationTask>> FillsStationCodes(IList<NotificationTask> notificationTasks)
         {
-            foreach (var task in notificationTasks)
+            foreach (var notificationTask in notificationTasks)
             {
-                await using var context = await _contextFactory.CreateDbContextAsync();
-                task.ArrivalStationCode = (await context.StationInfo.FirstOrDefaultAsync(s => s.StationName == task.ArrivalStation))!.ExpressCode;
-                task.DepartureStationCode = (await context.StationInfo.FirstOrDefaultAsync(s => s.StationName == task.DepartureStation))!.ExpressCode;
+                await using (var context = await _contextFactory.CreateDbContextAsync())
+                {
+                    var arrivalStationInfo = await context.StationInfo.SingleOrDefaultAsync(s => s.StationName == notificationTask.ArrivalStation);
+                    if (arrivalStationInfo == null) throw new NullReferenceException($"Не удалось получить станцию. StationName:{notificationTask.ArrivalStation}");
+                    notificationTask.ArrivalStationCode = arrivalStationInfo.ExpressCode;
+
+                    var departureStationInfo = await context.StationInfo.SingleOrDefaultAsync(s => s.StationName == notificationTask.DepartureStation);
+                    if (departureStationInfo == null) throw new NullReferenceException($"Не удалось получить станцию. StationName:{notificationTask.DepartureStation}");
+                    notificationTask.DepartureStationCode = departureStationInfo.ExpressCode;
+                }
             }
             return notificationTasks;
         }
@@ -131,7 +138,8 @@ namespace RailwayWizzard.Shared
             await using (var context = await _contextFactory.CreateDbContextAsync())
             {
                 var currentNotificationTask = await context.NotificationTask.FirstOrDefaultAsync(t => t.Id == inputNotificationTask.Id);
-                currentNotificationTask!.IsWorked = true;
+                if (currentNotificationTask == null) throw new NullReferenceException($"Не удалось получить задачу. ID:{inputNotificationTask.Id}");
+                currentNotificationTask.IsWorked = true;
                 await context.SaveChangesAsync();
             }
             await Task.CompletedTask;
@@ -147,8 +155,9 @@ namespace RailwayWizzard.Shared
             await using (var context = await _contextFactory.CreateDbContextAsync())
             {
                 var currentNotificationTask = await context.NotificationTask.FirstOrDefaultAsync(t => t.Id == inputNotificationTask.Id);
-                currentNotificationTask!.IsActual = false;
-                currentNotificationTask!.IsWorked = false;
+                if (currentNotificationTask == null) throw new NullReferenceException($"Не удалось получить задачу. ID:{inputNotificationTask.Id}");
+                currentNotificationTask.IsActual = false;
+                currentNotificationTask.IsWorked = false;
                 await context.SaveChangesAsync();
             }
             await Task.CompletedTask;
@@ -164,7 +173,8 @@ namespace RailwayWizzard.Shared
             await using (var context = await _contextFactory.CreateDbContextAsync())
             {
                 var currentNotificationTask = await context.NotificationTask.FirstOrDefaultAsync(t => t.Id == inputNotificationTask.Id);
-                currentNotificationTask!.IsWorked = false;
+                if (currentNotificationTask == null) throw new NullReferenceException($"Не удалось получить задачу. ID:{inputNotificationTask.Id}");
+                currentNotificationTask.IsWorked = false;
                 await context.SaveChangesAsync();
             }
             await Task.CompletedTask;
@@ -182,6 +192,44 @@ namespace RailwayWizzard.Shared
                 var currentNotificationTask = await context.NotificationTask.FirstOrDefaultAsync(t => t.Id == inputNotificationTask.Id);
                 if (currentNotificationTask == null) throw new NullReferenceException($"Не удалось получить задачу. ID:{inputNotificationTask.Id}");
                 return currentNotificationTask.IsStopped;
+            }
+        }
+
+        /// <summary>
+        /// Выставляет задаче последний полученный результат
+        /// </summary>
+        /// <param name="inputNotificationTask"></param>
+        /// <param name="lastResult"></param>
+        /// <returns></returns>
+        /// <exception cref="NullReferenceException"></exception>
+        public async Task SetLastResultNotificationTask(NotificationTask inputNotificationTask, string lastResult)
+        {
+            await using (var context = await _contextFactory.CreateDbContextAsync())
+            {
+                var currentNotificationTask = await context.NotificationTask.FirstOrDefaultAsync(t => t.Id == inputNotificationTask.Id);
+                if (currentNotificationTask == null) throw new NullReferenceException($"Не удалось получить задачу. ID:{inputNotificationTask.Id}");
+                currentNotificationTask.LastResult = lastResult;
+                await context.SaveChangesAsync();
+            }
+            await Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Результат равен последнему?
+        /// </summary>
+        /// <param name="inputNotificationTask"></param>
+        /// <param name="lastResult"></param>
+        /// <returns></returns>
+        /// <exception cref="NullReferenceException"></exception>
+        public async Task<bool> ResultIsLast(NotificationTask inputNotificationTask, string lastResult)
+        {
+            await using (var context = await _contextFactory.CreateDbContextAsync())
+            {
+                var currentNotificationTask = await context.NotificationTask.FirstOrDefaultAsync(t => t.Id == inputNotificationTask.Id);
+                if (currentNotificationTask == null) throw new NullReferenceException($"Не удалось получить задачу. ID:{inputNotificationTask.Id}");
+
+                if (currentNotificationTask.LastResult == lastResult) return true;
+                return false;
             }
         }
     }

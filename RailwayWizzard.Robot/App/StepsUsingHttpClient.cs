@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using RailwayWizzard.Core;
 using RailwayWizzard.Shared;
+using System.Text;
 
 
 namespace RailwayWizzard.Robot.App
@@ -28,42 +29,56 @@ namespace RailwayWizzard.Robot.App
         // Если выяснится что пользователь заблокировал бота - выставить ему в таблице юзеров статус - IsBlocked.
         // Когда пользователь вновь написал боту (Users/CreateOrUpdate) - выставляем ему статус IsBlocked=false
         public async Task Notification(NotificationTask inputNotificationTask)
-        {    
-            
-            int count = 1;  // Счетчик успешных попыток
+        {         
             string notificationTaskText = inputNotificationTask.ToCustomString();
-            string logMessage = $"Задача: {inputNotificationTask.Id} Попытка: {count} Рейс: {notificationTaskText}";
-            
+            string logMessage = $"Задача: {inputNotificationTask.Id} Рейс: {notificationTaskText}";
+
             try
             {
+                // Задача помечается статусом "В работе"
                 await _checker.SetIsWorkedNotificationTask(inputNotificationTask);
 
-                while (true)
+                _logger.LogTrace($"Run {logMessage} in Thread:{Thread.CurrentThread.ManagedThreadId}");
+                    
+                //Если во время выполнения задача стала неактуальна
+                if (!_checker.CheckActualNotificationTask(inputNotificationTask))
                 {
-                    _logger.LogTrace(logMessage);
-                    
-                    //Если во время выполнения задача стала неактуальна
-                    if (!_checker.CheckActualNotificationTask(inputNotificationTask))
-                    {
-                        await _checker.SetIsNotActualAndIsNotWorked(inputNotificationTask);
-                        _logger.LogTrace($"Во время выполнения программы задача {inputNotificationTask.Id} " +
-                                         $"стала неактуальна. Подробности задачи:{notificationTaskText}");
-                        break;
-                    }
-
-                    var freeSeats = await GetFreeSeats(inputNotificationTask);
-                    if (freeSeats.Count == 0) break;
-
-                    // Формирование текста уведомления о наличии мест
-                    string message = $"{char.ConvertFromUtf32(0x2705)} {notificationTaskText}" +
-                                     $"\n{String.Join("\n", freeSeats.ToArray())}" +
-                                     "\nОбнаружены свободные места\n";
-                    
-                    // Отправка сообщения пользователю
-                    await _botApi.SendMessageForUserAsync(message, inputNotificationTask.UserId);
-                                            
-                    count++;
+                    await _checker.SetIsNotActualAndIsNotWorked(inputNotificationTask);
+                    _logger.LogTrace($"Во время выполнения программы задача {inputNotificationTask.Id} " +
+                                        $"стала неактуальна. Подробности задачи:{notificationTaskText}");
+                    return;
                 }
+
+                // Поиск свободных мест
+                var freeSeats = await _robot.GetFreeSeatsOnTheTrain(inputNotificationTask);
+                var resultFreeSeats = freeSeats.ToString();
+
+                //Если текущий результат равен предыдущему - завершаем задачу
+                if (await _checker.ResultIsLast(inputNotificationTask, resultFreeSeats!)) return;
+
+                // Формирование текста уведомления о наличии мест
+                StringBuilder message = new();
+                if (freeSeats.Count == 0)
+                // Если свободные места были, а сейчас их уже нет
+                //TODO: заменить смайлик
+                    message = message.Append($"{char.ConvertFromUtf32(0x2700)} {notificationTaskText}" + 
+                               "\n Свободных мест больше нет");
+                // Если свободных мест не было, а сейчас они появились
+                else
+                    message = message.Append($"{char.ConvertFromUtf32(0x2705)} {notificationTaskText}" +
+                              $"\n{String.Join("\n", freeSeats.ToArray())}" +
+                              "\nОбнаружены свободные места\n");
+                    
+                // Отправка сообщения пользователю
+                await _botApi.SendMessageForUserAsync(message.ToString(), inputNotificationTask.UserId);
+                
+                // Записываем информацию о результате поиска свободных мест
+                await _checker.SetLastResultNotificationTask(inputNotificationTask, resultFreeSeats!);
+
+                //Задача закончила свое выполнение
+                await _checker.SetIsNotWorked(inputNotificationTask);
+
+                await Task.CompletedTask;
             }
             catch (Exception e)
             {
@@ -71,38 +86,6 @@ namespace RailwayWizzard.Robot.App
                 _logger.LogError($"Неизвестная ошибка метода обработки задач. {logMessage}\n {e}");
                 throw;
             }
-        }
-        
-        /// <summary>
-        /// Метод получения свободных мест по заданным параметрам поездки
-        /// Возвращает результат только если места есть
-        /// В противном случае - крутится в цикле до момента их появления.
-        /// </summary>
-        /// <param name="inputNotificationTask"></param>
-        /// <returns></returns>
-        private async Task<List<string>> GetFreeSeats(NotificationTask inputNotificationTask)
-        {
-            List<string> result = new();
-            string railwayDataText = inputNotificationTask.ToCustomString();
-            do
-            {
-                Thread.Sleep(1000 * 30); //пол минуты
-                
-                //Если задача остановлена пользователем - останавливаем поиск
-                var IsStoppedNotificationTask = await _checker.GetIsStoppedNotificationTask(inputNotificationTask);
-                if (IsStoppedNotificationTask)
-                {
-                    await _checker.SetIsNotWorked(inputNotificationTask);
-                    _logger.LogTrace($"Во время выполнения программы задача {inputNotificationTask.Id} " +
-                                        $"была остановлена пользователем. Подробности задачи:{railwayDataText}");
-                    return result;
-                }
-
-                result = await _robot.GetFreeSeatsOnTheTrain(inputNotificationTask);
-            }
-            while (result.Count==0);
-
-            return result;
         }
     }
 }

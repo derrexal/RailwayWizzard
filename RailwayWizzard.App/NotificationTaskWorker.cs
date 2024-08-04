@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-using RailwayWizzard.EntityFrameworkCore.Data;
 using RailwayWizzard.Robot.App;
 using RailwayWizzard.Shared;
 
@@ -13,7 +11,8 @@ namespace RailwayWizzard.App
         private readonly IChecker _checker;
         private readonly ILogger<NotificationTaskWorker> _logger;
         private readonly ILogger<StepsUsingHttpClient> _stepsLogger;
-        private const int timeInterval = 1000 * 60 * 10; //Интервал запуска (10 мин)
+        private readonly ISteps _steps;
+        private const int runningInterval = 1000 * 60 * 1; //Интервал запуска (1 мин)
 
         public NotificationTaskWorker(
             IRobot robot,
@@ -27,6 +26,7 @@ namespace RailwayWizzard.App
             _checker = checker;
             _logger = logger;
             _stepsLogger = stepsLogger;
+            _steps = new StepsUsingHttpClient(_robot, _botApi, _checker, _stepsLogger);
         }
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
@@ -38,25 +38,24 @@ namespace RailwayWizzard.App
                 await DoWork();
                 //TODO: Все-таки хочется, чтобы работа по задаче началась непосредственно после создания
 
-                await Task.Delay(timeInterval, cancellationToken);
+                await Task.Delay(runningInterval, cancellationToken);
             }
         }
 
-        //TODO: переделать это безобразие
         private async Task DoWork()
         {
+            List<Task> tasks = new();
             try
             {
-                var currentNotificationTasks = await _checker.GetNotificationTasksForWork();
-                foreach (var task in currentNotificationTasks)
-                {
-                    new StepsUsingHttpClient(_robot,_botApi,_checker, _stepsLogger).Notification(task);
-                    _logger.LogTrace($"Run Task:{task.Id} in Thread:{Thread.CurrentThread.ManagedThreadId}");
-                }
+                var notificationTasks = await _checker.GetNotificationTasksForWork();
+                foreach (var notificationTask in notificationTasks)
+                    // TODO: запустив эту задачу мы не запустим другие. Как их запустить скопом?
+                    tasks.Add(_steps.Notification(notificationTask));
+                await Task.WhenAll(tasks);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error in {nameof(NotificationTaskWorker)} {ex}");
+                _logger.LogError($"{nameof(NotificationTaskWorker)} {ex}");
                 throw; 
             }
             
@@ -68,4 +67,4 @@ namespace RailwayWizzard.App
             await base.StopAsync(cancellationToken);
         }
     }
-}   
+}

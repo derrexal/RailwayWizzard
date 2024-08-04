@@ -24,5 +24,9 @@ namespace RailwayWizzard.Shared
         public Task SetIsNotWorked(NotificationTask inputNotificationTask);
 
         public Task<bool> GetIsStoppedNotificationTask(NotificationTask inputNotificationTask);
+
+        public Task SetLastResultNotificationTask(NotificationTask inputNotificationTask, string lastResult);
+
+        public Task<bool> ResultIsLast(NotificationTask inputNotificationTask, string lastResult);
     }
 }

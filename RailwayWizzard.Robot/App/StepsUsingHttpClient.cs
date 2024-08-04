@@ -84,7 +84,9 @@ namespace RailwayWizzard.Robot.App
             catch (Exception e)
             {
                 await _checker.SetIsNotWorked(inputNotificationTask);
-                _logger.LogError($"Неизвестная ошибка метода обработки задач. {logMessage}\n {e}");
+                string messageError = $"Неизвестная ошибка метода обработки задач. {logMessage}\n {e}";
+                await _botApi.SendMessageForAdminAsync(messageError);
+                _logger.LogError(messageError);
                 throw;
             }
         }

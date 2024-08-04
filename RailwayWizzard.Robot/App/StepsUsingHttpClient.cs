@@ -58,10 +58,10 @@ namespace RailwayWizzard.Robot.App
 
                 // Формирование текста уведомления о наличии мест
                 StringBuilder message = new();
-                if (freeSeats.Count == 0)
+
                 // Если свободные места были, а сейчас их уже нет
-                //TODO: заменить смайлик
-                    message = message.Append($"{char.ConvertFromUtf32(0x2700)} {notificationTaskText}" + 
+                if (resultFreeSeats == "")
+                    message = message.Append($"{char.ConvertFromUtf32(0x26D4)} {notificationTaskText}" + 
                                "\n Свободных мест больше нет");
                 // Если свободных мест не было, а сейчас они появились
                 else

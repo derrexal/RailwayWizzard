@@ -51,7 +51,7 @@ namespace RailwayWizzard.Robot.App
 
                 // Поиск свободных мест
                 var freeSeats = await _robot.GetFreeSeatsOnTheTrain(inputNotificationTask);
-                var resultFreeSeats = freeSeats.ToString();
+                var resultFreeSeats = String.Join(";", freeSeats);
 
                 //Если текущий результат равен предыдущему - завершаем задачу
                 if (await _checker.ResultIsLast(inputNotificationTask, resultFreeSeats!)) return;

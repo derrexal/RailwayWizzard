@@ -29,8 +29,12 @@ namespace RailwayWizzard.Robot.App
             var textResponse = await GetTrainInformationByParameters(inputNotificationTask);
             //TODO: нужно смапить в DTO чтобы этот огромный объект не таскать по памяти
             RootBigBrother? myDeserializedClass = JsonConvert.DeserializeObject<RootBigBrother>(textResponse);
-            if (myDeserializedClass == null) 
-                throw new NullReferenceException ($"Сервис РЖД при запросе списка свободных мест вернул не стандартный ответ. Ответ:{textResponse}");
+            if (myDeserializedClass == null)
+            {
+                _logger.LogError($"Сервис РЖД при запросе списка свободных мест вернул не стандартный ответ. Ответ:{textResponse}");
+                return new List<string>();
+            }    
+                
             if (myDeserializedClass.Trains.Count==0) 
                 throw new NullReferenceException($"Сервис РЖД при запросе списка свободных мест вернул ответ в котором нет доступных поездок. Ответ:{textResponse}");
             //вытаскиваем свободные места по запрашиваемому рейсу

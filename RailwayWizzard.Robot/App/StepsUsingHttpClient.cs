@@ -72,6 +72,7 @@ namespace RailwayWizzard.Robot.App
                 // Отправка сообщения пользователю
                 await _botApi.SendMessageForUserAsync(message.ToString(), inputNotificationTask.UserId);
                 
+                //TODO: Не нужно хранить всю строку, можно записывать н-р хэш
                 // Записываем информацию о результате поиска свободных мест
                 await _checker.SetLastResultNotificationTask(inputNotificationTask, resultFreeSeats!);
 

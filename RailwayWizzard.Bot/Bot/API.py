@@ -43,7 +43,7 @@ async def make_request(method, endpoint, json_data=None, params=None) -> ClientR
             else:
                 raise Exception(f'Invalid method {method}')
     except Exception as e:
-        logger.error(f'Error in {endpoint}: {str(e)}')
+        logger.exception(f'Error in {endpoint}: {str(e)}')
         raise e
 
 

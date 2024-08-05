@@ -17,6 +17,6 @@ async def run():
 async def send_message(data=Body()):
     if data is None:
         error_message = "Ошибка валидации входящего запроса по адресу /api/sendMessageForUser"
-        logger.error(error_message)
+        logger.exception(error_message)
         raise HTTPException(status_code=400, detail=error_message)
     await send_message_to_user(data["userId"], data["message"])

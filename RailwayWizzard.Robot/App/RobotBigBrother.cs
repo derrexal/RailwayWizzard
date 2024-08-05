@@ -7,8 +7,6 @@ using System.Text.RegularExpressions;
 
 namespace RailwayWizzard.Robot.App
 {
-    //TODO: вынести в отдельный сервис
-
     /// <summary>
     /// Класс для работы с АПИ РЖД
     /// </summary>
@@ -31,8 +29,15 @@ namespace RailwayWizzard.Robot.App
             var textResponse = await GetTrainInformationByParameters(inputNotificationTask);
             //TODO: нужно смапить в DTO чтобы этот огромный объект не таскать по памяти
             RootBigBrother? myDeserializedClass = JsonConvert.DeserializeObject<RootBigBrother>(textResponse);
-            if (myDeserializedClass == null) { throw new NullReferenceException ($"Сервис РЖД при запросе списка свободных мест вернул не стандартный ответ. Ответ:{textResponse}"); }
-            if (myDeserializedClass.Trains.Count==0) { throw new NullReferenceException($"Сервис РЖД при запросе списка свободных мест вернул ответ в котором нет доступных поездок. Ответ:{textResponse}"); }
+            
+            if (myDeserializedClass == null)
+                throw new NullReferenceException ($"Сервис РЖД при запросе списка свободных мест вернул не стандартный ответ. Ответ:{textResponse}");
+            if (myDeserializedClass.Trains.Count == 0)
+            {
+                _logger.LogError($"Сервис РЖД при запросе списка свободных мест вернул ответ в котором нет доступных поездок. Ответ:{textResponse}");
+                return new List<string>();
+            }
+
             //вытаскиваем свободные места по запрашиваемому рейсу
             var currentRoute = GetCurrentRouteFromResponse(myDeserializedClass, inputNotificationTask);
             if (currentRoute.Count == 0) return new List<string>();
@@ -92,11 +97,10 @@ namespace RailwayWizzard.Robot.App
         /// <param name="root"></param>
         /// <param name="departureTime"></param>
         /// <returns></returns>
-        private Dictionary<string,int> GetCurrentRouteFromResponse(RootBigBrother root, NotificationTask inputNotificationTask)
+        private HashSet<SearchResult> GetCurrentRouteFromResponse(RootBigBrother root, NotificationTask inputNotificationTask)
         {
-            //словарь - тип вагона:кол-во мест
-            Dictionary<string, int> result = new Dictionary<string, int>();
-            
+            HashSet<SearchResult> results = new ();
+
             //todo: костыль, но как по другому?
             //наполяем список типов вагонов словами, чтобы было с чем сравнивать
             List<string> carTypesText = new List<string>();
@@ -127,21 +131,38 @@ namespace RailwayWizzard.Robot.App
                                     var key = carGroup.ServiceClassNameRu is not null ? carGroup.ServiceClassNameRu : carGroup.CarTypeName;
                                     //TODO: костыльевато, но по другому хз как. В пакете данных приходит только "СИД"
                                     if (key == "СИД") key = "Сидячий";
-                                    if (!result.TryGetValue(key, out int value)) // если элемента нет в коллекции
-                                        result.Add(key, carGroup.TotalPlaceQuantity);
-                                    else
-                                        result[key] = value + carGroup.TotalPlaceQuantity;
+                                    var result = new SearchResult { CarType = key, TotalPlace = carGroup.TotalPlaceQuantity, Price = carGroup.MaxPrice };
+                                    AddOrUpdateSearchResult(results, result);
                                 }
+            return results;
+        }
 
-            return result;
+        /// <summary>
+        /// Добавляет SearchResult в коллекцию, а если он уже добавлен - обновляет поля
+        /// </summary>
+        /// <param name="collection"></param>
+        /// <param name="newItem"></param>
+        private void AddOrUpdateSearchResult(HashSet<SearchResult> collection, SearchResult newItem)
+        {
+            if (collection.TryGetValue(newItem, out var existingItem))
+            {
+                // Обновляем существующий элемент
+                existingItem.TotalPlace = existingItem.TotalPlace + newItem.TotalPlace;
+                existingItem.Price = newItem.Price;
+            }
+            else
+            {
+                // Добавляем новый элемент
+                collection.Add(newItem);
+            }
         }
 
         //TODO: Отправлять в бот только словарь свободных мест а эту логику переложить на бота! Ни к чему гонять такие объемы данных по сети
-        private List<string> SupportingMethod(Dictionary<string, int> currentRoutes)
+        private List<string> SupportingMethod(HashSet<SearchResult> currentRoutes)
         {
             List<string> result = new();
             foreach(var route in currentRoutes)
-                result.Add($"Класс обслуживания: <strong>{route.Key}</strong> \nСвободных мест: <strong>{route.Value}</strong>\n");
+                result.Add($"Класс обслуживания: <strong>{route.CarType}</strong>\nСвободных мест: <strong>{route.TotalPlace}</strong>\nЦена: <strong> {route.Price}</strong>\n");
             return result;
         }
 

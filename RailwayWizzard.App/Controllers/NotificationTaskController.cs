@@ -87,7 +87,9 @@ namespace RailwayWizzard.App.Controllers
                 CarTypes = u.CarTypes,
                 NumberSeats = u.NumberSeats,
                 DateFromString = u.DateFrom.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture)
-            }).ToListAsync();
+            })
+                .OrderBy(u=>u.Id)
+                .ToListAsync();
 
             return notificationTasks;
         }

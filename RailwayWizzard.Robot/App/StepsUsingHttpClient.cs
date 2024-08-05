@@ -51,17 +51,17 @@ namespace RailwayWizzard.Robot.App
 
                 // Поиск свободных мест
                 var freeSeats = await _robot.GetFreeSeatsOnTheTrain(inputNotificationTask);
-                var resultFreeSeats = freeSeats.ToString();
+                var resultFreeSeats = String.Join(";", freeSeats);
 
                 //Если текущий результат равен предыдущему - завершаем задачу
                 if (await _checker.ResultIsLast(inputNotificationTask, resultFreeSeats!)) return;
 
                 // Формирование текста уведомления о наличии мест
                 StringBuilder message = new();
-                if (freeSeats.Count == 0)
+
                 // Если свободные места были, а сейчас их уже нет
-                //TODO: заменить смайлик
-                    message = message.Append($"{char.ConvertFromUtf32(0x2700)} {notificationTaskText}" + 
+                if (resultFreeSeats == "")
+                    message = message.Append($"{char.ConvertFromUtf32(0x26D4)} {notificationTaskText}" + 
                                "\n Свободных мест больше нет");
                 // Если свободных мест не было, а сейчас они появились
                 else
@@ -72,6 +72,7 @@ namespace RailwayWizzard.Robot.App
                 // Отправка сообщения пользователю
                 await _botApi.SendMessageForUserAsync(message.ToString(), inputNotificationTask.UserId);
                 
+                //TODO: Не нужно хранить всю строку, можно записывать н-р хэш
                 // Записываем информацию о результате поиска свободных мест
                 await _checker.SetLastResultNotificationTask(inputNotificationTask, resultFreeSeats!);
 
@@ -83,7 +84,9 @@ namespace RailwayWizzard.Robot.App
             catch (Exception e)
             {
                 await _checker.SetIsNotWorked(inputNotificationTask);
-                _logger.LogError($"Неизвестная ошибка метода обработки задач. {logMessage}\n {e}");
+                string messageError = $"Неизвестная ошибка метода обработки задач. {logMessage}\n {e}";
+                await _botApi.SendMessageForAdminAsync(messageError);
+                _logger.LogError(messageError);
                 throw;
             }
         }

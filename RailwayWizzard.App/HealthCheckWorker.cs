@@ -11,7 +11,7 @@ namespace RailwayWizzard.App
         private readonly ILogger _logger;
         private readonly IBotApi _botApi;
         private readonly IRobot _robot;
-        private const int timeInterval = 1000 * 60 * 20; //Интервал запуска (20 мин)
+        private const int timeInterval = 1000 * 60 * 10; //Интервал запуска (10 мин)
         
         public HealthCheckWorker(ILogger<HealthCheckWorker> logger, IBotApi botApi, IRobot robot)
         {
@@ -54,16 +54,18 @@ namespace RailwayWizzard.App
                 var executionTime = watch.ElapsedMilliseconds;
 
                 string message;
-                if (executionTime > 15000)
+                if (executionTime > 30000)
                 {
-                    message = $"[{this.GetType().Name}] В ходе проверки доступности на примере рейса {testNotificationTask.ToCustomString()} \nпревышено время выполнения: {executionTime} мс";
+                    message = $"[{this.GetType().Name}] В ходе проверки доступности на примере рейса {testNotificationTask.ToCustomString()} \n" +
+                        $"превышено допустимое время выполнения(30 с): {executionTime} мс";
                     _logger.LogInformation(message);
                     await _botApi.SendMessageForAdminAsync(message);
                 }
 
                 if (freeSeats.Count==0)
                 {
-                    message = $"[{this.GetType().Name}] В ходе проверки доступности не обнаружено свободных мест на рейс: \n{testNotificationTask.ToCustomString()}\n\nВремя выполнения метода: {executionTime} мс";
+                    message = $"[{this.GetType().Name}] В ходе проверки доступности на примере рейса {testNotificationTask.ToCustomString()}\n не обнаружено свободных мест\n\n" +
+                        $"Дополнительная информация: время выполнения метода: {executionTime} мс";
                     _logger.LogInformation(message);
                     await _botApi.SendMessageForAdminAsync(message);
                 }
@@ -82,6 +84,5 @@ namespace RailwayWizzard.App
             _logger.LogInformation($"{nameof(HealthCheckWorker)} stopped at: {DateTimeOffset.Now}");
             await base.StopAsync(cancellationToken);
         }
-
     }
 }

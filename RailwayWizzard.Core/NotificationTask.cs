@@ -48,7 +48,7 @@ namespace RailwayWizzard.Core
         [NotMapped]
         public string? DateFromString { get; set; }
 
-        public string? LastResult { get; set; }
+        public string LastResult { get; set; } = "";
 
         public string ToCustomString()
         {

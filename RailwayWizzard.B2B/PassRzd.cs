@@ -91,7 +91,10 @@ namespace RailwayWizzard.B2B
         private IList<string> ParseScheduleText(string textResponse, string dateFrom)
         {
             var availableTime = new List<string>();
-            string todayTime = DateTime.Now.ToString("HH:mm");
+            TimeZoneInfo moscowTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Russian Standard Time");
+            DateTime moscowDateTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, moscowTimeZone);
+
+            string todayTime = moscowDateTime.ToString("HH:mm");
             IHtmlDocument document = new HtmlParser().ParseDocument(textResponse);
             var table = document.QuerySelector("table.basicSched_trainsInfo_table");
             if (table != null)

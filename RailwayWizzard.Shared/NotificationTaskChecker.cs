@@ -88,7 +88,6 @@ namespace RailwayWizzard.Shared
         /// <returns></returns>
         public async Task<IList<NotificationTask>> GetNotWorkedNotificationTasks()
         {
-            await UpdateActualStatusNotificationTask();
             var activeNotificationTasks = await GetActiveAndNotStopNotificationTasks();
             var notWorkedNotificationTasks = activeNotificationTasks.Where(t => t.IsWorked == false).ToList();
             return notWorkedNotificationTasks;

@@ -54,7 +54,12 @@ namespace RailwayWizzard.Robot.App
                 var resultFreeSeats = String.Join(";", freeSeats);
 
                 //Если текущий результат равен предыдущему - завершаем задачу
-                if (await _checker.ResultIsLast(inputNotificationTask, resultFreeSeats!)) return;
+                if (await _checker.ResultIsLast(inputNotificationTask, resultFreeSeats!))
+                {
+                    //Задача закончила свое выполнение
+                    await _checker.SetIsNotWorked(inputNotificationTask);
+                    return;
+                }
 
                 // Формирование текста уведомления о наличии мест
                 StringBuilder message = new();
@@ -78,8 +83,8 @@ namespace RailwayWizzard.Robot.App
 
                 //Задача закончила свое выполнение
                 await _checker.SetIsNotWorked(inputNotificationTask);
-
-                await Task.CompletedTask;
+                
+                return;
             }
             catch (Exception e)
             {

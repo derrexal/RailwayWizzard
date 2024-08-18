@@ -41,7 +41,7 @@ namespace RailwayWizzard.App
                 ArrivalStation = "Орел",
                 DepartureStationCode = 2000000,
                 ArrivalStationCode = 2000140,
-                TimeFrom = "05:18",
+                TimeFrom = "08:46",
                 DateFrom = DateTime.Today.AddDays(30),
                 CarTypes = new List<CarTypeEnum>{CarTypeEnum.Sedentary, CarTypeEnum.ReservedSeat, CarTypeEnum.Compartment, CarTypeEnum.Luxury}
             };

@@ -19,12 +19,17 @@ namespace RailwayWizzard.Shared
         /// <inheritdoc/>
         public bool CheckActualNotificationTask(NotificationTask task)
         {
-            DateTime itemDateFromDateTime = DateTime.ParseExact(
+            DateTime notificationTaskDateTime = DateTime.ParseExact(
                         task.DateFrom.ToShortDateString() + " " + task.TimeFrom,
                         "MM/dd/yyyy HH:mm",
                         CultureInfo.InvariantCulture);
 
-            if (itemDateFromDateTime < DateTime.Now)
+            // Find the time zone for Moscow
+            TimeZoneInfo moscowTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Russian Standard Time");
+            // Convert the UTC time to Moscow time
+            DateTime moscowDateTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, moscowTimeZone);
+
+            if (notificationTaskDateTime < moscowDateTime)
                 return false;
             return true;
         }

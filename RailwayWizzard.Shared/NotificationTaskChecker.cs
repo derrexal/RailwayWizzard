@@ -6,9 +6,7 @@ using RailwayWizzard.EntityFrameworkCore.Data;
 
 namespace RailwayWizzard.Shared
 {
-    /// <summary>
-    /// Cодержит вспомогательные методы для сущности NotificationTask
-    /// </summary>
+    /// <inheritdoc/>
     public class NotificationTaskChecker : IChecker
     {
         private readonly IDbContextFactory<RailwayWizzardAppContext> _contextFactory;
@@ -18,11 +16,7 @@ namespace RailwayWizzard.Shared
             _contextFactory = contextFactory;
         }
 
-        /// <summary>
-        /// Проверяет задачу на актуальность
-        /// </summary>
-        /// <param name="task"></param>
-        /// <returns></returns>
+        /// <inheritdoc/>
         public bool CheckActualNotificationTask(NotificationTask task)
         {
             DateTime itemDateFromDateTime = DateTime.ParseExact(
@@ -35,73 +29,79 @@ namespace RailwayWizzard.Shared
             return true;
         }
 
-        /// <summary>
-        /// Обновляет состояние таблицы по полю "IsActual" если поездка уже в прошлом
-        /// </summary>
-        /// <returns></returns>
-        private async Task UpdateActualStatusNotificationTask()
-        {
-            await using (var context = await _contextFactory.CreateDbContextAsync())
-            {
-                var activeNotificationTasks = await GetActiveNotificationTasks();
-                foreach (var activeNotificationTask in activeNotificationTasks)
-                {
-                    if (!CheckActualNotificationTask(activeNotificationTask))
-                    {
-                        activeNotificationTask.IsActual = false;
-                        context.NotificationTask.Update(activeNotificationTask);
-                    }
-                }
-                await context.SaveChangesAsync();
-            }
-            await Task.CompletedTask;
-        }
-
-        /// <summary>
-        /// Получает список всех задач со статусом "Актуально"
-        /// </summary>
-        /// <returns></returns>
-        public async Task<IList<NotificationTask>> GetActiveNotificationTasks()
-        {
-            await using var context = await _contextFactory.CreateDbContextAsync();
-            var notificationTasks = await context.NotificationTask
-                .Where(t => t.IsActual == true)
-                .ToListAsync();
-            return notificationTasks;
-        }
-
-        /// <summary>
-        /// Получает список задач со статусом "Актуально" и "Не остановлена"
-        /// </summary>
-        /// <returns></returns>
-        public async Task<IList<NotificationTask>> GetActiveAndNotStopNotificationTasks()
-        {
-            await UpdateActualStatusNotificationTask();
-            var activeNotificationTasks = await GetActiveNotificationTasks();
-            var activeAndNotStopNotificationTasks = activeNotificationTasks.Where(t => t.IsStopped == false).ToList();
-            return activeAndNotStopNotificationTasks;
-        }
-
-        /// <summary>
-        /// Получает список задач со статусом "Актуально", "Не остановлена" и над которыми еще не работают
-        /// </summary>
-        /// <returns></returns>
+        /// <inheritdoc/>
         public async Task<IList<NotificationTask>> GetNotWorkedNotificationTasks()
         {
-            var activeNotificationTasks = await GetActiveAndNotStopNotificationTasks();
-            var notWorkedNotificationTasks = activeNotificationTasks.Where(t => t.IsWorked == false).ToList();
+            await using var context = await _contextFactory.CreateDbContextAsync();
+
+            var notWorkedNotificationTasks = await context.NotificationTask
+                .Where(t => t.IsActual == true)
+                .Where(t => t.IsStopped == false)
+                .Where(t => t.IsWorked == false)
+                .ToListAsync();
+
             return notWorkedNotificationTasks;
         }
 
-        /// <summary>
-        /// Возвращает подходящий для работы список задач
-        /// </summary>
-        /// <returns></returns>
+        /// <inheritdoc/>
         public async Task<IList<NotificationTask>> GetNotificationTasksForWork()
         {
+            await UpdateActualStatusNotificationTask();
+
             var notWorkedNotificationTasks = await GetNotWorkedNotificationTasks();
+
             var result = await FillsStationCodes(notWorkedNotificationTasks);
+
             return result;
+        }
+
+        /// <inheritdoc/>
+        public async Task SetIsWorkedNotificationTask(NotificationTask inputNotificationTask)
+        {
+            var currentNotificationTask = await GetNotificationTaskFromId(inputNotificationTask.Id);
+
+            currentNotificationTask.IsWorked = true;
+
+            await UpdateNotificationTask(currentNotificationTask);
+        }
+
+        /// <inheritdoc/>
+        public async Task SetIsNotActualAndIsNotWorked(NotificationTask inputNotificationTask)
+        {
+            var currentNotificationTask = await GetNotificationTaskFromId(inputNotificationTask.Id);
+
+            currentNotificationTask.IsActual = false;
+            currentNotificationTask.IsWorked = false;
+
+            await UpdateNotificationTask(currentNotificationTask);
+        }
+
+        /// <inheritdoc/>
+        public async Task SetIsNotWorked(NotificationTask inputNotificationTask)
+        {
+            var currentNotificationTask = await GetNotificationTaskFromId(inputNotificationTask.Id);
+
+            currentNotificationTask.IsWorked = false;
+
+            await UpdateNotificationTask(currentNotificationTask);
+        }
+
+        /// <inheritdoc/>
+        public async Task SetLastResultNotificationTask(NotificationTask inputNotificationTask, string lastResult)
+        {
+            var currentNotificationTask = await GetNotificationTaskFromId(inputNotificationTask.Id);
+
+            currentNotificationTask.LastResult = lastResult;
+
+            await UpdateNotificationTask(currentNotificationTask);
+        }
+
+        /// <inheritdoc/>
+        public async Task<bool> ResultIsLast(NotificationTask inputNotificationTask, string lastResult)
+        {
+            var currentNotificationTask = await GetNotificationTaskFromId(inputNotificationTask.Id);
+            if (currentNotificationTask.LastResult == lastResult) return true;
+            return false;
         }
 
         /// <summary>
@@ -109,7 +109,7 @@ namespace RailwayWizzard.Shared
         /// </summary>
         /// <param name="notificationTasks">Задания для которых необходимо заполнить коды городов</param>
         /// <returns></returns>
-        public async Task<IList<NotificationTask>> FillsStationCodes(IList<NotificationTask> notificationTasks)
+        private async Task<IList<NotificationTask>> FillsStationCodes(IList<NotificationTask> notificationTasks)
         {
             foreach (var notificationTask in notificationTasks)
             {
@@ -127,109 +127,56 @@ namespace RailwayWizzard.Shared
             return notificationTasks;
         }
 
+
         /// <summary>
-        /// Выставляем задаче статус - в работе
+        /// Обновляет состояние таблицы по полю "IsActual" если поездка уже в прошлом
+        /// Это необходимо для проверки всех активных задач, чтобы БД отражала правильное состояние
         /// </summary>
-        /// <param name="inputNotificationTask"></param>
         /// <returns></returns>
-        public async Task SetIsWorkedNotificationTask(NotificationTask inputNotificationTask)
+        private async Task UpdateActualStatusNotificationTask()
         {
             await using (var context = await _contextFactory.CreateDbContextAsync())
             {
-                var currentNotificationTask = await context.NotificationTask.FirstOrDefaultAsync(t => t.Id == inputNotificationTask.Id);
-                if (currentNotificationTask == null) throw new NullReferenceException($"Не удалось получить задачу. ID:{inputNotificationTask.Id}");
-                currentNotificationTask.IsWorked = true;
+                var notificationTasks = await context.NotificationTask.Where(t => t.IsActual == true).ToListAsync();
+
+                foreach (var notificationTask in notificationTasks)
+                    if (!CheckActualNotificationTask(notificationTask))
+                    {
+                        notificationTask.IsActual = false;
+                        context.NotificationTask.Update(notificationTask);
+                    }
                 await context.SaveChangesAsync();
             }
             await Task.CompletedTask;
         }
 
         /// <summary>
-        /// Выставляет задаче статус - не актуально и не в работе
+        /// Возвращает сущность задачи по ее Id
         /// </summary>
-        /// <param name="inputNotificationTask"></param>
-        /// <returns></returns>
-        public async Task SetIsNotActualAndIsNotWorked(NotificationTask inputNotificationTask)
-        {
-            await using (var context = await _contextFactory.CreateDbContextAsync())
-            {
-                var currentNotificationTask = await context.NotificationTask.FirstOrDefaultAsync(t => t.Id == inputNotificationTask.Id);
-                if (currentNotificationTask == null) throw new NullReferenceException($"Не удалось получить задачу. ID:{inputNotificationTask.Id}");
-                currentNotificationTask.IsActual = false;
-                currentNotificationTask.IsWorked = false;
-                await context.SaveChangesAsync();
-            }
-            await Task.CompletedTask;
-        }
-
-        /// <summary>
-        /// Выставляет задаче статус - не актуально
-        /// </summary>
-        /// <param name="inputNotificationTask"></param>
-        /// <returns></returns>
-        public async Task SetIsNotWorked(NotificationTask inputNotificationTask)
-        {
-            await using (var context = await _contextFactory.CreateDbContextAsync())
-            {
-                var currentNotificationTask = await context.NotificationTask.FirstOrDefaultAsync(t => t.Id == inputNotificationTask.Id);
-                if (currentNotificationTask == null) throw new NullReferenceException($"Не удалось получить задачу. ID:{inputNotificationTask.Id}");
-                currentNotificationTask.IsWorked = false;
-                await context.SaveChangesAsync();
-            }
-            await Task.CompletedTask;
-        }
-
-        /// <summary>
-        /// Возвращает для задачи статус флага IsStopped
-        /// </summary>
-        /// <param name="inputNotificationTask"></param>
-        /// <returns></returns>
-        public async Task<bool> GetIsStoppedNotificationTask(NotificationTask inputNotificationTask)
-        {
-            await using (var context = await _contextFactory.CreateDbContextAsync())
-            {
-                var currentNotificationTask = await context.NotificationTask.FirstOrDefaultAsync(t => t.Id == inputNotificationTask.Id);
-                if (currentNotificationTask == null) throw new NullReferenceException($"Не удалось получить задачу. ID:{inputNotificationTask.Id}");
-                return currentNotificationTask.IsStopped;
-            }
-        }
-
-        /// <summary>
-        /// Выставляет задаче последний полученный результат
-        /// </summary>
-        /// <param name="inputNotificationTask"></param>
-        /// <param name="lastResult"></param>
+        /// <param name="id"></param>
         /// <returns></returns>
         /// <exception cref="NullReferenceException"></exception>
-        public async Task SetLastResultNotificationTask(NotificationTask inputNotificationTask, string lastResult)
+        private async Task<NotificationTask> GetNotificationTaskFromId(int id)
         {
-            await using (var context = await _contextFactory.CreateDbContextAsync())
-            {
-                var currentNotificationTask = await context.NotificationTask.FirstOrDefaultAsync(t => t.Id == inputNotificationTask.Id);
-                if (currentNotificationTask == null) throw new NullReferenceException($"Не удалось получить задачу. ID:{inputNotificationTask.Id}");
-                currentNotificationTask.LastResult = lastResult;
-                await context.SaveChangesAsync();
-            }
-            await Task.CompletedTask;
+            await using var context = await _contextFactory.CreateDbContextAsync();
+
+            var currentNotificationTask = await context.NotificationTask.FirstAsync(t => t.Id == id);
+            if (currentNotificationTask == null) throw new NullReferenceException($"Не удалось получить задачу. ID:{id}");
+
+            return currentNotificationTask;
         }
 
         /// <summary>
-        /// Результат равен последнему?
+        /// Обновляет состояние задачи
         /// </summary>
-        /// <param name="inputNotificationTask"></param>
-        /// <param name="lastResult"></param>
+        /// <param name="notificationTask"></param>
         /// <returns></returns>
-        /// <exception cref="NullReferenceException"></exception>
-        public async Task<bool> ResultIsLast(NotificationTask inputNotificationTask, string lastResult)
+        private async Task UpdateNotificationTask(NotificationTask notificationTask)
         {
-            await using (var context = await _contextFactory.CreateDbContextAsync())
-            {
-                var currentNotificationTask = await context.NotificationTask.FirstOrDefaultAsync(t => t.Id == inputNotificationTask.Id);
-                if (currentNotificationTask == null) throw new NullReferenceException($"Не удалось получить задачу. ID:{inputNotificationTask.Id}");
-
-                if (currentNotificationTask.LastResult == lastResult) return true;
-                return false;
-            }
+            await using var context = await _contextFactory.CreateDbContextAsync();
+            context.NotificationTask.Update(notificationTask);
+            await context.SaveChangesAsync();
+            await Task.CompletedTask;
         }
     }
 }

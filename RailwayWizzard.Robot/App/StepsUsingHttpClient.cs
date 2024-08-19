@@ -44,8 +44,12 @@ namespace RailwayWizzard.Robot.App
                 if (!_checker.CheckActualNotificationTask(inputNotificationTask))
                 {
                     await _checker.SetIsNotActualAndIsNotWorked(inputNotificationTask);
-                    _logger.LogTrace($"Во время выполнения программы задача {inputNotificationTask.Id} " +
-                                        $"стала неактуальна. Подробности задачи:{notificationTaskText}");
+
+                    string notActualTaskMessage = $"Поиск остановлен - стала неактуальна задача {notificationTaskText}";
+                    
+                    _logger.LogTrace(notActualTaskMessage);
+                    await _botApi.SendMessageForUserAsync(notActualTaskMessage,inputNotificationTask.UserId);
+
                     return;
                 }
 

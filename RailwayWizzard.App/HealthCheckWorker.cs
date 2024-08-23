@@ -11,7 +11,8 @@ namespace RailwayWizzard.App
         private readonly ILogger _logger;
         private readonly IBotApi _botApi;
         private readonly IRobot _robot;
-        private const int timeInterval = 1000 * 60 * 10; //Интервал запуска (10 мин)
+        private const int timeInterval = 1000 * 60 * 10; // Интервал запуска (10 мин)
+        private const int maxTime = 30000; // Допустимое время выполнения проверки
         
         public HealthCheckWorker(ILogger<HealthCheckWorker> logger, IBotApi botApi, IRobot robot)
         {
@@ -53,25 +54,30 @@ namespace RailwayWizzard.App
                 watch.Stop();
                 var executionTime = watch.ElapsedMilliseconds;
 
-                string message;
-                if (executionTime > 30000)
+                string message = "";
+                if (executionTime > maxTime)
                 {
-                    message = $"[{this.GetType().Name}] В ходе проверки доступности на примере рейса {testNotificationTask.ToCustomString()} \n" +
-                        $"превышено допустимое время выполнения(30 с): {executionTime} мс";
+                    message = $"[{this.GetType().Name}] Рейс {testNotificationTask.ToCustomString()} " +
+                        $"превышено допустимое время выполнения({maxTime/ 1000} с): {executionTime} мс";
                     _logger.LogInformation(message);
                     await _botApi.SendMessageForAdminAsync(message);
                 }
-
+                //TODO: вынести в Exceptions
                 if (freeSeats.Count==0)
                 {
-                    message = $"[{this.GetType().Name}] В ходе проверки доступности на примере рейса {testNotificationTask.ToCustomString()}\n не обнаружено свободных мест\n\n" +
+                    message += $"[{this.GetType().Name}] Рейс {testNotificationTask.ToCustomString()} не обнаружено свободных мест." +
                         $"Время выполнения метода: {executionTime} мс";
                     _logger.LogInformation(message);
                 }
+                if (message != "") return;
+
+                message = $"[{this.GetType().Name}] Рейс {testNotificationTask.ToCustomString()} проверка выполнена успешно." +
+                    $"Время выполнения метода: {executionTime} мс";
+                _logger.LogTrace(message);
             }
             catch (Exception ex)
             {
-                string messageError = $"[{this.GetType().Name}] В ходе проверки доступности на примере рейса {testNotificationTask.ToCustomString()}\nвозникла ошибка: {ex.Message}";
+                string messageError = $"[{this.GetType().Name}] Рейс {testNotificationTask.ToCustomString()} возникла ошибка: {ex.Message}";
                 await _botApi.SendMessageForAdminAsync(messageError);
                 _logger.LogError(messageError);
                 throw; 

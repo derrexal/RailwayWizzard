@@ -29,7 +29,7 @@ namespace RailwayWizzard.Shared
             // Convert the UTC time to Moscow time
             DateTime moscowDateTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, moscowTimeZone);
 
-            if (notificationTaskDateTime < moscowDateTime)
+            if (notificationTaskDateTime > moscowDateTime)
                 return false;
             return true;
         }

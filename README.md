@@ -27,4 +27,7 @@ RailwayWizzard.Bot/Bot/.env
 ## Благодарность
 Данный проект был вдохновлен [rzd-api](https://github.com/visavi/rzd-api).
 
-Спасибо автору [visavi](https://github.com/visavi)
+Спасибо автору [visavi](https://github.com/visavi).
+
+## License
+The class is open-sourced software licensed under the [MIT license](https://opensource.org/license/MIT).

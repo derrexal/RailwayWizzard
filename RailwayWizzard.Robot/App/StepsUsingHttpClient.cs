@@ -94,8 +94,8 @@ namespace RailwayWizzard.Robot.App
             {
                 await _checker.SetIsNotWorked(inputNotificationTask);
                 string messageError = $"Неизвестная ошибка метода обработки задач. {logMessage}\n {e}";
-                await _botApi.SendMessageForAdminAsync(messageError);
                 _logger.LogError(messageError);
+                await _botApi.SendMessageForAdminAsync(messageError);
                 throw;
             }
         }

@@ -32,7 +32,7 @@ public class BotApi : IBotApi
 
         var response = await httpClient.SendAsync(request);
         if (response.StatusCode != HttpStatusCode.OK)
-            throw new Exception($"Метод отправки сообщения пользователю:{userId} завершился с кодом:{response.StatusCode}");
+            throw new Exception($"Метод отправки сообщения пользователю:{userId} завершился с кодом:{response.StatusCode} {response}");
     }
     
     /// <summary>

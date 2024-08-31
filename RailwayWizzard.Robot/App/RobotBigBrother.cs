@@ -145,16 +145,9 @@ namespace RailwayWizzard.Robot.App
         private void AddOrUpdateSearchResult(HashSet<SearchResult> collection, SearchResult newItem)
         {
             if (collection.TryGetValue(newItem, out var existingItem))
-            {
-                // Обновляем существующий элемент
                 existingItem.TotalPlace = existingItem.TotalPlace + newItem.TotalPlace;
-                existingItem.Price = newItem.Price;
-            }
             else
-            {
-                // Добавляем новый элемент
                 collection.Add(newItem);
-            }
         }
 
         //TODO: Отправлять в бот только словарь свободных мест а эту логику переложить на бота! Ни к чему гонять такие объемы данных по сети

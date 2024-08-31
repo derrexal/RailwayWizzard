@@ -10,12 +10,13 @@ namespace RailwayWizzard.Robot.Core
         public override bool Equals(object? obj)
         {
             return obj is SearchResult result &&
-                   CarType == result.CarType;
+                   CarType == result.CarType &&
+                   TotalPlace == result.TotalPlace;
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(CarType);
+            return HashCode.Combine(CarType + TotalPlace.ToString());
         }
     }
 }

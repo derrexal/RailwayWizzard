@@ -24,10 +24,7 @@ namespace RailwayWizzard.Shared
                         "MM/dd/yyyy HH:mm",
                         CultureInfo.InvariantCulture);
 
-            // Find the time zone for Moscow
-            TimeZoneInfo moscowTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Russian Standard Time");
-            // Convert the UTC time to Moscow time
-            DateTime moscowDateTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, moscowTimeZone);
+            var moscowDateTime = Common.GetMoscowDateTime;
 
             if (notificationTaskDateTime < moscowDateTime)
                 return false;

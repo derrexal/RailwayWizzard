@@ -4,22 +4,24 @@ using RailwayWizzard.Shared;
 
 namespace RailwayWizzard.App
 {
-    public class NotificationTaskWorker : BackgroundService
+    public class NotificationTaskWorker : BaseRaiwayWizzardBackgroundService
     {
+        private const int runningInterval = 1000 * 60 * 1; //Интервал запуска (1 мин)
+
         private readonly IRobot _robot;
         private readonly IBotApi _botApi;
         private readonly IChecker _checker;
         private readonly ILogger<NotificationTaskWorker> _logger;
         private readonly ILogger<StepsUsingHttpClient> _stepsLogger;
         private readonly ISteps _steps;
-        private const int runningInterval = 1000 * 60 * 1; //Интервал запуска (1 мин)
 
         public NotificationTaskWorker(
             IRobot robot,
             IBotApi botApi,
             IChecker checker,
             ILogger<NotificationTaskWorker> logger, 
-            ILogger<StepsUsingHttpClient> stepsLogger)
+            ILogger<StepsUsingHttpClient> stepsLogger) 
+            : base(runningInterval, logger)
         {
             _robot = robot;
             _botApi = botApi;
@@ -29,19 +31,7 @@ namespace RailwayWizzard.App
             _steps = new StepsUsingHttpClient(_robot, _botApi, _checker, _stepsLogger);
         }
 
-        protected override async Task ExecuteAsync(CancellationToken cancellationToken)
-        {
-            while (!cancellationToken.IsCancellationRequested)
-            {
-                _logger.LogInformation($"{nameof(NotificationTaskWorker)} running at: {DateTimeOffset.Now}");
-
-                await DoWork();
-
-                await Task.Delay(runningInterval, cancellationToken);
-            }
-        }
-
-        private async Task DoWork()
+        protected override async Task DoWork()
         {
             List<Task> tasks = new();
             try
@@ -55,13 +45,6 @@ namespace RailwayWizzard.App
             {
                 _logger.LogError($"{nameof(NotificationTaskWorker)} {ex}");
             }
-            
-        }
-        
-        public override async Task StopAsync(CancellationToken cancellationToken)
-        {
-            _logger.LogInformation($"{nameof(NotificationTaskWorker)} stopped at: {DateTimeOffset.Now}");
-            await base.StopAsync(cancellationToken);
         }
     }
 }

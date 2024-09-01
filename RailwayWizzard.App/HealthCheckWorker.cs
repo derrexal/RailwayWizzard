@@ -6,34 +6,27 @@ namespace RailwayWizzard.App
     /// <summary>
     /// Периодически проверяет работоспособность сервиса получения информации от РЖД
     /// </summary>
-    public class HealthCheckWorker : BackgroundService
+    public class HealthCheckWorker : BaseRaiwayWizzardBackgroundService
     {
+        private const int runningInterval = 1000 * 60 * 10; // Интервал запуска (10 мин)
+        private const int maxTime = 30000; // Допустимое время выполнения проверки
+
         private readonly ILogger _logger;
         private readonly IBotApi _botApi;
         private readonly IRobot _robot;
-        private const int timeInterval = 1000 * 60 * 10; // Интервал запуска (10 мин)
-        private const int maxTime = 30000; // Допустимое время выполнения проверки
         
-        public HealthCheckWorker(ILogger<HealthCheckWorker> logger, IBotApi botApi, IRobot robot)
+        public HealthCheckWorker(
+            ILogger<HealthCheckWorker> logger, 
+            IBotApi botApi, 
+            IRobot robot)
+            : base(runningInterval, logger)
         {
             _botApi = botApi;
             _logger = logger;
             _robot = robot;
         }
 
-        protected override async Task ExecuteAsync(CancellationToken cancellationToken)
-        {
-            while (!cancellationToken.IsCancellationRequested)
-            {
-                _logger.LogInformation($"{nameof(HealthCheckWorker)} running at: {DateTimeOffset.Now}");
-
-                await DoWork();
-
-                await Task.Delay(timeInterval, cancellationToken);
-            }
-        }
-
-        private async Task DoWork()
+        protected override async Task DoWork()
         {
             // тестовые данные
             NotificationTask testNotificationTask = new NotificationTask
@@ -50,7 +43,9 @@ namespace RailwayWizzard.App
             {
                 //Время выполнения метода
                 var watch = System.Diagnostics.Stopwatch.StartNew();
+        
                 var freeSeats = await _robot.GetFreeSeatsOnTheTrain(testNotificationTask);
+                
                 watch.Stop();
                 var executionTime = watch.ElapsedMilliseconds;
 
@@ -78,16 +73,10 @@ namespace RailwayWizzard.App
             catch (Exception ex)
             {
                 string messageError = $"[{this.GetType().Name}] Рейс {testNotificationTask.ToCustomString()} возникла ошибка: {ex.Message}";
-                await _botApi.SendMessageForAdminAsync(messageError);
                 _logger.LogError(messageError);
+                await _botApi.SendMessageForAdminAsync(messageError);
                 throw; 
             }
-        }
-
-        public override async Task StopAsync(CancellationToken cancellationToken)
-        {
-            _logger.LogInformation($"{nameof(HealthCheckWorker)} stopped at: {DateTimeOffset.Now}");
-            await base.StopAsync(cancellationToken);
         }
     }
 }

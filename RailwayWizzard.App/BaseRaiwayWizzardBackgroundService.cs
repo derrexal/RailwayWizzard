@@ -1,7 +1,7 @@
 ﻿namespace RailwayWizzard.App
 {
     /// <summary>
-    /// Воркер который не работает в период с 03:20 по 04:00
+    /// Воркер который не работает в период с 03:20 по 04:10
     /// </summary>
     public abstract class BaseRaiwayWizzardBackgroundService : BackgroundService
     {

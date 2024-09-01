@@ -1,4 +1,6 @@
-﻿namespace RailwayWizzard.App
+﻿using RailwayWizzard.Shared;
+
+namespace RailwayWizzard.App
 {
     /// <summary>
     /// Воркер который не работает в период с 03:20 по 04:10
@@ -14,18 +16,17 @@
 
         public BaseRaiwayWizzardBackgroundService(int runningInterval, ILogger logger)
         {
-            _nameWorker = GetType().BaseType.ToString();
+            _nameWorker = GetType().Name.ToString();
             _runningInterval = runningInterval;
             _logger = logger;
         }
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            var todayTime = TimeOnly.FromDateTime(DateTime.Now);
+            var todayTime = TimeOnly.FromDateTime(Common.GetMoscowDateTime);
             
             while (!cancellationToken.IsCancellationRequested && 
-                todayTime < _startDownTime && 
-                todayTime > _endDownTime)
+                (todayTime <= _startDownTime || todayTime >= _endDownTime))
             {
                 _logger.LogInformation($"{_nameWorker} running at: {DateTimeOffset.Now}");
 

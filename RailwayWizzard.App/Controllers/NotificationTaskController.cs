@@ -23,20 +23,20 @@ namespace RailwayWizzard.App.Controllers
         }
 
         [HttpPost("CreateAndGetId")]
-        public async Task<IActionResult> CreateAndGetId(NotificationTask stationInfo)
+        public async Task<IActionResult> CreateAndGetId(NotificationTask notificationTask)
         {
             if (!ModelState.IsValid)
                 return BadRequest($"Request param is no valid: {ModelState}");
 
-            stationInfo.CreationTime = DateTime.Now;
-            stationInfo.IsActual = true;
-            stationInfo.IsWorked = false;
-            stationInfo.IsStopped = false;
-            _context.Add(stationInfo);
+            notificationTask.CreationTime = DateTime.Now;
+            notificationTask.IsActual = true;
+            notificationTask.IsWorked = false;
+            notificationTask.IsStopped = false;
+            _context.Add(notificationTask);
 
             await _context.SaveChangesAsync();
-            _logger.LogTrace($"Success create NotificationTask. Id:{stationInfo.Id} UserId:{stationInfo.UserId}");
-            return Ok(stationInfo.Id);
+            _logger.LogInformation($"Success create NotificationTask ID: {notificationTask.Id} Details: {notificationTask.ToCustomString()}");
+            return Ok(notificationTask.Id);
         }
 
         /// <summary>

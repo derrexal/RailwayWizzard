@@ -38,16 +38,16 @@ namespace RailwayWizzard.Robot.App
                 // Задача помечается статусом "В работе"
                 await _checker.SetIsWorkedNotificationTask(inputNotificationTask);
 
-                _logger.LogTrace($"Run {logMessage} in Thread:{Thread.CurrentThread.ManagedThreadId}");
-                    
+                _logger.LogInformation($"Run {logMessage} in Thread:{Thread.CurrentThread.ManagedThreadId}");
+
                 //Если во время выполнения задача стала неактуальна
                 if (!_checker.CheckActualNotificationTask(inputNotificationTask))
                 {
                     await _checker.SetIsNotActualAndIsNotWorked(inputNotificationTask);
 
-                    string notActualTaskMessage = $"Поиск остановлен - стала неактуальна задача {notificationTaskText}";
+                    string notActualTaskMessage = $"Поиск остановлен. {logMessage} стала неактуальна.";
                     
-                    _logger.LogTrace(notActualTaskMessage);
+                    _logger.LogInformation(notActualTaskMessage);
                     await _botApi.SendMessageForUserAsync(notActualTaskMessage,inputNotificationTask.UserId);
 
                     return;

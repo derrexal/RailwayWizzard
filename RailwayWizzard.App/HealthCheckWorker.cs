@@ -68,7 +68,7 @@ namespace RailwayWizzard.App
 
                 message = $"[{this.GetType().Name}] Рейс {testNotificationTask.ToCustomString()} проверка выполнена успешно." +
                     $"Время выполнения метода: {executionTime} мс";
-                _logger.LogTrace(message);
+                _logger.LogInformation(message);
             }
             catch (Exception ex)
             {

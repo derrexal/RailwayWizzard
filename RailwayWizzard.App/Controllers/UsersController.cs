@@ -40,7 +40,7 @@ namespace RailwayWizzard.App.Controllers
             }
 
             await _context.SaveChangesAsync();
-            _logger.LogTrace($"Success create or update User. IdTg:{user.IdTg} Username:{user.Username}");
+            _logger.LogInformation($"Success create or update User. IdTg:{user.IdTg} Username:{user.Username}");
             return Ok("Success User Create");
         }
     }

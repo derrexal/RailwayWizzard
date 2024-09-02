@@ -16,7 +16,7 @@ namespace RailwayWizzard.App
 
         public BaseRaiwayWizzardBackgroundService(int runningInterval, ILogger logger)
         {
-            _nameWorker = GetType().BaseType.ToString();
+            _nameWorker = GetType().Name.ToString();
             _runningInterval = runningInterval;
             _logger = logger;
         }

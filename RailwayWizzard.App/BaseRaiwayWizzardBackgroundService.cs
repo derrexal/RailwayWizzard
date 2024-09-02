@@ -1,4 +1,6 @@
-﻿namespace RailwayWizzard.App
+﻿using RailwayWizzard.Shared;
+
+namespace RailwayWizzard.App
 {
     /// <summary>
     /// Воркер который не работает в период с 03:20 по 04:10
@@ -21,11 +23,12 @@
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            var todayTime = TimeOnly.FromDateTime(DateTime.Now);
+            var todayTime = TimeOnly.FromDateTime(Common.GetMoscowDateTime);
             
-            while (!cancellationToken.IsCancellationRequested && 
-                todayTime < _startDownTime && 
-                todayTime > _endDownTime)
+            // Сервис РЖД проводит тех. работы
+            var IsDownTime = todayTime > _startDownTime && todayTime < _endDownTime;
+
+            while (!cancellationToken.IsCancellationRequested && !IsDownTime)
             {
                 _logger.LogInformation($"{_nameWorker} running at: {DateTimeOffset.Now}");
 

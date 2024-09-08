@@ -75,7 +75,6 @@ namespace RailwayWizzard.App
                 string messageError = $"[{this.GetType().Name}] Рейс {testNotificationTask.ToCustomString()} возникла ошибка: {ex.Message}";
                 _logger.LogError(messageError);
                 await _botApi.SendMessageForAdminAsync(messageError);
-                throw; 
             }
         }
     }

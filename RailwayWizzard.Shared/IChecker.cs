@@ -12,7 +12,7 @@ namespace RailwayWizzard.Shared
         /// </summary>
         /// <param name="task"></param>
         /// <returns></returns>
-        public bool CheckActualNotificationTask(NotificationTask task);
+        public bool NotificationTaskIsActual(NotificationTask task);
 
         /// <summary>
         /// Получает список задач со статусом "Актуально", "Не остановлена" и над которыми еще не работают

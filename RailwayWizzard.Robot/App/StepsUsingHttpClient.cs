@@ -41,7 +41,7 @@ namespace RailwayWizzard.Robot.App
                 _logger.LogInformation($"Run {logMessage} in Thread:{Thread.CurrentThread.ManagedThreadId}");
 
                 //Если во время выполнения задача стала неактуальна
-                if (!_checker.CheckActualNotificationTask(inputNotificationTask))
+                if (!_checker.NotificationTaskIsActual(inputNotificationTask))
                 {
                     await _checker.SetIsNotActualAndIsNotWorked(inputNotificationTask);
 

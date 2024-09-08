@@ -17,7 +17,7 @@ namespace RailwayWizzard.Shared
         }
 
         /// <inheritdoc/>
-        public bool CheckActualNotificationTask(NotificationTask task)
+        public bool NotificationTaskIsActual(NotificationTask task)
         {
             DateTime notificationTaskDateTime = DateTime.ParseExact(
                         task.DateFrom.ToShortDateString() + " " + task.TimeFrom,
@@ -142,7 +142,7 @@ namespace RailwayWizzard.Shared
                 var notificationTasks = await context.NotificationTask.Where(t => t.IsActual == true).ToListAsync();
 
                 foreach (var notificationTask in notificationTasks)
-                    if (!CheckActualNotificationTask(notificationTask))
+                    if (!NotificationTaskIsActual(notificationTask))
                     {
                         notificationTask.IsActual = false;
                         context.NotificationTask.Update(notificationTask);

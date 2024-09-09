@@ -11,6 +11,8 @@ namespace RailwayWizzard.Robot.App;
 public class BotApi : IBotApi
 {
     private const string API_BOT_SEND_MESSAGE_URL = "http://bot_service:5000/api/sendMessageForUser";
+    private const int DEFAULT_DELAY_TIME = 5000;
+
     private readonly IConfiguration _configuration;
 
     public BotApi(IConfiguration configuration)
@@ -31,8 +33,15 @@ public class BotApi : IBotApi
         request.Content = JsonContent.Create(messageToUser);
 
         var response = await httpClient.SendAsync(request);
+        
+        // Retry send
         if (response.StatusCode != HttpStatusCode.OK)
-            throw new Exception($"Метод отправки сообщения пользователю:{userId} завершился с кодом:{response.StatusCode} {response}");
+        {
+            await Task.Delay(DEFAULT_DELAY_TIME);
+            response = await httpClient.SendAsync(request);
+            if (response.StatusCode != HttpStatusCode.OK)
+                throw new Exception($"Метод отправки сообщения пользователю:{userId} завершился с кодом:{response.StatusCode}.\nСообщение:{message}.\nОтвет сервера:{response}");
+        }
     }
     
     /// <summary>

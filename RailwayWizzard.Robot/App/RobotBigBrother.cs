@@ -26,12 +26,35 @@ namespace RailwayWizzard.Robot.App
         /// <returns></returns>
         public async Task<List<string>> GetFreeSeatsOnTheTrain(NotificationTask inputNotificationTask)
         {
+            const int retryCount = 3;
+            
+            var freeSeats = await GetFreeSeatsOnTheTrainHelper(inputNotificationTask);
+
+            if(freeSeats.Count > 0) return freeSeats;
+
+            for(int i = 0; i <= retryCount; i++)
+            {
+                if (freeSeats.Count == 0)
+                {
+                    await Task.Delay(60000);
+
+                    freeSeats = await GetFreeSeatsOnTheTrainHelper(inputNotificationTask);
+                }
+                else
+                    break;
+            }
+
+            return freeSeats;
+        }
+
+        public async Task<List<string>> GetFreeSeatsOnTheTrainHelper(NotificationTask inputNotificationTask)
+        {
             var textResponse = await GetTrainInformationByParameters(inputNotificationTask);
             //TODO: нужно смапить в DTO чтобы этот огромный объект не таскать по памяти
             RootBigBrother? myDeserializedClass = JsonConvert.DeserializeObject<RootBigBrother>(textResponse);
-            
+
             if (myDeserializedClass == null)
-                throw new NullReferenceException ($"Сервис РЖД при запросе списка свободных мест вернул не стандартный ответ. Ответ:{textResponse}");
+                throw new NullReferenceException($"Сервис РЖД при запросе списка свободных мест вернул не стандартный ответ. Ответ:{textResponse}");
             if (myDeserializedClass.Trains.Count == 0)
             {
                 _logger.LogError($"Сервис РЖД при запросе списка свободных мест вернул ответ в котором нет доступных поездок. Ответ:{textResponse}");
@@ -41,11 +64,11 @@ namespace RailwayWizzard.Robot.App
             //вытаскиваем свободные места по запрашиваемому рейсу
             var currentRoute = GetCurrentRouteFromResponse(myDeserializedClass, inputNotificationTask);
             if (currentRoute.Count == 0) return new List<string>();
+
             //Формируем текстовый ответ пользователю
             var result = SupportingMethod(currentRoute);
             return result;
         }
-
         /// <summary>
         /// Получение информации о рейсах по запрашиваемым параметрам
         /// </summary>

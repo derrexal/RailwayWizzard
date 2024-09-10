@@ -5,17 +5,20 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using RailwayWizzard.Core;
 using RailwayWizzard.EntityFrameworkCore.Data;
-
+using RailwayWizzard.Shared;
 
 namespace RailwayWizzard.B2B
 {
     public class PassRzd: IPassRzd
     {
         private readonly RailwayWizzardAppContext _context;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public PassRzd(RailwayWizzardAppContext context)
+
+        public PassRzd(RailwayWizzardAppContext context, IHttpClientFactory httpClientFactory)
         {
             _context = context;
+            _httpClientFactory = httpClientFactory;
         }
 
         public async Task<List<RootStations>> GetStations(string inputStation)
@@ -39,11 +42,15 @@ namespace RailwayWizzard.B2B
         {
             var uriInputStation = Uri.EscapeDataString(inputStation);
             string url = $"https://pass.rzd.ru/suggester/?stationNamePart={uriInputStation}&lang=ru";
-            HttpClient client = new HttpClient();
-            using HttpRequestMessage request = new (HttpMethod.Get, url);
+            using var request = new HttpRequestMessage(HttpMethod.Get, url);
             request.Headers.Add("Host", "pass.rzd.ru");
-            using HttpResponseMessage response = await client.SendAsync(request);
+            
+            using var client = _httpClientFactory.CreateClient();
+            
+            using var response = await client.SendAsync(request);
+            
             response.EnsureSuccessStatusCode();
+            
             var textResponse = await response.Content.ReadAsStringAsync();
             return textResponse;
 ;       }
@@ -70,13 +77,17 @@ namespace RailwayWizzard.B2B
             var stationTo = await GetStationInfo(scheduleDto.StationTo);
             if (stationTo is null || stationFrom is null) throw new ArgumentException($"Не найден ExpressCode по станциям {scheduleDto.StationFrom},{scheduleDto.StationTo}. Вероятно в них допущена ошибка");
 
-            HttpClient client = new HttpClient();
             string url = "https://pass.rzd.ru/basic-schedule/public/ru?STRUCTURE_ID=5249&layer_id=5526&refererLayerId=5526&" +
                          $"st_from={stationFrom.ExpressCode}&st_to={stationTo.ExpressCode}&st_from_name={scheduleDto.StationFrom}&st_to_name={scheduleDto.StationTo}&day={scheduleDto.Date}";
-            using HttpRequestMessage request = new(HttpMethod.Get, url);
+            using var request = new HttpRequestMessage(HttpMethod.Get, url);
             request.Headers.Add("Host", "pass.rzd.ru");
-            using HttpResponseMessage response = await client.SendAsync(request);
+
+            using var client = _httpClientFactory.CreateClient();
+            
+            using var response = await client.SendAsync(request);
+            
             response.EnsureSuccessStatusCode();
+            
             var textResponse = await response.Content.ReadAsStringAsync();
             if (textResponse.IsNullOrEmpty()) throw new Exception("Сервис РЖД при запросе списка свободных мест вернул пустой ответ");
             return textResponse;
@@ -91,10 +102,9 @@ namespace RailwayWizzard.B2B
         private IList<string> ParseScheduleText(string textResponse, string dateFrom)
         {
             var availableTime = new List<string>();
-            TimeZoneInfo moscowTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Russian Standard Time");
-            DateTime moscowDateTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, moscowTimeZone);
 
-            string todayTime = moscowDateTime.ToString("HH:mm");
+            string moscowTodayTime = Common.GetMoscowDateTime.ToString("HH:mm");
+
             IHtmlDocument document = new HtmlParser().ParseDocument(textResponse);
             var table = document.QuerySelector("table.basicSched_trainsInfo_table");
             if (table != null)
@@ -106,12 +116,14 @@ namespace RailwayWizzard.B2B
                     if (cells.Length > 1)
                     {
                         var timeRailwayStr = cells[1].TextContent;
+                        // Если поезд на сегодня - проверяем допустимое для ввода время
                         if (dateFrom == DateTime.Now.ToString("dd.MM.yyyy"))
                         {
                             // Если время из расписания больше чем сейчас - добавляем его в список доступных для выбора
-                            if (String.CompareOrdinal(timeRailwayStr, todayTime) > 0)
+                            if (String.CompareOrdinal(timeRailwayStr, moscowTodayTime) > 0)
                                 availableTime.Add(timeRailwayStr);
                         }
+                        // Иначе просто отдаем расписание
                         else
                             availableTime.Add(timeRailwayStr);
                     }

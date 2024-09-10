@@ -40,7 +40,9 @@ namespace RailwayWizzard.App
                     c.TimestampFormat = "[yyyy-MM-dd HH:mm:ss] ";
                 });
             });
-            
+
+            builder.Services.AddHttpClient();
+
             var app = builder.Build();
 
             var factory = app.Services.GetRequiredService<IDbContextFactory<RailwayWizzardAppContext>>();

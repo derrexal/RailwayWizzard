@@ -14,10 +14,12 @@ public class BotApi : IBotApi
     private const int DEFAULT_DELAY_TIME = 5000;
 
     private readonly IConfiguration _configuration;
+    private readonly IHttpClientFactory _httpClientFactory;
 
-    public BotApi(IConfiguration configuration)
+    public BotApi(IConfiguration configuration, IHttpClientFactory httpClientFactory)
     {
         _configuration = configuration;
+        _httpClientFactory = httpClientFactory;
     }
 
     /// <summary>
@@ -28,11 +30,11 @@ public class BotApi : IBotApi
     public async Task SendMessageForUserAsync(string message, long userId)
     {
         ResponseToUser messageToUser = new ResponseToUser{ Message = message, UserId = userId };
-        using HttpClient httpClient = new HttpClient();
-        using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, API_BOT_SEND_MESSAGE_URL);
+        using var request = new HttpRequestMessage(HttpMethod.Post, API_BOT_SEND_MESSAGE_URL);
         request.Content = JsonContent.Create(messageToUser);
-
-        var response = await httpClient.SendAsync(request);
+        using var httpClient = _httpClientFactory.CreateClient(); ;
+        
+        using var response = await httpClient.SendAsync(request);
         
         // Retry send
         if (response.StatusCode != HttpStatusCode.OK)

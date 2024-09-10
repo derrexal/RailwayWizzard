@@ -13,10 +13,13 @@ namespace RailwayWizzard.Robot.App
     public class RobotBigBrother: IRobot
     {
         private readonly ILogger<RobotBigBrother> _logger;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public RobotBigBrother(ILogger<RobotBigBrother> logger)
+
+        public RobotBigBrother(ILogger<RobotBigBrother> logger, IHttpClientFactory httpClientFactory)
         {
             _logger = logger;
+            _httpClientFactory = httpClientFactory;
         }
 
         /// <summary>
@@ -84,7 +87,7 @@ namespace RailwayWizzard.Robot.App
             url = url + ksid;
 
             //Устаналиваем необходимые headers и body
-            var request = new HttpRequestMessage(HttpMethod.Post, url);
+            using var request = new HttpRequestMessage(HttpMethod.Post, url);
             request.Headers.Add("Accept", "application/json, text/plain, */*");
             request.Headers.Add("Accept-Language", "ru-RU,ru;q=0.9");
             request.Headers.Add("Connection", "keep-alive");
@@ -105,8 +108,8 @@ namespace RailwayWizzard.Robot.App
                 , null, "application/json");
 
             //отправляем запрос
-            var client = new HttpClient();
-            var response = await client.SendAsync(request);
+            using var client = _httpClientFactory.CreateClient();
+            using var response = await client.SendAsync(request);
             response.EnsureSuccessStatusCode();
 
             var textResponse = await response.Content.ReadAsStringAsync();
@@ -191,9 +194,9 @@ namespace RailwayWizzard.Robot.App
             string url = "https://w-22900.fp.kaspersky-labs.com/oxwdsq?cid=22900";
             try
             {
-                HttpClient client = new HttpClient();
-                using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
-                using HttpResponseMessage response = await client.SendAsync(request);
+                using var request = new HttpRequestMessage(HttpMethod.Get, url);
+                using var client = _httpClientFactory.CreateClient();
+                using var response = await client.SendAsync(request);
                 response.EnsureSuccessStatusCode();
                 var textResponse = await response.Content.ReadAsStringAsync();
                 

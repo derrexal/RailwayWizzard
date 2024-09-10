@@ -73,11 +73,12 @@ namespace RailwayWizzard.Robot.App
                     message = message.Append($"{char.ConvertFromUtf32(0x26D4)} {notificationTaskText}" + 
                                "\n Свободных мест больше нет");
                 // Если свободных мест не было, а сейчас они появились
+                // Или если изменилось количество свободных мест
                 else
                     message = message.Append($"{char.ConvertFromUtf32(0x2705)} {notificationTaskText}" +
                               $"\n{String.Join("\n", freeSeats.ToArray())}" +
                               "\nОбнаружены свободные места\n");
-                    
+                                    
                 // Отправка сообщения пользователю
                 await _botApi.SendMessageForUserAsync(message.ToString(), inputNotificationTask.UserId);
                 
@@ -95,7 +96,7 @@ namespace RailwayWizzard.Robot.App
             catch (Exception e)
             {
                 await _checker.SetIsNotWorked(inputNotificationTask);
-                string messageError = $"{nameof(StepsUsingHttpClient)} Неизвестная ошибка метода обработки задач. {logMessage}\n {e}";
+                string messageError = $"Fatal Error. {logMessage}\n {e}";
                 _logger.LogError(messageError);
                 await _botApi.SendMessageForAdminAsync(messageError);
                 throw;

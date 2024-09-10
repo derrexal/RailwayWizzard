@@ -26,6 +26,8 @@ namespace RailwayWizzard.Shared
 
             var moscowDateTime = Common.GetMoscowDateTime;
 
+            Console.WriteLine($"DEBUG CheckTime notificationTaskDateTime:{notificationTaskDateTime} moscowDateTime:{moscowDateTime}");
+            
             if (notificationTaskDateTime < moscowDateTime)
                 return false;
             return true;

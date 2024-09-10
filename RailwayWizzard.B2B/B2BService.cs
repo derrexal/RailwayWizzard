@@ -9,33 +9,45 @@ using RailwayWizzard.Shared;
 
 namespace RailwayWizzard.B2B
 {
-    public class PassRzd: IPassRzd
+    public class B2BService: IB2BService
     {
         private readonly RailwayWizzardAppContext _context;
         private readonly IHttpClientFactory _httpClientFactory;
 
 
-        public PassRzd(RailwayWizzardAppContext context, IHttpClientFactory httpClientFactory)
+        public B2BService(RailwayWizzardAppContext context, IHttpClientFactory httpClientFactory)
         {
             _context = context;
             _httpClientFactory = httpClientFactory;
         }
 
-        public async Task<List<RootStations>> GetStations(string inputStation)
-        {
-            var textResponse = await GetStationsText(inputStation);
-            if (textResponse.IsNullOrEmpty()) { return new List<RootStations>(); }
-            var stations = DeserializeStationsText(textResponse);
-
-            if (stations.Count>0) await CreateStationsInfoAsync(stations);
-            return stations;
-        }
 
         public async Task<IList<string>> GetAvailableTimes(ScheduleDto scheduleDto)
         {
             var text = await GetScheduleText(scheduleDto);
             var availableTimes = ParseScheduleText(text, scheduleDto.Date);
             return availableTimes;
+        }
+
+        public async Task<List<StationInfo>> StationValidate(string stationName)
+        {
+            //Ищем станцию по полному соответствию
+            var station = await GetStationInfo(stationName);
+            if (station is not null) return new List<StationInfo> { station };
+
+            //Ищем станцию по НЕполному соответствию
+            var stations = await GetStationsInfo(stationName);
+            return stations;
+        }
+
+        private async Task<List<StationFromJson>> GetStations(string inputStation)
+        {
+            var textResponse = await GetStationsText(inputStation);
+            if (textResponse.IsNullOrEmpty()) { return new List<StationFromJson>(); }
+            var stations = DeserializeStationsText(textResponse);
+
+            if (stations.Count > 0) await CreateStationsInfoAsync(stations);
+            return stations;
         }
 
         private async Task<string> GetStationsText(string inputStation)
@@ -55,9 +67,9 @@ namespace RailwayWizzard.B2B
             return textResponse;
 ;       }
 
-        private List<RootStations> DeserializeStationsText(string textResponse)
+        private List<StationFromJson> DeserializeStationsText(string textResponse)
         {
-            var stations = JsonConvert.DeserializeObject<List<RootStations>>(textResponse);
+            var stations = JsonConvert.DeserializeObject<List<StationFromJson>>(textResponse);
             if (stations!.Count == 0)
                 throw new NullReferenceException(
                     $"Сервис РЖД при запросе списка свободных мест вернул ответ в котором нет поездок. Ответ:{textResponse}");
@@ -138,7 +150,7 @@ namespace RailwayWizzard.B2B
         /// </summary>
         /// <param name="stationName"></param>
         /// <returns></returns>
-        public async Task<StationInfo?> GetStationInfo(string stationName)
+        private async Task<StationInfo?> GetStationInfo(string stationName)
         {
             //Если есть в БД
             var stationInfo = await _context.StationInfo.SingleOrDefaultAsync(s => s.StationName == stationName);
@@ -175,23 +187,12 @@ namespace RailwayWizzard.B2B
                 .ToList();
         }
 
-        public async Task<List<StationInfo>> StationValidate(string stationName)
-        {
-            //Ищем станцию по полному соответствию
-            var station = await GetStationInfo(stationName);
-            if (station is not null) return new List<StationInfo> { station}; 
-
-            //Ищем станцию по НЕполному соответствию
-            var stations = await GetStationsInfo(stationName);
-            return stations;
-        }
-
         /// <summary>
         /// Добавляет в таблицу AppStationInfo новые записи
         /// </summary>
         /// <param name="rootStations"></param>
         /// <returns></returns>
-        private async Task CreateStationsInfoAsync(List<RootStations> rootStations)
+        private async Task CreateStationsInfoAsync(List<StationFromJson> rootStations)
         {
             foreach (var rootStation in rootStations)
                 if(await _context.StationInfo.AnyAsync(s=>s.ExpressCode==rootStation.c) is false)

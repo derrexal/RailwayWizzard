@@ -1,6 +1,9 @@
 ﻿namespace RailwayWizzard.B2B
 {
-    public class RootStations
+    /// <summary>
+    /// Класс станции получаемой путем десериализации из json
+    /// </summary>
+    public class StationFromJson
     {
         public string n { get; set; }
         public int c { get; set; }

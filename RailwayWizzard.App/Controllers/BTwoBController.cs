@@ -9,10 +9,11 @@ namespace RailwayWizzard.App.Controllers
     [Route("[controller]")]
     public class BTwoBController : Controller
     {
-        private readonly IPassRzd _passRzd;
+        private readonly IB2BService _b2bService;
 
-        public BTwoBController(IPassRzd passRzd) =>
-            _passRzd = passRzd;
+        //TODO: rename controller for B2B service
+        public BTwoBController(IB2BService b2bService) =>
+            _b2bService = b2bService;
 
 
         [HttpGet("GetAvailableTimes")]
@@ -25,7 +26,7 @@ namespace RailwayWizzard.App.Controllers
             scheduleDto.StationFrom = scheduleDto.StationFrom.ToUpper();
             scheduleDto.StationTo = scheduleDto.StationTo.ToUpper();
 
-            return Ok(await _passRzd.GetAvailableTimes(scheduleDto));
+            return Ok(await _b2bService.GetAvailableTimes(scheduleDto));
         }   
 
         [HttpGet("GetStationValidate")]
@@ -34,7 +35,7 @@ namespace RailwayWizzard.App.Controllers
             if (!ModelState.IsValid)
                 return BadRequest($"Request param is no valid: {ModelState}");
 
-            return Ok(await _passRzd.StationValidate(inputStation));
+            return Ok(await _b2bService.StationValidate(inputStation));
         }
     }
 }

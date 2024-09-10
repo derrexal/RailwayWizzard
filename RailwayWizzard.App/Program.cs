@@ -21,7 +21,7 @@ namespace RailwayWizzard.App
             builder.Services.AddTransient<IBotApi, BotApi>();
             builder.Services.AddTransient<IRobot, RobotBigBrother>();
             builder.Services.AddTransient<ISteps, StepsUsingHttpClient>();
-            builder.Services.AddTransient<IPassRzd, PassRzd>();
+            builder.Services.AddTransient<IB2BService, B2BService>();
 
             builder.Services.AddDbContextFactory<RailwayWizzardAppContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("RailwayWizzardAppContext") 

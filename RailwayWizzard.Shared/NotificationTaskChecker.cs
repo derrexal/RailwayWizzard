@@ -26,7 +26,7 @@ namespace RailwayWizzard.Shared
                         "MM/dd/yyyy HH:mm",
                         CultureInfo.InvariantCulture);
 
-            var notificationTaskIsActual = moscowDateTime > notificationTaskDateTime;
+            var notificationTaskIsActual = notificationTaskDateTime > moscowDateTime;
 
             Console.WriteLine($"DEBUG CheckTime " +
                 $"moscowDateTime:{moscowDateTime} " +
@@ -34,8 +34,8 @@ namespace RailwayWizzard.Shared
                 $"notificationTaskIsActual:{notificationTaskIsActual}");
 
             if (notificationTaskIsActual)
-                return false;
-            return true;
+                return true;
+            return false;
         }
 
         /// <inheritdoc/>

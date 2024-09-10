@@ -87,13 +87,15 @@ namespace RailwayWizzard.Robot.App
 
                 //Задача закончила свое выполнение
                 await _checker.SetIsNotWorked(inputNotificationTask);
-                
+
+                _logger.LogInformation($"Stop {logMessage} in Thread:{Thread.CurrentThread.ManagedThreadId}");
+
                 return;
             }
             catch (Exception e)
             {
                 await _checker.SetIsNotWorked(inputNotificationTask);
-                string messageError = $"Неизвестная ошибка метода обработки задач. {logMessage}\n {e}";
+                string messageError = $"{nameof(StepsUsingHttpClient)} Неизвестная ошибка метода обработки задач. {logMessage}\n {e}";
                 _logger.LogError(messageError);
                 await _botApi.SendMessageForAdminAsync(messageError);
                 throw;

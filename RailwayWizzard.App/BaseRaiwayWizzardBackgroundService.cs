@@ -28,6 +28,8 @@ namespace RailwayWizzard.App
             // Сервис РЖД проводит тех. работы
             var IsDownTime = todayTime > _startDownTime && todayTime < _endDownTime;
 
+            _logger.LogInformation($"DEBUG DownTimeCheck todayTime:{todayTime} IsDownTime{IsDownTime}");
+
             while (!cancellationToken.IsCancellationRequested && !IsDownTime)
             {
                 _logger.LogInformation($"{_nameWorker} running at: {DateTimeOffset.Now}");

@@ -19,20 +19,14 @@ namespace RailwayWizzard.Shared
         /// <inheritdoc/>
         public bool NotificationTaskIsActual(NotificationTask task)
         {
+            DateTime notificationTaskDateTime = DateTime.ParseExact(
+            task.DateFrom.ToShortDateString() + " " + task.TimeFrom,
+            "MM/dd/yyyy HH:mm",
+            CultureInfo.InvariantCulture);
+
             var moscowDateTime = Common.GetMoscowDateTime;
 
-            DateTime notificationTaskDateTime = DateTime.ParseExact(
-                        task.DateFrom.ToShortDateString() + " " + task.TimeFrom,
-                        "MM/dd/yyyy HH:mm",
-                        CultureInfo.InvariantCulture);
-
             var notificationTaskIsActual = notificationTaskDateTime > moscowDateTime;
-
-            Console.WriteLine($"DEBUG CheckTime " +
-                $"moscowDateTime:{moscowDateTime} " +
-                $"notificationTaskDateTime:{notificationTaskDateTime} " +
-                $"notificationTaskIsActual:{notificationTaskIsActual}");
-
             if (notificationTaskIsActual)
                 return true;
             return false;

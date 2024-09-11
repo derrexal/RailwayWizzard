@@ -34,7 +34,8 @@ public class BotApi : IBotApi
         request.Content = JsonContent.Create(messageToUser);
         using var httpClient = _httpClientFactory.CreateClient(); ;
         
-        using var response = await httpClient.SendAsync(request);
+        // не использую using т.к. придется внизу другую переменную юзать (Compiler Error)
+        var response = await httpClient.SendAsync(request);
         
         // Retry send
         if (response.StatusCode != HttpStatusCode.OK)

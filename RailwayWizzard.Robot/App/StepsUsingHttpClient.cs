@@ -61,7 +61,11 @@ namespace RailwayWizzard.Robot.App
                 if (await _checker.ResultIsLast(inputNotificationTask, resultFreeSeats!))
                 {
                     //Задача закончила свое выполнение
+                    // ToDo: дублирование с кодом ниже - убрать
                     await _checker.SetIsNotWorked(inputNotificationTask);
+
+                    _logger.LogInformation($"Stop {logMessage} in Thread:{Thread.CurrentThread.ManagedThreadId}");
+
                     return;
                 }
 

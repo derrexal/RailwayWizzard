@@ -1,15 +1,16 @@
 ﻿using RailwayWizzard.Core;
 using RailwayWizzard.Robot.App;
+using RailwayWizzard.Shared;
 
 namespace RailwayWizzard.App
 {
     /// <summary>
     /// Периодически проверяет работоспособность сервиса получения информации от РЖД
     /// </summary>
-    public class HealthCheckWorker : BaseRaiwayWizzardBackgroundService
+    public class HealthCheckWorker : BackgroundService
     {
-        private const int runningInterval = 1000 * 60 * 10; // Интервал запуска (10 мин)
-        private const int maxTime = 30000; // Допустимое время выполнения проверки
+        private const int RUN_INTERVAL = 1000 * 60 * 10; // Интервал запуска (10 мин)
+        private const int MAX_RUN_TIME = 30000; // Допустимое время выполнения проверки
 
         private readonly ILogger _logger;
         private readonly IBotApi _botApi;
@@ -19,14 +20,28 @@ namespace RailwayWizzard.App
             ILogger<HealthCheckWorker> logger, 
             IBotApi botApi, 
             IRobot robot)
-            : base(runningInterval, logger)
         {
             _botApi = botApi;
             _logger = logger;
             _robot = robot;
         }
 
-        protected override async Task DoWork()
+        protected override async Task ExecuteAsync(CancellationToken cancellationToken)
+        {
+            var isDownTime = Common.IsDownTimeRzd();
+
+            while (!cancellationToken.IsCancellationRequested && !isDownTime)
+            {
+                _logger.LogInformation($"{nameof(HealthCheckWorker)} running at: {Common.GetMoscowDateTime} Moscow time");
+
+                await DoWork();
+
+                await Task.Delay(RUN_INTERVAL, cancellationToken);
+            }
+        }
+
+
+        protected async Task DoWork()
         {
             // тестовые данные
             NotificationTask testNotificationTask = new NotificationTask
@@ -40,7 +55,7 @@ namespace RailwayWizzard.App
                 CarTypes = new List<CarTypeEnum>{CarTypeEnum.Sedentary, CarTypeEnum.ReservedSeat, CarTypeEnum.Compartment, CarTypeEnum.Luxury}
             };
 
-            string baseMessage = $"[{this.GetType().Name}] Рейс {testNotificationTask.ToCustomString()} ";
+            string baseMessage = $"[{nameof(HealthCheckWorker)}] Время:{Common.GetMoscowDateTime} Рейс {testNotificationTask.ToCustomString()} ";
 
             try
             {
@@ -54,10 +69,11 @@ namespace RailwayWizzard.App
                 var executionTime = watch.ElapsedMilliseconds;
                 
                 //TODO: вынести в Exceptions
+                //TODO: Формировать message и только один раз залогировать. 
                 string message = "";
-                if (executionTime > maxTime)
+                if (executionTime > MAX_RUN_TIME)
                 {
-                    message =  baseMessage + $"превышено допустимое время выполнения({maxTime} мс): {executionTime} мс";
+                    message =  baseMessage + $"превышено допустимое время выполнения({MAX_RUN_TIME} мс): {executionTime} мс";
                     _logger.LogWarning(message);
                 }
                 
@@ -78,6 +94,13 @@ namespace RailwayWizzard.App
                 _logger.LogError(messageError);
                 await _botApi.SendMessageForAdminAsync(messageError);
             }
+        }
+ 
+        public override async Task StopAsync(CancellationToken cancellationToken)
+        {
+            _logger.LogInformation($"{nameof(HealthCheckWorker)} stopped at: {Common.GetMoscowDateTime} Moscow time");
+
+            await base.StopAsync(cancellationToken);
         }
     }
 }

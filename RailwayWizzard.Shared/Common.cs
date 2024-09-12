@@ -25,5 +25,24 @@
 
             }
         }
+
+        /// <summary>
+        /// Возвращает результат проверки текущего времени на попадание в технические работы у РЖД (03:20-04:10).
+        /// </summary>
+        /// <returns>Результат проверки.</returns>
+        public static bool IsDownTimeRzd()
+        {
+            var startDownTime = new TimeOnly(03, 20);
+            var endDownTime = new TimeOnly(04, 10);
+
+            var todayTime = TimeOnly.FromDateTime(GetMoscowDateTime);
+
+            var IsDownTime = startDownTime < todayTime && todayTime < endDownTime;
+            
+            //DEBUG
+            Console.WriteLine($"DEBUG DownTimeCheck todayTime:{todayTime} IsDownTime{IsDownTime}");
+            
+            return IsDownTime;
+        }
     }
 }

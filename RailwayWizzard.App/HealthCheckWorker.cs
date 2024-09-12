@@ -28,9 +28,7 @@ namespace RailwayWizzard.App
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            var isDownTime = Common.IsDownTimeRzd();
-
-            while (!cancellationToken.IsCancellationRequested && !isDownTime)
+            while (!cancellationToken.IsCancellationRequested)
             {
                 _logger.LogInformation($"{nameof(HealthCheckWorker)} running at: {Common.GetMoscowDateTime} Moscow time");
 
@@ -43,6 +41,9 @@ namespace RailwayWizzard.App
 
         protected async Task DoWork()
         {
+            var isDownTime = Common.IsDownTimeRzd();
+            if (isDownTime) return;
+
             // тестовые данные
             NotificationTask testNotificationTask = new NotificationTask
             {

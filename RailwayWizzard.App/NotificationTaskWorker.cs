@@ -31,11 +31,10 @@ namespace RailwayWizzard.App
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            var isDownTime = Common.IsDownTimeRzd();
-
-            while (!cancellationToken.IsCancellationRequested && !isDownTime)
+            while (!cancellationToken.IsCancellationRequested)
             {
                 _logger.LogInformation($"{nameof(NotificationTaskWorker)} running at: {Common.GetMoscowDateTime} Moscow time");
+                
                 await DoWork();
 
                 await Task.Delay(RUN_INTERVAL, cancellationToken);
@@ -44,6 +43,9 @@ namespace RailwayWizzard.App
 
         protected async Task DoWork()
         {
+            var isDownTime = Common.IsDownTimeRzd();
+            if (isDownTime) return;
+
             List<Task> tasks = new();
             try
             {

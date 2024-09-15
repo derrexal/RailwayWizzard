@@ -30,7 +30,9 @@ public class BotApi : IBotApi
     public async Task SendMessageForUserAsync(string message, long userId)
     {
         ResponseToUser messageToUser = new ResponseToUser{ Message = message, UserId = userId };
-        using var request = new HttpRequestMessage(HttpMethod.Post, API_BOT_SEND_MESSAGE_URL);
+        
+        // не использую using т.к. придется внизу другую переменную юзать (Compiler Error)
+        var request = new HttpRequestMessage(HttpMethod.Post, API_BOT_SEND_MESSAGE_URL);
         request.Content = JsonContent.Create(messageToUser);
         using var httpClient = _httpClientFactory.CreateClient(); ;
         
@@ -39,8 +41,11 @@ public class BotApi : IBotApi
         
         // Retry send
         if (response.StatusCode != HttpStatusCode.OK)
-        {
+        {   
             await Task.Delay(DEFAULT_DELAY_TIME);
+
+            request = new HttpRequestMessage(HttpMethod.Post, API_BOT_SEND_MESSAGE_URL);
+            request.Content = JsonContent.Create(messageToUser);
             response = await httpClient.SendAsync(request);
             if (response.StatusCode != HttpStatusCode.OK)
                 throw new Exception($"Метод отправки сообщения пользователю:{userId} завершился с кодом:{response.StatusCode}.\nСообщение:{message}.\nОтвет сервера:{response}");

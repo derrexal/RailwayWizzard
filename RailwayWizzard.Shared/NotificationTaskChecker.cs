@@ -1,8 +1,7 @@
 ﻿using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 using RailwayWizzard.Core;
-using RailwayWizzard.EntityFrameworkCore.Data;
-
+using RailwayWizzard.EntityFrameworkCore;
 
 namespace RailwayWizzard.Shared
 {

@@ -27,7 +27,6 @@ namespace RailwayWizzard.App
                 options.UseNpgsql(builder.Configuration.GetConnectionString("RailwayWizzardAppContext") 
                                   ?? throw new InvalidOperationException("Connection string 'RailwayWizzardAppContext' not found.")));
 
-            // Add services to the container.
             builder.Services.AddControllers();
 
             builder.Services.AddHostedService<NotificationTaskWorker>();
@@ -54,7 +53,6 @@ namespace RailwayWizzard.App
                 context.NotificationTask.ExecuteUpdate(t =>
                     t.SetProperty(t => t.IsWorked, false));
             }
-
 
             app.UseAuthorization();
 

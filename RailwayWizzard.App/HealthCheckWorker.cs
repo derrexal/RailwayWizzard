@@ -63,7 +63,7 @@ namespace RailwayWizzard.App
                 //Время выполнения метода
                 var watch = System.Diagnostics.Stopwatch.StartNew();
         
-                var freeSeats = await _robot.GetFreeSeatsOnTheTrain(testNotificationTask);
+                var freeSeatsText = await _robot.GetFreeSeatsOnTheTrain(testNotificationTask);
                 
                 watch.Stop();
 
@@ -78,7 +78,7 @@ namespace RailwayWizzard.App
                     _logger.LogWarning(message);
                 }
                 
-                if (freeSeats.Count==0)
+                if (freeSeatsText == "")
                 {
                     message = baseMessage + $"не обнаружено свободных мест. Время выполнения метода: {executionTime} мс";
                     _logger.LogWarning(message);

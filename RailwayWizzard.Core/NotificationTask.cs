@@ -8,7 +8,7 @@ using Abp.Domain.Entities;
 namespace RailwayWizzard.Core
 {
     [Table("AppNotificationTasks")]
-    public class NotificationTask: Entity
+    public class NotificationTask : Entity
     {
         [Required]
         public string DepartureStation { get; set; }
@@ -41,18 +41,23 @@ namespace RailwayWizzard.Core
         [NotMapped]
         public long DepartureStationCode { get; set; }
 
-        //TODO: вынести в DTO, сделал nulalble так как была ошибка при создании таска из-за отсутствия этого параметра в запросе
         /// <summary>
         /// Дата в формате строки для отправки пользователю
         /// </summary>
         [NotMapped]
-        public string? DateFromString { get; set; }
+        public string DateFromString
+        {
+            get
+            {
+                return DateFrom.ToString("dd.MM.yyy", CultureInfo.InvariantCulture);
+            }
+        }
 
         public string LastResult { get; set; } = "";
 
         public string ToCustomString()
         {
-            return $"{DepartureStation} - {ArrivalStation} {TimeFrom} {DateFrom.ToString("dd.MM.yyy", CultureInfo.InvariantCulture)}";
+            return $"{DepartureStation} - {ArrivalStation} {TimeFrom} {DateFromString}";
         }
     }
 }

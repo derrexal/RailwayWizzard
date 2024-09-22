@@ -1,41 +1,34 @@
-﻿using Abp.Extensions;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using RailwayWizzard.B2B;
 using RailwayWizzard.Core;
 using RailwayWizzard.Robot.Core;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace RailwayWizzard.Robot.App
 {
-    /// <summary>
-    /// Класс для работы с АПИ РЖД
-    /// </summary>
-    public class RobotBigBrother: IRobot
+    public class RobotBigBrother : IRobot
     {
         private readonly ILogger<RobotBigBrother> _logger;
-        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IB2BClient _b2bClient;
 
-
-        public RobotBigBrother(ILogger<RobotBigBrother> logger, IHttpClientFactory httpClientFactory)
+        public RobotBigBrother(ILogger<RobotBigBrother> logger, IB2BClient b2bClient)
         {
             _logger = logger;
-            _httpClientFactory = httpClientFactory;
+            _b2bClient = b2bClient;
         }
 
-        /// <summary>
-        /// Получение информации о свободных мест в запрашиваемом рейсе
-        /// </summary>
-        /// <param name="inputNotificationTask"></param>
-        /// <returns></returns>
-        public async Task<List<string>> GetFreeSeatsOnTheTrain(NotificationTask inputNotificationTask)
+        /// <inheritdoc/>
+        public async Task<string> GetFreeSeatsOnTheTrain(NotificationTask inputNotificationTask)
         {
             const int retryCount = 3;
-            
+
             var freeSeats = await GetFreeSeatsOnTheTrainHelper(inputNotificationTask);
 
-            if(freeSeats.Count > 0) return freeSeats;
+            if (freeSeats.Count > 0) return "";
 
-            for(int i = 0; i <= retryCount; i++)
+            for (int i = 0; i <= retryCount; i++)
             {
                 if (freeSeats.Count == 0)
                 {
@@ -47,12 +40,14 @@ namespace RailwayWizzard.Robot.App
                     break;
             }
 
-            return freeSeats;
+            return String.Join("\n", freeSeats.ToArray());
         }
 
-        public async Task<List<string>> GetFreeSeatsOnTheTrainHelper(NotificationTask inputNotificationTask)
+        private async Task<List<string>> GetFreeSeatsOnTheTrainHelper(NotificationTask inputNotificationTask)
         {
-            var textResponse = await GetTrainInformationByParameters(inputNotificationTask);
+            string ksid = await GetKsidForGetTicketAsync();
+
+            var textResponse = await _b2bClient.GetTrainInformationByParametersAsync(inputNotificationTask, ksid);
             //TODO: нужно смапить в DTO чтобы этот огромный объект не таскать по памяти
             RootBigBrother? myDeserializedClass = JsonConvert.DeserializeObject<RootBigBrother>(textResponse);
 
@@ -70,52 +65,10 @@ namespace RailwayWizzard.Robot.App
 
             //Формируем текстовый ответ пользователю
             var result = SupportingMethod(currentRoute);
+
             return result;
         }
-        /// <summary>
-        /// Получение информации о рейсах по запрашиваемым параметрам
-        /// </summary>
-        /// <param name="inputNotificationTask"></param>
-        /// <returns></returns>
-        private async Task<string> GetTrainInformationByParameters(NotificationTask inputNotificationTask)
-        {
-            //адрес сервиса получения рейсов по заданной дате
-            string url = "https://ticket.rzd.ru/apib2b/p/Railway/V1/Search/TrainPricing?service_provider=B2B_RZD&bs=";
 
-            //Дополняем строку запроса
-            string ksid = await GetKsidForGetTicket();
-            url = url + ksid;
-
-            //Устаналиваем необходимые headers и body
-            using var request = new HttpRequestMessage(HttpMethod.Post, url);
-            request.Headers.Add("Accept", "application/json, text/plain, */*");
-            request.Headers.Add("Accept-Language", "ru-RU,ru;q=0.9");
-            request.Headers.Add("Connection", "keep-alive");
-            request.Headers.Add("Origin", "https://ticket.rzd.ru");
-            request.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36");
-            request.Headers.Add("Cookie", " LANG_SITE=ru; " + $"oxxfgh={ksid}");
-            request.Content = new StringContent(
-                "{\"Origin\":\"" + inputNotificationTask.DepartureStationCode + "\"," +
-                "\"Destination\":\"" + inputNotificationTask.ArrivalStationCode + "\"," +
-                "\"DepartureDate\":\"" + inputNotificationTask.DateFrom.ToString("yyyy-MM-ddT00:00:00") + "\"," +
-                "\"TimeFrom\":0," +
-                "\"TimeTo\":24," +
-                "\"CarGrouping\":\"DontGroup\"," +
-                "\"GetByLocalTime\":true," +
-                "\"SpecialPlacesDemand\":\"StandardPlacesAndForDisabledPersons\"," +
-                "\"CarIssuingType\":\"All\"," +
-                "\"GetTrainsFromSchedule\":false}"
-                , null, "application/json");
-
-            //отправляем запрос
-            using var client = _httpClientFactory.CreateClient();
-            using var response = await client.SendAsync(request);
-            response.EnsureSuccessStatusCode();
-
-            var textResponse = await response.Content.ReadAsStringAsync();
-            if (textResponse.IsNullOrEmpty()) { throw new Exception("Сервис РЖД при запросе списка свободных мест вернул пустой ответ"); }
-            return textResponse;
-        }
 
         /// <summary>
         /// Получение информации о свободных местах в запрашиваемый день по запрашиваемому рейсу
@@ -125,13 +78,13 @@ namespace RailwayWizzard.Robot.App
         /// <returns></returns>
         private HashSet<SearchResult> GetCurrentRouteFromResponse(RootBigBrother root, NotificationTask inputNotificationTask)
         {
-            HashSet<SearchResult> results = new ();
+            HashSet<SearchResult> results = new();
 
             //todo: костыль, но как по другому?
             //наполяем список типов вагонов словами, чтобы было с чем сравнивать
             List<string> carTypesText = new List<string>();
-            foreach(var carType in inputNotificationTask.CarTypes)
-                switch(carType)
+            foreach (var carType in inputNotificationTask.CarTypes)
+                switch (carType)
                 {
                     case CarTypeEnum.Sedentary:
                         carTypesText.Add("Sedentary");
@@ -151,7 +104,7 @@ namespace RailwayWizzard.Robot.App
                 if (train.LocalDepartureDateTime.ToString()!.Contains(inputNotificationTask.TimeFrom)) //Если в ответе содержится необходимая поездка
                     foreach (var carGroup in train.CarGroups)
                         if (!carGroup.HasPlacesForDisabledPersons) // Если место не для инвалидов                               
-                            if(carTypesText.Contains(carGroup.CarType)) //Если это тот тип вагонов, которые выбрал пользователь
+                            if (carTypesText.Contains(carGroup.CarType)) //Если это тот тип вагонов, которые выбрал пользователь
                                 if (carGroup.TotalPlaceQuantity >= inputNotificationTask.NumberSeats)  //Если есть свободные места
                                 {
                                     var key = carGroup.ServiceClassNameRu is not null ? carGroup.ServiceClassNameRu : carGroup.CarTypeName;
@@ -176,40 +129,53 @@ namespace RailwayWizzard.Robot.App
                 collection.Add(newItem);
         }
 
-        //TODO: Отправлять в бот только словарь свободных мест а эту логику переложить на бота! Ни к чему гонять такие объемы данных по сети
         private List<string> SupportingMethod(HashSet<SearchResult> currentRoutes)
         {
             List<string> result = new();
-            foreach(var route in currentRoutes)
-                result.Add($"Класс обслуживания: <strong>{route.CarType}</strong>\nСвободных мест: <strong>{route.TotalPlace}</strong>\nЦена: <strong> {route.Price}</strong>\n");
+            foreach (var route in currentRoutes)
+                result.Add($"Класс обслуживания: <strong>{route.CarType}</strong>\n" +
+                    $"Свободных мест: <strong>{route.TotalPlace}</strong>\n" +
+                    $"Цена: <strong> {route.Price}</strong>\n");
             return result;
         }
 
-        /// <summary>
-        /// Получение значения "oxwdsq"(Ksid) для дальнейших запросов
-        /// </summary>
-        /// <returns></returns>
-        private async Task<string> GetKsidForGetTicket()
+        /// <inheritdoc/>
+        public async Task<string?> GetLinkToBuyTicket(NotificationTask notificationTask)
         {
-            string url = "https://w-22900.fp.kaspersky-labs.com/oxwdsq?cid=22900";
+            var baseLink = "https://ticket.rzd.ru/searchresults/v/1";
+
             try
             {
-                using var request = new HttpRequestMessage(HttpMethod.Get, url);
-                using var client = _httpClientFactory.CreateClient();
-                using var response = await client.SendAsync(request);
-                response.EnsureSuccessStatusCode();
-                var textResponse = await response.Content.ReadAsStringAsync();
-                
+                var departureStationNodeId = await _b2bClient.GetNodeIdStationAsync(notificationTask.DepartureStation);
+                var arrivalStationNodeId = await _b2bClient.GetNodeIdStationAsync(notificationTask.ArrivalStation);
+                var dateFromText = notificationTask.DateFrom.ToString("yyyy-MM-dd");
+
+                return $"{baseLink}/{departureStationNodeId}/{arrivalStationNodeId}/{dateFromText}";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"В ходе запроса к РЖД для получения кода станции возникла ошибка {ex}");
+                return null;
+            }
+        }
+
+        private async Task<string> GetKsidForGetTicketAsync()
+        {
+            try
+            {
+                var textResponse = await _b2bClient.GetKsidAsync();
+
                 //вытаскиваем из ответа строку со Ksid
                 if (!textResponse.Contains("id")) throw new HttpRequestException($"Сервис Касперского вернул невалидный ответ:\n{textResponse}");
                 Regex regex = new Regex("\"id\":\"(.*?)\"");
                 var res = regex.Match(textResponse).ToString();
-                
+
                 //Из всей строки получаем только значение
                 var keyValuePairs = res.Split(':').ToList();
                 var result = keyValuePairs.LastOrDefault();
-                if (result is null) throw new HttpRequestException($"Не удалось распарсить ответ от Касперского:\n{textResponse}");
-                
+                if (result is null) 
+                    throw new HttpRequestException($"Не удалось распарсить ответ от Касперского:\n{textResponse}");
+
                 result = result.Remove(result.Length - 1);
                 result = result.Remove(0, 1);
                 return result;
@@ -219,6 +185,27 @@ namespace RailwayWizzard.Robot.App
                 _logger.LogError($"Не доступен сервис Касперского для получения токена\n{e}");
                 throw;
             }
+        }
+
+        
+        public string GetMessageSeatsIsEmpty(string notificationTaskText)
+        {
+            return $"{char.ConvertFromUtf32(0x26D4)} " +
+                $"{notificationTaskText}" +
+                "\nСвободных мест больше нет";
+        }
+
+        public async Task<string> GetMessageSeatsIsComplete(NotificationTask notificationTask, string resultFreeSeats)
+        {
+            var linkToBuyTicket = await GetLinkToBuyTicket(notificationTask);
+
+            return 
+                $"{char.ConvertFromUtf32(0x2705)} {notificationTask.ToCustomString()}" +
+                $"\n{resultFreeSeats}" +
+                linkToBuyTicket is not null
+                  ? $"\nСсылка для покупки билета:{linkToBuyTicket}"
+                  : "" +
+                  "\nОбнаружены свободные места";
         }
     }
 }

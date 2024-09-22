@@ -11,6 +11,7 @@
   </ItemGroup>
 	
   <ItemGroup>
+    <ProjectReference Include="..\RailwayWizzard.B2B\RailwayWizzard.B2B.csproj" />
     <ProjectReference Include="..\RailwayWizzard.Core\RailwayWizzard.Core.csproj" />
     <ProjectReference Include="..\RailwayWizzard.Shared\RailwayWizzard.Shared.csproj" />
   </ItemGroup>

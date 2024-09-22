@@ -1,11 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using RailwayWizzard.App.Services;
+using RailwayWizzard.App.Services.Shared;
 using RailwayWizzard.B2B;
-using RailwayWizzard.EntityFrameworkCore.Data;
+using RailwayWizzard.EntityFrameworkCore;
+using RailwayWizzard.EntityFrameworkCore.UnitOfWork;
 using RailwayWizzard.Robot.App;
-using RailwayWizzard.Shared;
 
 namespace RailwayWizzard.App
 {
+    // TODO: отказаться от ABP
     public class Program
     {
         public static void Main(string[] args)
@@ -17,11 +20,16 @@ namespace RailwayWizzard.App
 
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddTransient<IChecker, NotificationTaskChecker>();
             builder.Services.AddTransient<IBotApi, BotApi>();
             builder.Services.AddTransient<IRobot, RobotBigBrother>();
             builder.Services.AddTransient<ISteps, StepsUsingHttpClient>();
-            builder.Services.AddTransient<IB2BService, B2BService>();
+            builder.Services.AddTransient<IB2BClient, B2BClient>();
+
+            builder.Services.AddScoped<IB2BService, B2BService>();
+            builder.Services.AddScoped<INotificationTaskService, NotificationTaskService>();
+            builder.Services.AddScoped<IUserService, UserService>();
+
+            builder.Services.AddScoped<IRailwayWizzardUnitOfWork,RailwayWizzardUnitOfWork>();
 
             builder.Services.AddDbContextFactory<RailwayWizzardAppContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("RailwayWizzardAppContext") 
@@ -49,6 +57,7 @@ namespace RailwayWizzard.App
             {
                 //Applying migrations to run program
                 context.Database.Migrate();
+                
                 //Before Run Program Update field IsWorked default value (false)
                 context.NotificationTask.ExecuteUpdate(t =>
                     t.SetProperty(t => t.IsWorked, false));

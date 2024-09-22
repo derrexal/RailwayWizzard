@@ -1,3 +1,4 @@
+using RailwayWizzard.EntityFrameworkCore.UnitOfWork;
 using RailwayWizzard.Robot.App;
 using RailwayWizzard.Shared;
 
@@ -9,7 +10,7 @@ namespace RailwayWizzard.App
 
         private readonly IRobot _robot;
         private readonly IBotApi _botApi;
-        private readonly IChecker _checker;
+        private readonly IRailwayWizzardUnitOfWork _uow;
         private readonly ILogger<NotificationTaskWorker> _logger;
         private readonly ILogger<StepsUsingHttpClient> _stepsLogger;
         private readonly ISteps _steps;
@@ -17,16 +18,16 @@ namespace RailwayWizzard.App
         public NotificationTaskWorker(
             IRobot robot,
             IBotApi botApi,
-            IChecker checker,
+            IRailwayWizzardUnitOfWork uow,
             ILogger<NotificationTaskWorker> logger, 
             ILogger<StepsUsingHttpClient> stepsLogger) 
         {
             _robot = robot;
             _botApi = botApi;
-            _checker = checker;
+            _uow = uow;
             _logger = logger;
             _stepsLogger = stepsLogger;
-            _steps = new StepsUsingHttpClient(_robot, _botApi, _checker, _stepsLogger);
+            _steps = new StepsUsingHttpClient(_robot, _botApi, _uow, _stepsLogger);
         }
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
@@ -49,7 +50,7 @@ namespace RailwayWizzard.App
             List<Task> tasks = new();
             try
             {
-                var notificationTasks = await _checker.GetNotificationTasksForWork();
+                var notificationTasks = await _uow.NotificationTaskRepository.GetNotificationTasksForWork();
                 foreach (var notificationTask in notificationTasks)
                     tasks.Add(_steps.Notification(notificationTask));
                 await Task.WhenAll(tasks);

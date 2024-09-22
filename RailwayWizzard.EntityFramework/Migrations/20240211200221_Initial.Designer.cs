@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
-using RailwayWizzard.EntityFrameworkCore.Data;
+using RailwayWizzard.EntityFrameworkCore;
 #nullable disable
 
 namespace RailwayWizzard.EntityFrameworkCore.Migrations

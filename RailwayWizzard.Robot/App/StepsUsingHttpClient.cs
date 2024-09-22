@@ -1,8 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using RailwayWizzard.Core;
-using RailwayWizzard.Shared;
-using System.Text;
-
+using RailwayWizzard.EntityFrameworkCore.UnitOfWork;
 
 namespace RailwayWizzard.Robot.App
 {
@@ -10,18 +8,18 @@ namespace RailwayWizzard.Robot.App
     {
         private readonly IRobot _robot;
         private readonly IBotApi _botApi;
-        private readonly IChecker _checker;
+        private readonly IRailwayWizzardUnitOfWork _uow;
         private readonly ILogger<StepsUsingHttpClient> _logger;
         
         public StepsUsingHttpClient(
             IRobot robot,
             IBotApi botApi,
-            IChecker checker,
+            IRailwayWizzardUnitOfWork uow,
             ILogger<StepsUsingHttpClient> logger)
         {
             _robot = robot;
             _botApi = botApi;
-            _checker = checker;
+            _uow = uow;
             _logger = logger;
         }
 
@@ -31,21 +29,22 @@ namespace RailwayWizzard.Robot.App
         public async Task Notification(NotificationTask inputNotificationTask)
         {         
             string notificationTaskText = inputNotificationTask.ToCustomString();
-            string logMessage = $"Задача: {inputNotificationTask.Id} Рейс: {notificationTaskText}";
+            string notificationTaskLogMessage = $"Задача: {inputNotificationTask.Id} Рейс: {notificationTaskText}";
 
             try
             {
                 // Задача помечается статусом "В работе"
-                await _checker.SetIsWorkedNotificationTask(inputNotificationTask);
+                await _uow.NotificationTaskRepository.SetIsWorkedNotificationTask(inputNotificationTask);
 
-                _logger.LogInformation($"Run {logMessage} in Thread:{Thread.CurrentThread.ManagedThreadId}");
+                _logger.LogInformation($"Run {notificationTaskLogMessage} in Thread:{Thread.CurrentThread.ManagedThreadId}");
 
-                //Если во время выполнения задача стала неактуальна
-                if (!_checker.NotificationTaskIsActual(inputNotificationTask))
+                //Во время выполнения задача стала неактуальна
+                var notificationTaskIsActual = _uow.NotificationTaskRepository.NotificationTaskIsActual(inputNotificationTask);
+                if (notificationTaskIsActual is false)
                 {
-                    await _checker.SetIsNotActualAndIsNotWorked(inputNotificationTask);
+                    await _uow.NotificationTaskRepository.SetIsNotActualAndIsNotWorked(inputNotificationTask);
 
-                    string notActualTaskMessage = $"Поиск остановлен. {logMessage} стала неактуальна.";
+                    string notActualTaskMessage = $"Stop {notificationTaskLogMessage} in Thread:{Thread.CurrentThread.ManagedThreadId}. Task has not actual.";
                     
                     _logger.LogInformation(notActualTaskMessage);
                     await _botApi.SendMessageForUserAsync(notActualTaskMessage,inputNotificationTask.UserId);
@@ -54,57 +53,59 @@ namespace RailwayWizzard.Robot.App
                 }
 
                 // Поиск свободных мест
-                var freeSeats = await _robot.GetFreeSeatsOnTheTrain(inputNotificationTask);
-                var resultFreeSeats = String.Join(";", freeSeats);
+                var resultFreeSeats = await _robot.GetFreeSeatsOnTheTrain(inputNotificationTask);
 
                 //Если текущий результат равен предыдущему - завершаем задачу
-                if (await _checker.ResultIsLast(inputNotificationTask, resultFreeSeats!))
+                var resultIsLast = await _uow.NotificationTaskRepository.ResultIsLast(inputNotificationTask, resultFreeSeats);
+                if (resultIsLast)
                 {
-                    //Задача закончила свое выполнение
-                    // ToDo: дублирование с кодом ниже - убрать
-                    await _checker.SetIsNotWorked(inputNotificationTask);
-
-                    _logger.LogInformation($"Stop {logMessage} in Thread:{Thread.CurrentThread.ManagedThreadId}");
-
+                    await SetIsNotWorked(inputNotificationTask, notificationTaskLogMessage);
+                    
                     return;
                 }
 
                 // Формирование текста уведомления о наличии мест
-                StringBuilder message = new();
+                string message ;
 
                 // Если свободные места были, а сейчас их уже нет
                 if (resultFreeSeats == "")
-                    message = message.Append($"{char.ConvertFromUtf32(0x26D4)} {notificationTaskText}" + 
-                               "\n Свободных мест больше нет");
+                    message = _robot.GetMessageSeatsIsEmpty(notificationTaskText);
+
                 // Если свободных мест не было, а сейчас они появились
                 // Или если изменилось количество свободных мест
                 else
-                    message = message.Append($"{char.ConvertFromUtf32(0x2705)} {notificationTaskText}" +
-                              $"\n{String.Join("\n", freeSeats.ToArray())}" +
-                              "\nОбнаружены свободные места\n");
-                                    
+                    message = await _robot.GetMessageSeatsIsComplete(inputNotificationTask, resultFreeSeats);
+
                 // Отправка сообщения пользователю
-                await _botApi.SendMessageForUserAsync(message.ToString(), inputNotificationTask.UserId);
+                await _botApi.SendMessageForUserAsync(message, inputNotificationTask.UserId);
                 
                 //TODO: Не нужно хранить всю строку, можно записывать н-р хэш
+                // Пока оставил для удобства отладки. В будущем записывать хэш, или какую-то более краткую версию, например base64
+                // которую можно расшифровать и она будет занимать меньше места чем исходная строка.
                 // Записываем информацию о результате поиска свободных мест
-                await _checker.SetLastResultNotificationTask(inputNotificationTask, resultFreeSeats!);
+                await _uow.NotificationTaskRepository.SetLastResultNotificationTask(inputNotificationTask, resultFreeSeats!);
 
-                //Задача закончила свое выполнение
-                await _checker.SetIsNotWorked(inputNotificationTask);
-
-                _logger.LogInformation($"Stop {logMessage} in Thread:{Thread.CurrentThread.ManagedThreadId}");
+                await SetIsNotWorked(inputNotificationTask, notificationTaskLogMessage);
 
                 return;
             }
             catch (Exception e)
             {
-                await _checker.SetIsNotWorked(inputNotificationTask);
-                string messageError = $"Fatal Error. {logMessage}\n {e}";
+                await SetIsNotWorked(inputNotificationTask, notificationTaskLogMessage);
+
+                string messageError = $"Fatal Error. {notificationTaskLogMessage} {e}";
                 _logger.LogError(messageError);
                 await _botApi.SendMessageForAdminAsync(messageError);
-                throw;
+
+                return;
             }
+        }
+
+        private async Task SetIsNotWorked(NotificationTask notificationTask, string logMessage)
+        {
+            await _uow.NotificationTaskRepository.SetIsNotWorked(notificationTask);
+
+            _logger.LogInformation($"Stop {logMessage} in Thread:{Thread.CurrentThread.ManagedThreadId}");
         }
     }
 }

@@ -49,7 +49,7 @@ async def make_request(method, endpoint, json_data=None, params=None) -> ClientR
 
 async def station_validate(input_station) -> list:
     """  """
-    endpoint = 'BTwoB/GetStationValidate'
+    endpoint = 'B2B/GetStationValidate'
     params = {'inputStation': input_station}
     response = await make_request('GET', endpoint, params=params)
     return await response.json()  # [{"expressCode":2000000,"stationName":"МОСКВА","id":4}]
@@ -57,7 +57,7 @@ async def station_validate(input_station) -> list:
 
 async def get_available_times(station_from_name, station_to_name, date):
     """  """
-    endpoint = 'BTwoB/GetAvailableTimes'
+    endpoint = 'B2B/GetAvailableTimes'
     json_data = {
         'StationFrom': station_from_name,
         'StationTo': station_to_name,
@@ -69,14 +69,14 @@ async def get_available_times(station_from_name, station_to_name, date):
 
 async def create_user(id_tg, username):
     """ Добавляет пользователя в БД """
-    endpoint = 'Users/CreateOrUpdate'
+    endpoint = 'User/CreateOrUpdate'
     json_data = {'IdTg': id_tg, 'Username': username}
     await make_request('POST', endpoint, json_data=json_data)
 
 
 async def create_and_get_id_notification_task(notification_task_data: NotificationTaskData):
-    """Создает задачу и отдает ее ID"""
-    endpoint = 'NotificationTask/CreateAndGetId'
+    """Создает задачу"""
+    endpoint = 'NotificationTask/Create'
     json_data = notification_task_data.__dict__  # Преобразование объекта в словарь
     logger.info(json_data)
     response = await make_request('POST', endpoint, json_data=json_data)

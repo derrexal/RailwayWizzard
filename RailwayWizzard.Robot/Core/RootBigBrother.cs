@@ -112,7 +112,7 @@
     {
         public string OriginStationCode { get; set; }
         public string DestinationStationCode { get; set; }
-        public List<Train> Trains { get; } = new();
+        public List<TrainFull> Trains { get; } = new();
         public object ClientFeeCalculation { get; set; }
         public object AgentFeeCalculation { get; set; }
         public string OriginCode { get; set; }
@@ -133,7 +133,7 @@
         public DateTime? MoscowDateTime { get; set; }
     }
 
-    public class Train
+    public class TrainFull
     {
         public List<CarGroup> CarGroups { get; } = new();
         public bool? IsFromSchedule { get; set; }

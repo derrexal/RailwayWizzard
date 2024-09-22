@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using RailwayWizzard.Core;
-using RailwayWizzard.EntityFrameworkCore.Data;
-using System.Globalization;
+using RailwayWizzard.App.Dto;
+using RailwayWizzard.App.Services.Shared;
 
 namespace RailwayWizzard.App.Controllers
 {
@@ -11,55 +9,41 @@ namespace RailwayWizzard.App.Controllers
     [Route("[controller]")]
     public class NotificationTaskController : Controller
     {
-        private readonly ILogger _logger;
-        private readonly RailwayWizzardAppContext _context;
 
-        public NotificationTaskController(
-            RailwayWizzardAppContext context, 
-            ILogger<NotificationTaskController> logger)
+        private readonly INotificationTaskService _notificationTaskService;
+
+        public NotificationTaskController(INotificationTaskService notificationTaskService)
         {
-            _context = context;
-            _logger = logger;
+            _notificationTaskService = notificationTaskService;
         }
 
-        [HttpPost("CreateAndGetId")]
-        public async Task<IActionResult> CreateAndGetId(NotificationTask notificationTask)
+        [HttpPost("Create")]
+        public async Task<IActionResult> Create(CreateNotificationTaskDto createNotificationTaskDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest($"Request param is no valid: {ModelState}");
 
-            notificationTask.CreationTime = DateTime.Now;
-            notificationTask.IsActual = true;
-            notificationTask.IsWorked = false;
-            notificationTask.IsStopped = false;
-            _context.Add(notificationTask);
-
-            await _context.SaveChangesAsync();
-            _logger.LogInformation($"Success create NotificationTask ID: {notificationTask.Id} Details: {notificationTask.ToCustomString()}");
-            return Ok(notificationTask.Id);
+            return Ok(await _notificationTaskService.CreateAsync(createNotificationTaskDto));
         }
 
         /// <summary>
         /// Устанавливает флаг IsStopped у конкретной сущности NotificationTask
         /// </summary>
-        /// <param name="idNotificationTask"></param>
+        /// <param name="notificationTaskId"></param>
         /// <returns></returns>
 
         [HttpGet("SetIsStopped")]
-        public async Task<IActionResult> SetIsStopped(int idNotificationTask)
+        public async Task<IActionResult> SetIsStopped(int notificationTaskId)
         {
             if (!ModelState.IsValid)
                 return BadRequest($"Request param is no valid: {ModelState}");
 
-            var currentTask = await _context.NotificationTask.FirstOrDefaultAsync(t => t.Id==idNotificationTask);
+            var result = await _notificationTaskService.SetIsStoppedAsync(notificationTaskId);
             
-            if (currentTask is null) { return BadRequest($"Error search task from Id:{idNotificationTask}"); }
+            if (result is null)
+                return BadRequest($"Error search task from Id:{notificationTaskId}");
             
-            currentTask.IsStopped = true;
-            currentTask!.IsWorked = false;
-            
-            await _context.SaveChangesAsync();
-            return Ok(currentTask.Id);
+            return Ok(result);
         }
 
         /// <summary>
@@ -67,31 +51,15 @@ namespace RailwayWizzard.App.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("GetActiveByUser")]
-        public async Task<IList<NotificationTask>> GetActiveByUser(long userId)
+        public async Task<IList<NotificationTaskDto>> GetActiveByUser(long userId)
         {
             if (!ModelState.IsValid)
                 throw new Exception($"Request param is no valid: {ModelState}");
 
-            var notificationTasksQuery = _context.NotificationTask
-            .Where(u => u.IsActual)
-            .Where(u=>!u.IsStopped)
-            .Where(u => u.UserId == userId)
-            .AsNoTracking();
+            var result = await _notificationTaskService.GetActiveByUserAsync(userId);
 
-            var notificationTasks = await notificationTasksQuery.Select(u => new NotificationTask
-            {
-                Id = u.Id,
-                ArrivalStation = u.ArrivalStation,
-                DepartureStation = u.DepartureStation,
-                TimeFrom = u.TimeFrom,
-                CarTypes = u.CarTypes,
-                NumberSeats = u.NumberSeats,
-                DateFromString = u.DateFrom.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture)
-            })
-                .OrderBy(u=>u.Id)
-                .ToListAsync();
-
-            return notificationTasks;
+            //TODO: почему не возвращаем тот же ОК?
+            return result;
         }
     }
 }

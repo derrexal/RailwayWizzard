@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using RailwayWizzard.App.Services.Shared;
 using RailwayWizzard.B2B;
 
 
@@ -7,12 +8,11 @@ namespace RailwayWizzard.App.Controllers
     //Контроллер для получения данных от сервисов РЖД
     [ApiController]
     [Route("[controller]")]
-    public class BTwoBController : Controller
+    public class B2BController : Controller
     {
         private readonly IB2BService _b2bService;
 
-        //TODO: rename controller for B2B service
-        public BTwoBController(IB2BService b2bService) =>
+        public B2BController(IB2BService b2bService) =>
             _b2bService = b2bService;
 
 
@@ -21,21 +21,17 @@ namespace RailwayWizzard.App.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest($"Request param is no valid: {ModelState}");
-
-            //подготовка данных
-            scheduleDto.StationFrom = scheduleDto.StationFrom.ToUpper();
-            scheduleDto.StationTo = scheduleDto.StationTo.ToUpper();
-
-            return Ok(await _b2bService.GetAvailableTimes(scheduleDto));
+           
+            return Ok(await _b2bService.GetAvailableTimesAsync(scheduleDto));
         }   
 
         [HttpGet("GetStationValidate")]
-        public async Task<IActionResult> GetStationValidate(string inputStation)
+        public async Task<IActionResult> GetStationValidate(string stationName)
         {
             if (!ModelState.IsValid)
                 return BadRequest($"Request param is no valid: {ModelState}");
 
-            return Ok(await _b2bService.StationValidate(inputStation));
+            return Ok(await _b2bService.StationValidateAsync(stationName));
         }
     }
 }

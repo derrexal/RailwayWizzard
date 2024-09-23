@@ -47,10 +47,10 @@ async def make_request(method, endpoint, json_data=None, params=None) -> ClientR
         raise e
 
 
-async def station_validate(input_station) -> list:
+async def station_validate(stationName) -> list:
     """  """
     endpoint = 'B2B/GetStationValidate'
-    params = {'inputStation': input_station}
+    params = {'stationName': stationName}
     response = await make_request('GET', endpoint, params=params)
     return await response.json()  # [{"expressCode":2000000,"stationName":"МОСКВА","id":4}]
 

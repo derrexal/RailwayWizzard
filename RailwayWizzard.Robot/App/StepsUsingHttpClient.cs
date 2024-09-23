@@ -51,6 +51,8 @@ namespace RailwayWizzard.Robot.App
 
                     return;
                 }
+                
+                //TODO: Во время выполнения задача была остановлена пользователем
 
                 // Поиск свободных мест
                 var resultFreeSeats = await _robot.GetFreeSeatsOnTheTrain(inputNotificationTask);

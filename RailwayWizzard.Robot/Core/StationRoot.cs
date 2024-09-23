@@ -1,7 +1,6 @@
 ﻿namespace RailwayWizzard.Robot.Core
 {
-    // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
-    public class Root
+    public class StationRoot
     {
         public List<City> city { get; set; }
         public List<Train> train { get; set; }

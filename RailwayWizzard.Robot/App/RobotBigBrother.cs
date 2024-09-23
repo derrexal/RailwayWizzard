@@ -20,13 +20,12 @@ namespace RailwayWizzard.Robot.App
         }
 
         /// <inheritdoc/>
+        // TODO: избавиться от этого метода
         public async Task<string> GetFreeSeatsOnTheTrain(NotificationTask inputNotificationTask)
         {
             const int retryCount = 3;
 
             var freeSeats = await GetFreeSeatsOnTheTrainHelper(inputNotificationTask);
-
-            if (freeSeats.Count > 0) return "";
 
             for (int i = 0; i <= retryCount; i++)
             {
@@ -146,8 +145,15 @@ namespace RailwayWizzard.Robot.App
 
             try
             {
-                var departureStationNodeId = await _b2bClient.GetNodeIdStationAsync(notificationTask.DepartureStation);
-                var arrivalStationNodeId = await _b2bClient.GetNodeIdStationAsync(notificationTask.ArrivalStation);
+                var departureStationNodeIdResponse = await _b2bClient.GetNodeIdStationAsync(notificationTask.DepartureStation);
+                var arrivalStationNodeResponse = await _b2bClient.GetNodeIdStationAsync(notificationTask.ArrivalStation);
+
+                var departureStationNodeId = GetNodeIdStation(departureStationNodeIdResponse);
+                var arrivalStationNodeId = GetNodeIdStation(arrivalStationNodeResponse);
+
+                if (departureStationNodeId == null || arrivalStationNodeId == null)
+                    return null;
+
                 var dateFromText = notificationTask.DateFrom.ToString("yyyy-MM-dd");
 
                 return $"{baseLink}/{departureStationNodeId}/{arrivalStationNodeId}/{dateFromText}";
@@ -157,6 +163,25 @@ namespace RailwayWizzard.Robot.App
                 _logger.LogError($"В ходе запроса к РЖД для получения кода станции возникла ошибка {ex}");
                 return null;
             }
+        }
+
+        /// <summary>
+        /// Метод получения nodeId станции из ответа АПИ.
+        /// </summary>
+        /// <param name="response">Ответ АПИ.</param>
+        /// <returns>nodeId</returns>
+        private string GetNodeIdStation(string response)
+        {
+            var stationRoot = JsonConvert.DeserializeObject<StationRoot>(response);
+            
+            if (stationRoot == null || stationRoot.city.Count == 0)
+                throw new NullReferenceException($"Сервис РЖД при запросе информации о станции вернул не стандартный ответ. Ответ:{response}");
+
+            var city = stationRoot.city.FirstOrDefault();
+            if (city == null)
+                throw new NullReferenceException($"Сервис РЖД при запросе информации о станции вернул не стандартный ответ. Ответ:{response}");
+            
+            return city.nodeId ?? "";
         }
 
         private async Task<string> GetKsidForGetTicketAsync()
@@ -197,15 +222,19 @@ namespace RailwayWizzard.Robot.App
 
         public async Task<string> GetMessageSeatsIsComplete(NotificationTask notificationTask, string resultFreeSeats)
         {
-            var linkToBuyTicket = await GetLinkToBuyTicket(notificationTask);
+            var linkToBuyTicketResponse = await GetLinkToBuyTicket(notificationTask);
 
-            return 
+            var linkToBuyTicket = linkToBuyTicketResponse is not null
+                ? $"\n\n<a href=\"{linkToBuyTicketResponse}\">Купить билет</a>"
+                  : "";
+
+            var result =
                 $"{char.ConvertFromUtf32(0x2705)} {notificationTask.ToCustomString()}" +
                 $"\n{resultFreeSeats}" +
-                linkToBuyTicket is not null
-                  ? $"\nСсылка для покупки билета:{linkToBuyTicket}"
-                  : "" +
-                  "\nОбнаружены свободные места";
+                "\nОбнаружены свободные места" +
+                linkToBuyTicket;
+
+            return result;
         }
     }
 }

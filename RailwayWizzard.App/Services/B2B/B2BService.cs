@@ -1,4 +1,5 @@
 ﻿using Abp.Collections.Extensions;
+using Abp.Domain.Uow;
 using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
 using Newtonsoft.Json;
@@ -178,6 +179,11 @@ namespace RailwayWizzard.App.Services.B2B
             }
 
             await _uow.StationInfoRepository.AddRangeStationInfoAsync(addedStationInfo);
+        }
+
+        public void Dispose()
+        {
+            _uow.Dispose();
         }
     }
 }

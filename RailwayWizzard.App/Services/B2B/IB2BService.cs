@@ -3,7 +3,7 @@ using RailwayWizzard.Core;
 
 namespace RailwayWizzard.App.Services.B2B
 {
-    public interface IB2BService
+    public interface IB2BService : IDisposable
     {
         /// <summary>
         /// Проверяет существует ли такая станция по полному или неполному соответствию.

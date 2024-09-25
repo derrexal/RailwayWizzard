@@ -2,7 +2,7 @@
 
 namespace RailwayWizzard.App.Services.NotificationTasks
 {
-    public interface INotificationTaskService
+    public interface INotificationTaskService : IDisposable
     {
         public Task<int> CreateAsync(CreateNotificationTaskDto notificationTask);
         public Task<int?> SetIsStoppedAsync(int idNotificationTask);

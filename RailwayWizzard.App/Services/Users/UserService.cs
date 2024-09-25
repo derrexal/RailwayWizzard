@@ -29,5 +29,11 @@ namespace RailwayWizzard.App.Services.Users
 
             _logger.LogInformation($"Success create or update User. IdTg:{user.IdTg} Username:{user.Username}");
         }
+
+        public void Dispose()
+        {
+            _uow.Dispose();
+        }
+
     }
 }

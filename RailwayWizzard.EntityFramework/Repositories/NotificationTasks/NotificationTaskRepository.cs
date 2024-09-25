@@ -96,6 +96,7 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
         }
 
         /// <inheritdoc/>
+        // TODO: вынести отсюда. Никакого отношения к сущности и базе не имеет...
         public bool NotificationTaskIsActual(NotificationTask task)
         {
             DateTime notificationTaskDateTime = DateTime.ParseExact(
@@ -167,6 +168,39 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
                 await _context.SaveChangesAsync();
             }
             await Task.CompletedTask;
+        }
+
+        public async Task<int> CreateAsync(NotificationTask notificationTask)
+        {
+            _context.Add(notificationTask);
+
+            await _context.SaveChangesAsync();
+            
+            return notificationTask.Id;
+        }
+
+        public async Task<int?> SetIsStoppedAsync(int idNotificationTask)
+        {
+            var currentTask = await _context.NotificationTask.FirstOrDefaultAsync(t => t.Id == idNotificationTask);
+
+            if (currentTask is null) return null;
+
+            currentTask.IsStopped = true;
+            currentTask!.IsWorked = false;
+
+            await _context.SaveChangesAsync();
+            
+            return currentTask.Id;
+        }
+
+        public async Task<IReadOnlyCollection<NotificationTask>> GetActiveByUserAsync(long userId)
+        {
+            return await _context.NotificationTask
+                .Where(u => u.IsActual)
+                .Where(u => !u.IsStopped)
+                .Where(u => u.UserId == userId)
+                .AsNoTracking()
+                .ToListAsync();
         }
     }
 }

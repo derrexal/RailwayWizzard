@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace RailwayWizzard.App.Dto
+namespace RailwayWizzard.App.Dto.User
 {
     public class CreateUserDto
     {

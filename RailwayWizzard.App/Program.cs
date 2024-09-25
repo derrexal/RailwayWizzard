@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using RailwayWizzard.App.Services;
-using RailwayWizzard.App.Services.Shared;
+using RailwayWizzard.App.Services.B2B;
+using RailwayWizzard.App.Services.NotificationTasks;
+using RailwayWizzard.App.Services.Users;
 using RailwayWizzard.B2B;
 using RailwayWizzard.EntityFrameworkCore;
 using RailwayWizzard.EntityFrameworkCore.UnitOfWork;

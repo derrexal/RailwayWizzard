@@ -1,21 +1,19 @@
-﻿using Microsoft.EntityFrameworkCore;
-using RailwayWizzard.App.Dto;
-using RailwayWizzard.App.Services.Shared;
+﻿using RailwayWizzard.App.Dto.NotificationTask;
 using RailwayWizzard.Core;
-using RailwayWizzard.EntityFrameworkCore;
+using RailwayWizzard.EntityFrameworkCore.UnitOfWork;
 
-namespace RailwayWizzard.App.Services
+namespace RailwayWizzard.App.Services.NotificationTasks
 {
     public class NotificationTaskService : INotificationTaskService
     {
         private readonly ILogger _logger;
-        private readonly RailwayWizzardAppContext _context;
+        private readonly IRailwayWizzardUnitOfWork _uow;
 
         public NotificationTaskService(
-            RailwayWizzardAppContext context,
+            IRailwayWizzardUnitOfWork uow,
             ILogger<NotificationTaskService> logger)
         {
-            _context = context;
+            _uow = uow;
             _logger = logger;
         }
 
@@ -37,39 +35,23 @@ namespace RailwayWizzard.App.Services
             notificationTask.IsWorked = false;
             notificationTask.IsStopped = false;
 
-            //TODO: вынести в репозиторий
-            _context.Add(notificationTask);
-            await _context.SaveChangesAsync();
+            var notificationTaskId = await _uow.NotificationTaskRepository.CreateAsync(notificationTask);
             
-            _logger.LogInformation($"Success create NotificationTask ID: {notificationTask.Id} Details: {notificationTask.ToCustomString()}");
+            _logger.LogInformation($"Success create NotificationTask ID: {notificationTaskId} Details: {notificationTask.ToCustomString()}");
 
-            return notificationTask.Id;
+            return notificationTaskId;
         }
-
 
         public async Task<int?> SetIsStoppedAsync(int idNotificationTask)
         {
-
-            var currentTask = await _context.NotificationTask.FirstOrDefaultAsync(t => t.Id == idNotificationTask);
-
-            if (currentTask is null) return null;
-
-            currentTask.IsStopped = true;
-            currentTask!.IsWorked = false;
-
-            await _context.SaveChangesAsync();
-            return currentTask.Id;
+            return await _uow.NotificationTaskRepository.SetIsStoppedAsync(idNotificationTask);
         }
 
-        public async Task<IList<NotificationTaskDto>> GetActiveByUserAsync(long userId)
+        public async Task<IReadOnlyCollection<NotificationTaskDto>> GetActiveByUserAsync(long userId)
         {
-            var notificationTasksQuery = _context.NotificationTask
-            .Where(u => u.IsActual)
-            .Where(u => !u.IsStopped)
-            .Where(u => u.UserId == userId)
-            .AsNoTracking();
+            var notificationTasks = await _uow.NotificationTaskRepository.GetActiveByUserAsync(userId);
 
-            var notificationTasks = await notificationTasksQuery.Select(u => new NotificationTaskDto
+            var result = notificationTasks.Select(u => new NotificationTaskDto
             {
                 Id = u.Id,
                 ArrivalStation = u.ArrivalStation,
@@ -80,9 +62,9 @@ namespace RailwayWizzard.App.Services
                 DateFromString = u.DateFromString
             })
                 .OrderBy(u => u.Id)
-                .ToListAsync();
+                .ToList();
 
-            return notificationTasks;
+            return result;
         }
     }
 }

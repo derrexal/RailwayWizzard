@@ -1,12 +1,11 @@
-﻿using RailwayWizzard.App.Dto;
-using RailwayWizzard.Core;
+﻿using RailwayWizzard.App.Dto.NotificationTask;
 
-namespace RailwayWizzard.App.Services.Shared
+namespace RailwayWizzard.App.Services.NotificationTasks
 {
     public interface INotificationTaskService
     {
         public Task<int> CreateAsync(CreateNotificationTaskDto notificationTask);
         public Task<int?> SetIsStoppedAsync(int idNotificationTask);
-        public Task<IList<NotificationTaskDto>> GetActiveByUserAsync(long userId);
+        public Task<IReadOnlyCollection<NotificationTaskDto>> GetActiveByUserAsync(long userId);
     }
 }

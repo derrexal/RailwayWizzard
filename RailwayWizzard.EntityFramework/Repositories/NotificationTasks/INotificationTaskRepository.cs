@@ -79,5 +79,11 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
         /// </summary>
         /// <returns>Список задач</returns>
         public Task<IList<NotificationTask>> GetNotificationTasksForWork();
+
+        public Task<int> CreateAsync(NotificationTask notificationTask);
+
+        public Task<int?> SetIsStoppedAsync(int idNotificationTask);
+
+        public Task<IReadOnlyCollection<NotificationTask>> GetActiveByUserAsync(long userId);
     }
 }

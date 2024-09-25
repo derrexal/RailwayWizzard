@@ -1,7 +1,7 @@
 ﻿using RailwayWizzard.B2B;
 using RailwayWizzard.Core;
 
-namespace RailwayWizzard.App.Services.Shared
+namespace RailwayWizzard.App.Services.B2B
 {
     public interface IB2BService
     {
@@ -11,7 +11,7 @@ namespace RailwayWizzard.App.Services.Shared
         /// <param name="stationName">Станция введенная пользователем.</param>
         /// <returns>Список станций.</returns>
         public Task<IReadOnlyCollection<StationInfo>> StationValidateAsync(string stationName);
-            
+
         /// <summary>
         /// Возвращает актуальное расписание для указанного рейса.
         /// </summary>

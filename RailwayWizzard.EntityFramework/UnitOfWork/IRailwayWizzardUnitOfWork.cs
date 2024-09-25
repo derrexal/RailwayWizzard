@@ -1,5 +1,6 @@
 ﻿using RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks;
 using RailwayWizzard.EntityFrameworkCore.Repositories.StationInfos;
+using RailwayWizzard.EntityFrameworkCore.Repositories.Users;
 
 namespace RailwayWizzard.EntityFrameworkCore.UnitOfWork
 {
@@ -8,5 +9,7 @@ namespace RailwayWizzard.EntityFrameworkCore.UnitOfWork
         IStationInfoRepository StationInfoRepository { get; }
 
         INotificationTaskRepository NotificationTaskRepository { get; }
+
+        IUserRepository UserRepository { get; }
     }
 }

@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using RailwayWizzard.App.Services.Shared;
+using RailwayWizzard.App.Services.B2B;
 using RailwayWizzard.B2B;
 
 

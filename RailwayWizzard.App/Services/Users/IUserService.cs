@@ -1,7 +1,6 @@
-﻿using RailwayWizzard.App.Dto;
-using RailwayWizzard.Core;
+﻿using RailwayWizzard.App.Dto.User;
 
-namespace RailwayWizzard.App.Services.Shared
+namespace RailwayWizzard.App.Services.Users
 {
     public interface IUserService
     {

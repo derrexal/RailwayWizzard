@@ -2,28 +2,27 @@
 using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
 using Newtonsoft.Json;
-using RailwayWizzard.App.Services.Shared;
 using RailwayWizzard.B2B;
 using RailwayWizzard.Core;
 using RailwayWizzard.EntityFrameworkCore.UnitOfWork;
 using RailwayWizzard.Shared;
 
-namespace RailwayWizzard.App.Services
+namespace RailwayWizzard.App.Services.B2B
 {
     /// <inheritdoc/>
     public class B2BService : IB2BService
     {
         private readonly IB2BClient _b2bClient;
-        private readonly IRailwayWizzardUnitOfWork _railwayWizzardUnitOfWork;
+        private readonly IRailwayWizzardUnitOfWork _uow;
 
         /// <summary>
         /// Initialize bla bla bla
         /// </summary>
         /// <param name="b2bClient">B2B клиент для связи с РЖД.</param>
-        public B2BService(IB2BClient b2bClient, IRailwayWizzardUnitOfWork railwayWizzardUnitOfWork)
+        public B2BService(IB2BClient b2bClient, IRailwayWizzardUnitOfWork uow)
         {
             _b2bClient = b2bClient;
-            _railwayWizzardUnitOfWork = railwayWizzardUnitOfWork;
+            _uow = uow;
         }
 
         /// <inheritdoc/>
@@ -35,7 +34,7 @@ namespace RailwayWizzard.App.Services
 
             var text = await _b2bClient.GetAvailableTimesAsync(scheduleDto);
             var availableTimes = ParseScheduleText(text, scheduleDto.Date);
-            
+
             return availableTimes;
         }
 
@@ -51,8 +50,6 @@ namespace RailwayWizzard.App.Services
 
             return stations;
         }
-
-
 
         /// <summary>
         /// Парсит расписание в виде HTML и!
@@ -81,7 +78,7 @@ namespace RailwayWizzard.App.Services
                         if (dateFrom == DateTime.Now.ToString("dd.MM.yyyy"))
                         {
                             // Если время из расписания больше чем сейчас - добавляем его в список доступных для выбора
-                            if (String.CompareOrdinal(timeRailwayStr, moscowTodayTime) > 0)
+                            if (string.CompareOrdinal(timeRailwayStr, moscowTodayTime) > 0)
                                 availableTime.Add(timeRailwayStr);
                         }
                         // Иначе просто отдаем расписание
@@ -98,7 +95,7 @@ namespace RailwayWizzard.App.Services
         private async Task<StationInfo?> GetStationInfoAsync(string stationName)
         {
             // Если есть в БД
-            var stationInfo = await _railwayWizzardUnitOfWork.StationInfoRepository.FindByStationNameAsync(stationName);
+            var stationInfo = await _uow.StationInfoRepository.FindByStationNameAsync(stationName);
             if (stationInfo is not null) { return stationInfo; }
 
             //Спрашиваем у АПИ
@@ -111,7 +108,7 @@ namespace RailwayWizzard.App.Services
             //if (station is not null) { return new StationInfo { ExpressCode = station.c, StationName = station.n }; }
 
             // Снова смотрим есть ли в БД
-            stationInfo = await _railwayWizzardUnitOfWork.StationInfoRepository.FindByStationNameAsync(stationName);
+            stationInfo = await _uow.StationInfoRepository.FindByStationNameAsync(stationName);
             if (stationInfo is not null) { return stationInfo; }
 
             return null;
@@ -125,7 +122,7 @@ namespace RailwayWizzard.App.Services
         private async Task<IReadOnlyCollection<StationInfo>> GetStationsInfo(string stationName)
         {
             //Ищем в БД
-            var stationsInfo = await _railwayWizzardUnitOfWork.StationInfoRepository.ContainsByStationNameAsync(stationName);
+            var stationsInfo = await _uow.StationInfoRepository.ContainsByStationNameAsync(stationName);
             if (stationsInfo.Any()) return stationsInfo;
 
             //Ищем в данных полученных по АПИ
@@ -168,9 +165,9 @@ namespace RailwayWizzard.App.Services
 
             foreach (var rootStation in rootStations)
             {
-                var anyStationInfo = await _railwayWizzardUnitOfWork.StationInfoRepository.AnyByExpressCodeAsync(rootStation.c);
+                var anyStationInfo = await _uow.StationInfoRepository.AnyByExpressCodeAsync(rootStation.c);
 
-                if(anyStationInfo is false)
+                if (anyStationInfo is false)
                 {
                     addedStationInfo.Add(new StationInfo
                     {
@@ -180,7 +177,7 @@ namespace RailwayWizzard.App.Services
                 }
             }
 
-            await _railwayWizzardUnitOfWork.StationInfoRepository.AddRangeStationInfoAsync(addedStationInfo);
+            await _uow.StationInfoRepository.AddRangeStationInfoAsync(addedStationInfo);
         }
     }
 }

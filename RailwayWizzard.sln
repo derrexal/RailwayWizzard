@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RailwayWizzard.EntityFramew
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RailwayWizzard.Shared", "RailwayWizzard.Shared\RailwayWizzard.Shared.csproj", "{339D0B15-3B70-42FD-AFFF-7BEFF09A916D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RailwayWizzard.B2B", "RailwayWizzard.B2B\RailwayWizzard.B2B.csproj", "{61E4177E-9A97-49CF-96E2-72524A29F8B9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RailwayWizzard.B2B", "RailwayWizzard.B2B\RailwayWizzard.B2B.csproj", "{61E4177E-9A97-49CF-96E2-72524A29F8B9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

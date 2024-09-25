@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using RailwayWizzard.App.Dto;
-using RailwayWizzard.App.Services.Shared;
+using RailwayWizzard.App.Dto.NotificationTask;
+using RailwayWizzard.App.Services.NotificationTasks;
 
 namespace RailwayWizzard.App.Controllers
 {
@@ -51,7 +51,7 @@ namespace RailwayWizzard.App.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("GetActiveByUser")]
-        public async Task<IList<NotificationTaskDto>> GetActiveByUser(long userId)
+        public async Task<IReadOnlyCollection<NotificationTaskDto>> GetActiveByUser(long userId)
         {
             if (!ModelState.IsValid)
                 throw new Exception($"Request param is no valid: {ModelState}");

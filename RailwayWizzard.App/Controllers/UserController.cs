@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using RailwayWizzard.App.Dto;
-using RailwayWizzard.App.Services.Shared;
+using RailwayWizzard.App.Dto.User;
+using RailwayWizzard.App.Services.Users;
 
 namespace RailwayWizzard.App.Controllers
 {

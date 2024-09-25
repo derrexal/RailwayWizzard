@@ -5,9 +5,11 @@ namespace RailwayWizzard.EntityFrameworkCore.UnitOfWork
 {
     public class RailwayWizzardUnitOfWork : IRailwayWizzardUnitOfWork
     {
-        //TODO: вынести в DI?
+        private readonly RailwayWizzardAppContext _context;
+
         public RailwayWizzardUnitOfWork(RailwayWizzardAppContext context)
         {
+            _context = context;
             StationInfoRepository = new StationInfoRepository(context);
             NotificationTaskRepository = new NotificationTaskRepository(context);
         }
@@ -23,7 +25,7 @@ namespace RailwayWizzard.EntityFrameworkCore.UnitOfWork
             {
                 if (disposing)
                 {
-                    db.Dispose();
+                    _context.Dispose();
                 }
                 this.disposed = true;
             }

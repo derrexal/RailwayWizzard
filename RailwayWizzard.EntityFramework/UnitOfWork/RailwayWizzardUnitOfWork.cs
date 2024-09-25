@@ -15,5 +15,25 @@ namespace RailwayWizzard.EntityFrameworkCore.UnitOfWork
         public IStationInfoRepository StationInfoRepository { get; }
         public INotificationTaskRepository NotificationTaskRepository { get; }
 
+        private bool disposed = false;
+
+        public virtual void Dispose(bool disposing)
+        {
+            if (!this.disposed)
+            {
+                if (disposing)
+                {
+                    db.Dispose();
+                }
+                this.disposed = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
     }
 }

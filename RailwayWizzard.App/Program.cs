@@ -32,10 +32,14 @@ namespace RailwayWizzard.App
 
             builder.Services.AddScoped<IRailwayWizzardUnitOfWork,RailwayWizzardUnitOfWork>();
 
-            builder.Services.AddDbContext<RailwayWizzardAppContext>(options =>
+            builder.Services.AddDbContextFactory<RailwayWizzardAppContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("RailwayWizzardAppContext") 
-                                  ?? throw new InvalidOperationException("Connection string 'RailwayWizzardAppContext' not found.")));
-
+                ?? throw new InvalidOperationException("Connection string 'RailwayWizzardAppContext' not found."),
+                npgsqlOptionsAction: npgsqlOption =>
+                    {
+                        npgsqlOption.EnableRetryOnFailure();
+                    }));
+                
             builder.Services.AddControllers();
 
             builder.Services.AddHostedService<NotificationTaskWorker>();
@@ -53,7 +57,8 @@ namespace RailwayWizzard.App
 
             var app = builder.Build();
 
-            using (var context = app.Services.GetRequiredService<RailwayWizzardAppContext>())
+            var factory = app.Services.GetRequiredService<IDbContextFactory<RailwayWizzardAppContext>>();
+            using (var context = factory.CreateDbContext())
             {
                 //Applying migrations to run program
                 context.Database.Migrate();
@@ -62,7 +67,6 @@ namespace RailwayWizzard.App
                 context.NotificationTask.ExecuteUpdate(t =>
                     t.SetProperty(t => t.IsWorked, false));
             }
-
             app.UseAuthorization();
 
             app.MapControllers();

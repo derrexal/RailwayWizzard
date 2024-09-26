@@ -20,7 +20,10 @@ from logger import logger
 load_dotenv()
 token = os.getenv('TOKEN')
 
-application = Application.builder().token(token).build()
+application = (Application.builder()
+               .read_timeout(15)
+               .token(token)
+               .build())
 
 
 # Перенести этот метод в др место не получается, т.к. тут создается application
@@ -33,6 +36,7 @@ async def send_message_to_user(user_id, message):
         logger.warning("Пользователь " + str(user_id) + " заблокировал бота\n" + eF.message)
         raise eF
     except Exception as e:
+        logger.exception("В ходе отправки сообщения пользователю возникла ошибка:")
         logger.exception(e)
         raise
   

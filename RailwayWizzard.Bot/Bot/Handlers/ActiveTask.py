@@ -82,10 +82,12 @@ async def one_step_active_task(update: Update, context: CallbackContext):
         if response is None:
             raise ValueError(f"ERROR stopped task number: {str(task_number)}")
 
-        await update.callback_query.edit_message_text(f"{update.callback_query.message.text_html} \n Остановлена",
+        await update.callback_query.edit_message_text(f"{update.callback_query.message.text_html} \n\n<strong>Остановлена</strong>",
                                                       parse_mode=ParseMode.HTML)
+
         await update.callback_query.message.reply_text(
             text=f"Задача № <strong> {str(task_number)} </strong> успешно остановлена.", parse_mode=ParseMode.HTML)
+
         return next_step
 
     except Exception as e:

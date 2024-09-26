@@ -96,6 +96,6 @@ async def get_active_task_by_user_id(user_id):
 async def delete_task_by_id(task_id):
     """Останавливает (Устанавливает статус Остановлен) задачу по ее ID"""
     endpoint = 'NotificationTask/SetIsStopped'
-    params = {'idNotificationTask': task_id}
+    params = {'notificationTaskId': task_id}
     response = await make_request('GET', endpoint, params=params)
     return await response.json()

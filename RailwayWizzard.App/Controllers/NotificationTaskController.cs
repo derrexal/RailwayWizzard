@@ -51,15 +51,14 @@ namespace RailwayWizzard.App.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("GetActiveByUser")]
-        public async Task<IReadOnlyCollection<NotificationTaskDto>> GetActiveByUser(long userId)
+        public async Task<IActionResult> GetActiveByUser(long userId)
         {
             if (!ModelState.IsValid)
                 throw new Exception($"Request param is no valid: {ModelState}");
 
             var result = await _notificationTaskService.GetActiveByUserAsync(userId);
 
-            //TODO: почему не возвращаем тот же ОК?
-            return result;
+            return Ok(result);
         }
     }
 }

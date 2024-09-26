@@ -8,26 +8,18 @@ namespace RailwayWizzard.App
     {
         private const int RUN_INTERVAL = 1000 * 60 * 1; //Интервал запуска (1 мин)
 
-        private readonly IRobot _robot;
-        private readonly IBotApi _botApi;
+        private readonly ISteps _steps;
         private readonly IRailwayWizzardUnitOfWork _uow;
         private readonly ILogger<NotificationTaskWorker> _logger;
-        private readonly ILogger<StepsUsingHttpClient> _stepsLogger;
-        private readonly ISteps _steps;
 
         public NotificationTaskWorker(
-            IRobot robot,
-            IBotApi botApi,
+            ISteps steps,
             IRailwayWizzardUnitOfWork uow,
-            ILogger<NotificationTaskWorker> logger, 
-            ILogger<StepsUsingHttpClient> stepsLogger) 
+            ILogger<NotificationTaskWorker> logger) 
         {
-            _robot = robot;
-            _botApi = botApi;
             _uow = uow;
             _logger = logger;
-            _stepsLogger = stepsLogger;
-            _steps = new StepsUsingHttpClient(_robot, _botApi, _uow, _stepsLogger);
+            _steps = steps;
         }
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
@@ -48,13 +40,17 @@ namespace RailwayWizzard.App
             if (isDownTime) return;
 
             List<Task> tasks = new();
+            
             try
             {
                 var notificationTasks = await _uow.NotificationTaskRepository.GetNotificationTasksForWork();
+                
                 foreach (var notificationTask in notificationTasks)
                     tasks.Add(_steps.Notification(notificationTask));
+                
                 await Task.WhenAll(tasks);
             }
+            
             catch (Exception ex)
             {
                 _logger.LogError($"{nameof(NotificationTaskWorker)} {ex}");

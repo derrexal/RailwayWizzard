@@ -32,7 +32,7 @@ namespace RailwayWizzard.App
 
             builder.Services.AddScoped<IRailwayWizzardUnitOfWork,RailwayWizzardUnitOfWork>();
 
-            builder.Services.AddDbContextFactory<RailwayWizzardAppContext>(options =>
+            builder.Services.AddDbContext<RailwayWizzardAppContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("RailwayWizzardAppContext") 
                                   ?? throw new InvalidOperationException("Connection string 'RailwayWizzardAppContext' not found.")));
 
@@ -53,12 +53,11 @@ namespace RailwayWizzard.App
 
             var app = builder.Build();
 
-            var factory = app.Services.GetRequiredService<IDbContextFactory<RailwayWizzardAppContext>>();
-            using(var context = factory.CreateDbContext())
+            using (var context = app.Services.GetRequiredService<RailwayWizzardAppContext>())
             {
                 //Applying migrations to run program
                 context.Database.Migrate();
-                
+
                 //Before Run Program Update field IsWorked default value (false)
                 context.NotificationTask.ExecuteUpdate(t =>
                     t.SetProperty(t => t.IsWorked, false));

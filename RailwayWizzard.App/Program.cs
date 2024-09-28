@@ -33,11 +33,13 @@ namespace RailwayWizzard.App
             builder.Services.AddScoped<IRailwayWizzardUnitOfWork,RailwayWizzardUnitOfWork>();
 
             builder.Services.AddDbContextFactory<RailwayWizzardAppContext>(options =>
-                options.UseNpgsql(builder.Configuration.GetConnectionString("RailwayWizzardAppContext") 
-                ?? throw new InvalidOperationException("Connection string 'RailwayWizzardAppContext' not found."),
+                options.UseNpgsql(builder.Configuration.GetConnectionString("RailwayWizzardAppContext"),
                 npgsqlOptionsAction: npgsqlOption =>
                     {
-                        npgsqlOption.EnableRetryOnFailure();
+                        npgsqlOption.EnableRetryOnFailure(
+                            maxRetryCount: 10,
+                            maxRetryDelay: TimeSpan.FromSeconds(30),
+                            errorCodesToAdd: null);
                     }));
                 
             builder.Services.AddControllers();

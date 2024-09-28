@@ -2,7 +2,7 @@
 
 namespace RailwayWizzard.App.Services.Users
 {
-    public interface IUserService : IDisposable
+    public interface IUserService
     {
         public Task CreateOrUpdateAsync(CreateUserDto user);
     }

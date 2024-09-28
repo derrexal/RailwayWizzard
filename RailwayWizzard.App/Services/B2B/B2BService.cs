@@ -1,5 +1,4 @@
 ﻿using Abp.Collections.Extensions;
-using Abp.Domain.Uow;
 using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
 using Newtonsoft.Json;
@@ -30,8 +29,13 @@ namespace RailwayWizzard.App.Services.B2B
         public async Task<IReadOnlyCollection<string>> GetAvailableTimesAsync(ScheduleDto scheduleDto)
         {
             //подготовка данных
-            scheduleDto.StationFrom = scheduleDto.StationFrom.ToUpper();
-            scheduleDto.StationTo = scheduleDto.StationTo.ToUpper();
+            scheduleDto.StationFromName = scheduleDto.StationFromName.ToUpper();
+            scheduleDto.StationToName = scheduleDto.StationToName.ToUpper();
+
+            // тут было обращение и к БД и к АПИ.
+            // Решил что смысла ходить к АПИ нет, т.к. на моменте когда запрашивается расписания станция уже точно должна быть в БД
+            scheduleDto.StationFrom = await _uow.StationInfoRepository.FindByStationNameAsync(scheduleDto.StationFromName);
+            scheduleDto.StationTo = await _uow.StationInfoRepository.FindByStationNameAsync(scheduleDto.StationToName);
 
             var text = await _b2bClient.GetAvailableTimesAsync(scheduleDto);
             var availableTimes = ParseScheduleText(text, scheduleDto.Date);
@@ -179,11 +183,6 @@ namespace RailwayWizzard.App.Services.B2B
             }
 
             await _uow.StationInfoRepository.AddRangeStationInfoAsync(addedStationInfo);
-        }
-
-        public void Dispose()
-        {
-            _uow.Dispose();
         }
     }
 }

@@ -4,7 +4,7 @@ using RailwayWizzard.EntityFrameworkCore.Repositories.Users;
 
 namespace RailwayWizzard.EntityFrameworkCore.UnitOfWork
 {
-    public interface IRailwayWizzardUnitOfWork : IDisposable
+    public interface IRailwayWizzardUnitOfWork
     {
         IStationInfoRepository StationInfoRepository { get; }
 

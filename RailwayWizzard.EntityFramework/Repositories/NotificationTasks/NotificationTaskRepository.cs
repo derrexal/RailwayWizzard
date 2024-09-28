@@ -41,6 +41,7 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
         /// <inheritdoc/>
         public async Task UpdateNotificationTask(NotificationTask notificationTask)
         {
+            //TODO: Есть же метод Update в этом классе
             _context.NotificationTask.Update(notificationTask);
             await _context.SaveChangesAsync();
             await Task.CompletedTask;
@@ -156,17 +157,18 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
         /// <returns></returns>
         private async Task UpdateActualStatusNotificationTask()
         {
-            {
-                var notificationTasks = await _context.NotificationTask.Where(t => t.IsActual == true).ToListAsync();
+            var notificationTasks = await _context.NotificationTask.Where(t => t.IsActual == true).ToListAsync();
 
-                foreach (var notificationTask in notificationTasks)
-                    if (!NotificationTaskIsActual(notificationTask))
-                    {
-                        notificationTask.IsActual = false;
-                        _context.NotificationTask.Update(notificationTask);
-                    }
-                await _context.SaveChangesAsync();
-            }
+            foreach (var notificationTask in notificationTasks)
+                if (!NotificationTaskIsActual(notificationTask))
+                {
+                    notificationTask.IsActual = false;
+                    // TODO: не нужно? Проверить и другие места
+                    _context.NotificationTask.Update(notificationTask);
+                }
+            
+            await _context.SaveChangesAsync();
+            
             await Task.CompletedTask;
         }
 
@@ -186,7 +188,7 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
             if (currentTask is null) return null;
 
             currentTask.IsStopped = true;
-            currentTask!.IsWorked = false;
+            currentTask.IsWorked = false;
 
             await _context.SaveChangesAsync();
             

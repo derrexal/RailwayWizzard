@@ -66,10 +66,5 @@ namespace RailwayWizzard.App.Services.NotificationTasks
 
             return result;
         }
-
-        public void Dispose()
-        {
-            _uow.Dispose();
-        }
     }
 }

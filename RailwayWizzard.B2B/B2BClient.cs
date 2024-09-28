@@ -1,18 +1,15 @@
 ﻿using Abp.Collections.Extensions;
 using RailwayWizzard.Core;
-using RailwayWizzard.EntityFrameworkCore.UnitOfWork;
 
 namespace RailwayWizzard.B2B
 {
     public class B2BClient: IB2BClient
     {
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly IRailwayWizzardUnitOfWork _uow;
 
-        public B2BClient(IHttpClientFactory httpClientFactory, IRailwayWizzardUnitOfWork uow)
+        public B2BClient(IHttpClientFactory httpClientFactory)
         {
             _httpClientFactory = httpClientFactory;
-            _uow = uow;
         }
 
         /// <inheritdoc/>
@@ -107,15 +104,15 @@ namespace RailwayWizzard.B2B
         /// <inheritdoc/>
         public async Task<string> GetAvailableTimesAsync(ScheduleDto scheduleDto)
         {
-            // тут было обращение и к БД и к АПИ.
-            // Решил что смысла ходить к АПИ нет, т.к. на моменте когда запрашивается расписания станция уже точно должна быть в БД
-            var stationFrom = await _uow.StationInfoRepository.FindByStationNameAsync(scheduleDto.StationFrom);
-            var stationTo = await _uow.StationInfoRepository.FindByStationNameAsync(scheduleDto.StationTo);
-            
-            if (stationTo is null || stationFrom is null) throw new ArgumentException($"Не найден ExpressCode по станциям {scheduleDto.StationFrom},{scheduleDto.StationTo}. Вероятно в них допущена ошибка");
+            if (scheduleDto.StationTo is null || scheduleDto.StationFrom is null)
+                throw new ArgumentException($"Не найден ExpressCode по станциям {scheduleDto.StationFromName},{scheduleDto.StationToName}. Вероятно в них допущена ошибка");
 
             string url = "https://pass.rzd.ru/basic-schedule/public/ru?STRUCTURE_ID=5249&layer_id=5526&refererLayerId=5526&" +
-                         $"st_from={stationFrom.ExpressCode}&st_to={stationTo.ExpressCode}&st_from_name={scheduleDto.StationFrom}&st_to_name={scheduleDto.StationTo}&day={scheduleDto.Date}";
+                         $"st_from={scheduleDto.StationFrom.ExpressCode}" +
+                         $"&st_to={scheduleDto.StationTo.ExpressCode}" +
+                         $"&st_from_name={scheduleDto.StationFromName}" +
+                         $"&st_to_name={scheduleDto.StationToName}" +
+                         $"&day={scheduleDto.Date}";
             
             using var request = new HttpRequestMessage(HttpMethod.Get, url);
             request.Headers.Add("Host", "pass.rzd.ru");

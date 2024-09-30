@@ -42,6 +42,7 @@ namespace RailwayWizzard.Robot.App
                 {
                     await _notificationTaskRepository.SetIsNotActualAndIsNotWorked(inputNotificationTask);
 
+                    //TODO: не вызываем реализованный метод  SetIsNotWorked !!! А может это вообще вырежем и не надо будет думат
                     string notActualTaskMessage = $"Stop {notificationTaskLogMessage} in Thread:{Thread.CurrentThread.ManagedThreadId}. Task has not actual.";
 
                     _logger.LogInformation(notActualTaskMessage);
@@ -85,12 +86,13 @@ namespace RailwayWizzard.Robot.App
                 // Записываем информацию о результате поиска свободных мест
                 await _notificationTaskRepository.SetLastResultNotificationTask(inputNotificationTask, resultFreeSeats!);
 
-                await SetIsNotWorked(inputNotificationTask, notificationTaskLogMessage, "Success");
+                await SetIsNotWorked(inputNotificationTask, notificationTaskLogMessage, "Result is new");
 
                 return;
             }
             catch (Exception e)
             {
+                //TODO: логируем тут а потом ниже ?
                 await SetIsNotWorked(inputNotificationTask, notificationTaskLogMessage, "Fatal");
 
                 string messageError = $"Fatal Error. {notificationTaskLogMessage} {e}";

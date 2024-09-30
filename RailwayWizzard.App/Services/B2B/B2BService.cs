@@ -2,9 +2,10 @@
 using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
 using Newtonsoft.Json;
+using RailwayWizzard.App.Dto.B2B;
 using RailwayWizzard.B2B;
 using RailwayWizzard.Core;
-using RailwayWizzard.EntityFrameworkCore.UnitOfWork;
+using RailwayWizzard.EntityFrameworkCore.Repositories.StationInfos;
 using RailwayWizzard.Shared;
 
 namespace RailwayWizzard.App.Services.B2B
@@ -13,29 +14,37 @@ namespace RailwayWizzard.App.Services.B2B
     public class B2BService : IB2BService
     {
         private readonly IB2BClient _b2bClient;
-        private readonly IRailwayWizzardUnitOfWork _uow;
+        private readonly IStationInfoRepository _stationInfoRepository;
+        private readonly ILogger _logger;
+
+        // TODO: Почему тут просто логер а в воркере например типизированный?
+
 
         /// <summary>
         /// Initialize bla bla bla
         /// </summary>
         /// <param name="b2bClient">B2B клиент для связи с РЖД.</param>
-        public B2BService(IB2BClient b2bClient, IRailwayWizzardUnitOfWork uow)
+        public B2BService(
+            IB2BClient b2bClient,
+            IStationInfoRepository stationInfoRepository,
+            ILogger<B2BService> logger)
         {
             _b2bClient = b2bClient;
-            _uow = uow;
+            _stationInfoRepository = stationInfoRepository;
+            _logger = logger;
         }
 
         /// <inheritdoc/>
-        public async Task<IReadOnlyCollection<string>> GetAvailableTimesAsync(ScheduleDto scheduleDto)
+        public async Task<IReadOnlyCollection<string>> GetAvailableTimesAsync(RouteDto routeDto)
         {
-            //подготовка данных
-            scheduleDto.StationFromName = scheduleDto.StationFromName.ToUpper();
-            scheduleDto.StationToName = scheduleDto.StationToName.ToUpper();
-
-            // тут было обращение и к БД и к АПИ.
-            // Решил что смысла ходить к АПИ нет, т.к. на моменте когда запрашивается расписания станция уже точно должна быть в БД
-            scheduleDto.StationFrom = await _uow.StationInfoRepository.FindByStationNameAsync(scheduleDto.StationFromName);
-            scheduleDto.StationTo = await _uow.StationInfoRepository.FindByStationNameAsync(scheduleDto.StationToName);
+            var scheduleDto = new ScheduleDto
+            {
+                Date = routeDto.Date,
+                StationFromName = routeDto.StationFromName.ToUpper(),
+                StationToName = routeDto.StationToName.ToUpper(),
+                StationFrom = await _stationInfoRepository.FindByStationNameAsync(routeDto.StationFromName),
+                StationTo = await _stationInfoRepository.FindByStationNameAsync(routeDto.StationToName)
+            };
 
             var text = await _b2bClient.GetAvailableTimesAsync(scheduleDto);
             var availableTimes = ParseScheduleText(text, scheduleDto.Date);
@@ -100,7 +109,7 @@ namespace RailwayWizzard.App.Services.B2B
         private async Task<StationInfo?> GetStationInfoAsync(string stationName)
         {
             // Если есть в БД
-            var stationInfo = await _uow.StationInfoRepository.FindByStationNameAsync(stationName);
+            var stationInfo = await _stationInfoRepository.FindByStationNameAsync(stationName);
             if (stationInfo is not null) { return stationInfo; }
 
             //Спрашиваем у АПИ
@@ -113,7 +122,7 @@ namespace RailwayWizzard.App.Services.B2B
             //if (station is not null) { return new StationInfo { ExpressCode = station.c, StationName = station.n }; }
 
             // Снова смотрим есть ли в БД
-            stationInfo = await _uow.StationInfoRepository.FindByStationNameAsync(stationName);
+            stationInfo = await _stationInfoRepository.FindByStationNameAsync(stationName);
             if (stationInfo is not null) { return stationInfo; }
 
             return null;
@@ -127,7 +136,7 @@ namespace RailwayWizzard.App.Services.B2B
         private async Task<IReadOnlyCollection<StationInfo>> GetStationsInfo(string stationName)
         {
             //Ищем в БД
-            var stationsInfo = await _uow.StationInfoRepository.ContainsByStationNameAsync(stationName);
+            var stationsInfo = await _stationInfoRepository.ContainsByStationNameAsync(stationName);
             if (stationsInfo.Any()) return stationsInfo;
 
             //Ищем в данных полученных по АПИ
@@ -170,7 +179,7 @@ namespace RailwayWizzard.App.Services.B2B
 
             foreach (var rootStation in rootStations)
             {
-                var anyStationInfo = await _uow.StationInfoRepository.AnyByExpressCodeAsync(rootStation.c);
+                var anyStationInfo = await _stationInfoRepository.AnyByExpressCodeAsync(rootStation.c);
 
                 if (anyStationInfo is false)
                 {
@@ -182,7 +191,7 @@ namespace RailwayWizzard.App.Services.B2B
                 }
             }
 
-            await _uow.StationInfoRepository.AddRangeStationInfoAsync(addedStationInfo);
+            await _stationInfoRepository.AddRangeStationInfoAsync(addedStationInfo);
         }
     }
 }

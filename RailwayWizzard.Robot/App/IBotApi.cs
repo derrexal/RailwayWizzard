@@ -13,7 +13,7 @@ public interface IBotApi
     /// <param name="userId">Id пользователя</param>
     /// <returns>Задача</returns>
     public Task SendMessageForUserAsync(string message, long userId);
-    
+
     /// <summary>
     /// Метод отправки сообщения администратору
     /// </summary>

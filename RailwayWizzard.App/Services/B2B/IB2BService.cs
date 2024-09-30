@@ -1,4 +1,4 @@
-﻿using RailwayWizzard.B2B;
+﻿using RailwayWizzard.App.Dto.B2B;
 using RailwayWizzard.Core;
 
 namespace RailwayWizzard.App.Services.B2B
@@ -17,6 +17,6 @@ namespace RailwayWizzard.App.Services.B2B
         /// </summary>
         /// <param name="scheduleDto">Рейс.</param>
         /// <returns>Актуальное расписание.</returns>
-        public Task<IReadOnlyCollection<string>> GetAvailableTimesAsync(ScheduleDto scheduleDto);
+        public Task<IReadOnlyCollection<string>> GetAvailableTimesAsync(RouteDto scheduleDto);
     }
 }

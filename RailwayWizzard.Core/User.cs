@@ -1,12 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Abp.Domain.Entities;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Abp.Domain.Entities;
 
 
 namespace RailwayWizzard.Core;
 
 [Table("AppUsers")]
-public class User: Entity
+public class User : Entity
 {
     [Required]
     public long IdTg { get; set; }

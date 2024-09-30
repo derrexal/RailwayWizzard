@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using RailwayWizzard.App.Dto.B2B;
 using RailwayWizzard.App.Services.B2B;
-using RailwayWizzard.B2B;
 
 
 namespace RailwayWizzard.App.Controllers
@@ -17,13 +17,13 @@ namespace RailwayWizzard.App.Controllers
 
 
         [HttpGet("GetAvailableTimes")]
-        public async Task<IActionResult> GetAvailableTimes(ScheduleDto scheduleDto)
+        public async Task<IActionResult> GetAvailableTimes(RouteDto scheduleDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest($"Request param is no valid: {ModelState}");
-           
+
             return Ok(await _b2bService.GetAvailableTimesAsync(scheduleDto));
-        }   
+        }
 
         [HttpGet("GetStationValidate")]
         public async Task<IActionResult> GetStationValidate(string stationName)

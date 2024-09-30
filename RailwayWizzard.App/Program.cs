@@ -4,7 +4,9 @@ using RailwayWizzard.App.Services.NotificationTasks;
 using RailwayWizzard.App.Services.Users;
 using RailwayWizzard.B2B;
 using RailwayWizzard.EntityFrameworkCore;
-using RailwayWizzard.EntityFrameworkCore.UnitOfWork;
+using RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks;
+using RailwayWizzard.EntityFrameworkCore.Repositories.StationInfos;
+using RailwayWizzard.EntityFrameworkCore.Repositories.Users;
 using RailwayWizzard.Robot.App;
 
 namespace RailwayWizzard.App
@@ -21,16 +23,19 @@ namespace RailwayWizzard.App
 
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddTransient<IBotApi, BotApi>();
-            builder.Services.AddTransient<IRobot, RobotBigBrother>();
-            builder.Services.AddTransient<ISteps, StepsUsingHttpClient>();
-            builder.Services.AddTransient<IB2BClient, B2BClient>();
+            builder.Services.AddScoped<IBotApi, BotApi>();
+            builder.Services.AddScoped<IRobot, RobotBigBrother>();
+            builder.Services.AddScoped<ISteps, StepsUsingHttpClient>();
+
+            builder.Services.AddScoped<IB2BClient, B2BClient>();
 
             builder.Services.AddScoped<IB2BService, B2BService>();
             builder.Services.AddScoped<INotificationTaskService, NotificationTaskService>();
             builder.Services.AddScoped<IUserService, UserService>();
 
-            builder.Services.AddScoped<IRailwayWizzardUnitOfWork,RailwayWizzardUnitOfWork>();
+            builder.Services.AddScoped<INotificationTaskRepository, NotificationTaskRepository>();
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IStationInfoRepository, StationInfoRepository>();
 
             builder.Services.AddDbContextFactory<RailwayWizzardAppContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("RailwayWizzardAppContext"),
@@ -41,7 +46,7 @@ namespace RailwayWizzard.App
                             maxRetryDelay: TimeSpan.FromSeconds(30),
                             errorCodesToAdd: null);
                     }));
-                
+
             builder.Services.AddControllers();
 
             builder.Services.AddHostedService<NotificationTaskWorker>();

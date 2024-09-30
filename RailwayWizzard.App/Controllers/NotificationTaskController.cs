@@ -39,10 +39,10 @@ namespace RailwayWizzard.App.Controllers
                 return BadRequest($"Request param is no valid: {ModelState}");
 
             var result = await _notificationTaskService.SetIsStoppedAsync(notificationTaskId);
-            
+
             if (result is null)
                 return BadRequest($"Error search task from Id:{notificationTaskId}");
-            
+
             return Ok(result);
         }
 

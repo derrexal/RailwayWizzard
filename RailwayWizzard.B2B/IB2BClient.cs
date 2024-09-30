@@ -19,7 +19,7 @@ namespace RailwayWizzard.B2B
         /// </summary>
         /// <param name="inputNotificationTask">Задача</param>
         /// <returns></returns>
-        public Task<string> GetTrainInformationByParametersAsync(NotificationTask inputNotificationTask,string ksid);
+        public Task<string> GetTrainInformationByParametersAsync(NotificationTask inputNotificationTask, string ksid);
 
         /// <summary>
         /// Получение расписания в формате HTML разметки

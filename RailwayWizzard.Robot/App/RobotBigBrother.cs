@@ -172,14 +172,14 @@ namespace RailwayWizzard.Robot.App
         private string GetNodeIdStation(string response)
         {
             var stationRoot = JsonConvert.DeserializeObject<StationRoot>(response);
-            
+
             if (stationRoot == null || stationRoot.city.Count == 0)
                 throw new NullReferenceException($"Сервис РЖД при запросе информации о станции вернул не стандартный ответ. Ответ:{response}");
 
             var city = stationRoot.city.FirstOrDefault();
             if (city == null)
                 throw new NullReferenceException($"Сервис РЖД при запросе информации о станции вернул не стандартный ответ. Ответ:{response}");
-            
+
             return city.nodeId ?? "";
         }
 
@@ -197,7 +197,7 @@ namespace RailwayWizzard.Robot.App
                 //Из всей строки получаем только значение
                 var keyValuePairs = res.Split(':').ToList();
                 var result = keyValuePairs.LastOrDefault();
-                if (result is null) 
+                if (result is null)
                     throw new HttpRequestException($"Не удалось распарсить ответ от Касперского:\n{textResponse}");
 
                 result = result.Remove(result.Length - 1);
@@ -211,7 +211,7 @@ namespace RailwayWizzard.Robot.App
             }
         }
 
-        
+
         public string GetMessageSeatsIsEmpty(string notificationTaskText)
         {
             return $"{char.ConvertFromUtf32(0x26D4)} " +

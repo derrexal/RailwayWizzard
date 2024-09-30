@@ -7,13 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AngleSharp" Version="1.1.2" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\RailwayWizzard.Core\RailwayWizzard.Core.csproj" />
-    <ProjectReference Include="..\RailwayWizzard.Shared\RailwayWizzard.Shared.csproj" />
   </ItemGroup>
 
 </Project>

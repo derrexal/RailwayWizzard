@@ -1,9 +1,8 @@
-﻿using System.ComponentModel;
+﻿using Abp.Domain.Entities;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Globalization;
-using Abp.Domain.Entities;
-
 
 namespace RailwayWizzard.Core
 {

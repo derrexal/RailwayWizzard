@@ -1,18 +1,20 @@
 ﻿using RailwayWizzard.App.Dto.User;
 using RailwayWizzard.Core;
-using RailwayWizzard.EntityFrameworkCore.UnitOfWork;
+using RailwayWizzard.EntityFrameworkCore.Repositories.Users;
 
 namespace RailwayWizzard.App.Services.Users
 {
     /// <inheritdoc/>
     public class UserService : IUserService
     {
-        private readonly IRailwayWizzardUnitOfWork _uow;
+        private readonly IUserRepository _userRepository;
         private readonly ILogger _logger;
 
-        public UserService(IRailwayWizzardUnitOfWork uow, ILogger<UserService> logger)
+        public UserService(
+            IUserRepository userRepository,
+            ILogger<UserService> logger)
         {
-            _uow = uow;
+            _userRepository = userRepository;
             _logger = logger;
         }
 
@@ -25,7 +27,7 @@ namespace RailwayWizzard.App.Services.Users
                 Username = createUserDto.Username
             };
 
-            await _uow.UserRepository.CreateOrUpdateAsync(user);
+            await _userRepository.CreateOrUpdateAsync(user);
 
             _logger.LogInformation($"Success create or update User. IdTg:{user.IdTg} Username:{user.Username}");
         }

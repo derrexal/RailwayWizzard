@@ -7,7 +7,7 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.Users
     {
         private readonly RailwayWizzardAppContext _context;
 
-        public UserRepository (RailwayWizzardAppContext context)
+        public UserRepository(RailwayWizzardAppContext context)
         {
             _context = context;
         }

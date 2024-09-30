@@ -23,19 +23,19 @@ public class BotApi : IBotApi
     /// <inheritdoc/>
     public async Task SendMessageForUserAsync(string message, long userId)
     {
-        ResponseToUser messageToUser = new ResponseToUser{ Message = message, UserId = userId };
-        
+        ResponseToUser messageToUser = new ResponseToUser { Message = message, UserId = userId };
+
         // не использую using т.к. придется внизу другую переменную юзать (Compiler Error)
         var request = new HttpRequestMessage(HttpMethod.Post, API_BOT_SEND_MESSAGE_URL);
         request.Content = JsonContent.Create(messageToUser);
         using var httpClient = _httpClientFactory.CreateClient(); ;
-        
+
         // не использую using т.к. придется внизу другую переменную юзать (Compiler Error)
         var response = await httpClient.SendAsync(request);
-        
+
         // Retry send
         if (response.StatusCode != HttpStatusCode.OK)
-        {   
+        {
             await Task.Delay(DEFAULT_DELAY_TIME);
 
             request = new HttpRequestMessage(HttpMethod.Post, API_BOT_SEND_MESSAGE_URL);

@@ -38,7 +38,7 @@
             var todayTime = TimeOnly.FromDateTime(GetMoscowDateTime);
 
             var IsDownTime = startDownTime < todayTime && todayTime < endDownTime;
-            
+
             return IsDownTime;
         }
     }

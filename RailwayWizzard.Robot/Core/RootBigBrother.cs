@@ -1,6 +1,6 @@
 ﻿namespace RailwayWizzard.Robot.Core
 {
-        public class AvailableBaggageType
+    public class AvailableBaggageType
     {
         public string Type { get; set; }
         public string Name { get; set; }

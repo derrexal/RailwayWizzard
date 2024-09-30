@@ -1,19 +1,19 @@
 ﻿using RailwayWizzard.App.Dto.NotificationTask;
 using RailwayWizzard.Core;
-using RailwayWizzard.EntityFrameworkCore.UnitOfWork;
+using RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks;
 
 namespace RailwayWizzard.App.Services.NotificationTasks
 {
     public class NotificationTaskService : INotificationTaskService
     {
+        private readonly INotificationTaskRepository _notificationTaskRepository;
         private readonly ILogger _logger;
-        private readonly IRailwayWizzardUnitOfWork _uow;
 
         public NotificationTaskService(
-            IRailwayWizzardUnitOfWork uow,
+            INotificationTaskRepository notificationTaskRepository,
             ILogger<NotificationTaskService> logger)
         {
-            _uow = uow;
+            _notificationTaskRepository = notificationTaskRepository;
             _logger = logger;
         }
 
@@ -35,8 +35,8 @@ namespace RailwayWizzard.App.Services.NotificationTasks
             notificationTask.IsWorked = false;
             notificationTask.IsStopped = false;
 
-            var notificationTaskId = await _uow.NotificationTaskRepository.CreateAsync(notificationTask);
-            
+            var notificationTaskId = await _notificationTaskRepository.CreateAsync(notificationTask);
+
             _logger.LogInformation($"Success create NotificationTask ID: {notificationTaskId} Details: {notificationTask.ToCustomString()}");
 
             return notificationTaskId;
@@ -44,12 +44,12 @@ namespace RailwayWizzard.App.Services.NotificationTasks
 
         public async Task<int?> SetIsStoppedAsync(int idNotificationTask)
         {
-            return await _uow.NotificationTaskRepository.SetIsStoppedAsync(idNotificationTask);
+            return await _notificationTaskRepository.SetIsStoppedAsync(idNotificationTask);
         }
 
         public async Task<IReadOnlyCollection<NotificationTaskDto>> GetActiveByUserAsync(long userId)
         {
-            var notificationTasks = await _uow.NotificationTaskRepository.GetActiveByUserAsync(userId);
+            var notificationTasks = await _notificationTaskRepository.GetActiveByUserAsync(userId);
 
             var result = notificationTasks.Select(u => new NotificationTaskDto
             {

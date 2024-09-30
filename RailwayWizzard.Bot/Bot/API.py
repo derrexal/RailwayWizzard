@@ -59,8 +59,8 @@ async def get_available_times(station_from_name, station_to_name, date):
     """  """
     endpoint = 'B2B/GetAvailableTimes'
     json_data = {
-        'StationFrom': station_from_name,
-        'StationTo': station_to_name,
+        'StationFromName': station_from_name,
+        'StationToName': station_to_name,
         'Date': date
     }
     response = await make_request('GET', endpoint, json_data=json_data)

@@ -92,12 +92,12 @@ namespace RailwayWizzard.Robot.App
             }
             catch (Exception e)
             {
-                //TODO: логируем тут а потом ниже ?
-                await SetIsNotWorked(inputNotificationTask, notificationTaskLogMessage, "Fatal");
-
                 string messageError = $"Fatal Error. {notificationTaskLogMessage} {e}";
                 _logger.LogError(messageError);
                 await _botApi.SendMessageForAdminAsync(messageError);
+
+                //TODO: логируем тут а потом ниже ?
+                await SetIsNotWorked(inputNotificationTask, notificationTaskLogMessage, "Fatal");
 
                 return;
             }

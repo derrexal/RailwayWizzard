@@ -1,8 +1,8 @@
-﻿using Abp.Domain.Entities;
+﻿using System.Globalization;
+using Abp.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using RailwayWizzard.Core;
 using RailwayWizzard.Shared;
-using System.Globalization;
 
 namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
 {
@@ -20,7 +20,7 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
         public async Task<NotificationTask> GetNotificationTaskFromId(int id)
         {
             var currentNotificationTask = await _context.NotificationTask.FirstAsync(t => t.Id == id);
-            if (currentNotificationTask == null)
+            if (currentNotificationTask == null) 
                 throw new EntityNotFoundException($"Не удалось получить задачу. ID:{id}");
 
             return currentNotificationTask;
@@ -41,7 +41,6 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
         /// <inheritdoc/>
         public async Task UpdateNotificationTask(NotificationTask notificationTask)
         {
-            //TODO: Есть же метод Update в этом классе
             _context.NotificationTask.Update(notificationTask);
             await _context.SaveChangesAsync();
             await Task.CompletedTask;
@@ -51,7 +50,8 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
         public async Task<bool> ResultIsLast(NotificationTask inputNotificationTask, string lastResult)
         {
             var currentNotificationTask = await GetNotificationTaskFromId(inputNotificationTask.Id);
-            if (currentNotificationTask.LastResult == lastResult) return true;
+            if (currentNotificationTask.LastResult == lastResult) 
+                return true;
             return false;
         }
 
@@ -137,12 +137,12 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
             foreach (var notificationTask in notificationTasks)
             {
                 var arrivalStationInfo = await _context.StationInfo.SingleOrDefaultAsync(s => s.StationName == notificationTask.ArrivalStation);
-                if (arrivalStationInfo == null)
+                if (arrivalStationInfo == null) 
                     throw new EntityNotFoundException($"Не удалось получить станцию. StationName:{notificationTask.ArrivalStation}");
                 notificationTask.ArrivalStationCode = arrivalStationInfo.ExpressCode;
 
                 var departureStationInfo = await _context.StationInfo.SingleOrDefaultAsync(s => s.StationName == notificationTask.DepartureStation);
-                if (departureStationInfo == null)
+                if (departureStationInfo == null) 
                     throw new EntityNotFoundException($"Не удалось получить станцию. StationName:{notificationTask.DepartureStation}");
                 notificationTask.DepartureStationCode = departureStationInfo.ExpressCode;
             }
@@ -168,7 +168,7 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
                 }
 
             await _context.SaveChangesAsync();
-
+            
             await Task.CompletedTask;
         }
 
@@ -177,7 +177,7 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
             _context.Add(notificationTask);
 
             await _context.SaveChangesAsync();
-
+            
             return notificationTask.Id;
         }
 
@@ -185,13 +185,14 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
         {
             var currentTask = await _context.NotificationTask.FirstOrDefaultAsync(t => t.Id == idNotificationTask);
 
-            if (currentTask is null) return null;
+            if (currentTask is null) 
+                return null;
 
             currentTask.IsStopped = true;
             currentTask.IsWorked = false;
 
             await _context.SaveChangesAsync();
-
+            
             return currentTask.Id;
         }
 
@@ -201,7 +202,6 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
                 .Where(u => u.IsActual)
                 .Where(u => !u.IsStopped)
                 .Where(u => u.UserId == userId)
-                .AsNoTracking()
                 .ToListAsync();
         }
     }

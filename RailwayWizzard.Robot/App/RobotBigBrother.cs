@@ -132,13 +132,17 @@ namespace RailwayWizzard.Robot.App
             List<string> result = new();
 
             foreach (var route in currentRoutes)
+            {
+                var price = route.Price is not null
+                    ? $"Цена: <strong> {Math.Round((decimal)route.Price!)}  ₽ </strong>\n"
+                    : "";
+
                 result.Add(
                     $"Класс обслуживания: <strong>{route.CarType}</strong>\n" +
                     $"Свободных мест: <strong>{route.TotalPlace}</strong>\n" +
-                    route.Price is not null 
-                    ? $"Цена: <strong> {Math.Round((decimal)route.Price!)}  ₽ </strong>\n"
-                    : "");
-            
+                    price);
+            }
+
 
             return result;
         }

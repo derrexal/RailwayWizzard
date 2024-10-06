@@ -130,10 +130,16 @@ namespace RailwayWizzard.Robot.App
         private List<string> SupportingMethod(HashSet<SearchResult> currentRoutes)
         {
             List<string> result = new();
+
             foreach (var route in currentRoutes)
-                result.Add($"Класс обслуживания: <strong>{route.CarType}</strong>\n" +
+                result.Add(
+                    $"Класс обслуживания: <strong>{route.CarType}</strong>\n" +
                     $"Свободных мест: <strong>{route.TotalPlace}</strong>\n" +
-                    $"Цена: <strong> {route.Price}</strong>\n");
+                    route.Price is not null 
+                    ? $"Цена: <strong> {Math.Round((decimal)route.Price!)}  ₽ </strong>\n"
+                    : "");
+            
+
             return result;
         }
 

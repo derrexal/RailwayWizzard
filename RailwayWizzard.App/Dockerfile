@@ -9,8 +9,11 @@ FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["RailwayWizzard.App/RailwayWizzard.App.csproj", "RailwayWizzard.App/"]
+COPY ["RailwayWizzard.B2B/RailwayWizzard.B2B.csproj", "RailwayWizzard.B2B/"]
 COPY ["RailwayWizzard.Core/RailwayWizzard.Core.csproj", "RailwayWizzard.Core/"]
-COPY ["RailwayWizzard.Robot/RailwayWizzard.Robot.csproj", "RailwayWizzard.Robot/"]
+COPY ["RailwayWizzard.EntityFramework/RailwayWizzard.EntityFrameworkCore.csproj", RailwayWizzard.EntityFrameworkCore/"]
+COPY ["RailwayWizzard.Robot/RailwayWizzard.B2BHelper.csproj", "RailwayWizzard.Robot/"]
+COPY ["RailwayWizzard.Shared/RailwayWizzard.Shared.csproj", "RailwayWizzard.Shared/"]
 RUN dotnet restore "./RailwayWizzard.App/./RailwayWizzard.App.csproj"
 COPY . .
 WORKDIR "/src/RailwayWizzard.App"

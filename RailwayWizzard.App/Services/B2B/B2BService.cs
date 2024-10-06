@@ -46,6 +46,10 @@ namespace RailwayWizzard.App.Services.B2B
                 StationTo = await _stationInfoRepository.FindByStationNameAsync(routeDto.StationToName)
             };
 
+            if (scheduleDto.StationTo is null || scheduleDto.StationFrom is null)
+                throw new ArgumentException($"Не найдена одна из станций: {scheduleDto.StationFromName},{scheduleDto.StationToName}. Вероятно в названии допущена ошибка");
+
+            /// TODO: Вынести в робота?
             var text = await _b2bClient.GetAvailableTimesAsync(scheduleDto);
             var availableTimes = ParseScheduleText(text, scheduleDto.Date);
 

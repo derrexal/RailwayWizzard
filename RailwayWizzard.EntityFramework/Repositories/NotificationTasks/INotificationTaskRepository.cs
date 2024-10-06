@@ -8,6 +8,12 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
     public interface INotificationTaskRepository
     {
         /// <summary>
+        /// Инициализирует начальное состояние базы.
+        /// </summary>
+        /// <returns></returns>
+        public Task DatabaseInitialize();
+
+        /// <summary>
         /// Возвращает сущность задачи по ее Id
         /// </summary>
         /// <param name="id"></param>
@@ -20,13 +26,6 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
         /// </summary>
         /// <returns>Список задач</returns>
         public Task<IList<NotificationTask>> GetNotWorkedNotificationTasks();
-
-        /// <summary>
-        /// Обновляет состояние задачи
-        /// </summary>
-        /// <param name="notificationTask"></param>
-        /// <returns></returns>
-        public Task UpdateNotificationTask(NotificationTask notificationTask);
 
         /// <summary>
         /// Возвращает результат сравнения последнего результата с текущим
@@ -68,22 +67,30 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
         public Task SetIsNotWorked(NotificationTask inputNotificationTask);
 
         /// <summary>
-        /// Проверяет задачу на актуальность
-        /// </summary>
-        /// <param name="task">Задача</param>
-        /// <returns>Результат проверки</returns>
-        public bool NotificationTaskIsActual(NotificationTask task);
-
-        /// <summary>
         /// Возвращает подходящий для работы список задач
         /// </summary>
         /// <returns>Список задач</returns>
         public Task<IList<NotificationTask>> GetNotificationTasksForWork();
 
+        /// <summary>
+        /// Добавляет сущность <see cref="NotificationTask"/> в БД.
+        /// </summary>
+        /// <param name="notificationTask">Задача для добавления.</param>
+        /// <returns>Идентификатор добавленной сущности.</returns>
         public Task<int> CreateAsync(NotificationTask notificationTask);
 
+        /// <summary>
+        /// Устанавливает задаче статус "Остановлена".
+        /// </summary>
+        /// <param name="idNotificationTask"></param>
+        /// <returns>Идентификатор остановленной задачи.</returns>
         public Task<int?> SetIsStoppedAsync(int idNotificationTask);
 
+        /// <summary>
+        /// Получает список активных задач по идентификатору пользователя.
+        /// </summary>
+        /// <param name="userId">Идентификатор пользователя.</param>
+        /// <returns>Список активных задач.</returns>
         public Task<IReadOnlyCollection<NotificationTask>> GetActiveByUserAsync(long userId);
     }
 }

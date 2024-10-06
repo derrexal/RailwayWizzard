@@ -39,16 +39,19 @@ namespace RailwayWizzard.App
             var isDownTime = Common.IsDownTimeRzd();
             if (isDownTime) return;
 
-            List<Task> tasks = new();
+            // TODO: отказался от этой идеи из-за проблем с контекстом. (System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext)
+            //List<Task> tasks = new();
 
             try
             {
+                await _notificationTaskRepository.DatabaseInitialize();
+
                 var notificationTasks = await _notificationTaskRepository.GetNotificationTasksForWork();
 
                 foreach (var notificationTask in notificationTasks)
-                    tasks.Add(_steps.Notification(notificationTask));
+                    await _steps.Notification(notificationTask);
 
-                await Task.WhenAll(tasks);
+                //await Task.WhenAll(tasks);
             }
 
             catch (Exception ex)

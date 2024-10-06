@@ -1,9 +1,11 @@
 ﻿using Microsoft.Extensions.Logging;
 using RailwayWizzard.Core;
+using RailwayWizzard.Core.Shared;
 using RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks;
 
 namespace RailwayWizzard.Robot.App
 {
+    /// <inheritdoc/>
     public class StepsUsingHttpClient : ISteps
     {
         private readonly IRobot _robot;
@@ -37,8 +39,7 @@ namespace RailwayWizzard.Robot.App
                 
                 //TODO: Такая ситуация вообще может произойти? Актуальность задачи проверяется на предыдущем шаге (воркер.)
                 //Во время выполнения задача стала неактуальна
-                var notificationTaskIsActual = _notificationTaskRepository.NotificationTaskIsActual(inputNotificationTask);
-                if (notificationTaskIsActual is false)
+                if (inputNotificationTask.IsActuality() == false)
                 {
                     await _notificationTaskRepository.SetIsNotActualAndIsNotWorked(inputNotificationTask);
 

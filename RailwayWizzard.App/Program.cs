@@ -16,16 +16,11 @@ namespace RailwayWizzard.App
     {
         public static void Main(string[] args)
         {
-            //TODO:Кажется из-за этого в базу время записывается -3 hour
-            //todo: Это решает проблему "System.InvalidCastException: Cannot write DateTime with Kind=Local to PostgreSQL type 'timestamp with time zone', only UTC is supported. "
-            //todo: пока оставлю так, оно работает и это сейчас главнее
-            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
-
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddScoped<IBotApi, BotApi>();
+            builder.Services.AddTransient<ISteps, StepsUsingHttpClient>();
             builder.Services.AddScoped<IRobot, RobotBigBrother>();
-            builder.Services.AddScoped<ISteps, StepsUsingHttpClient>();
+            builder.Services.AddScoped<IBotApi, BotApi>();
 
             builder.Services.AddScoped<IB2BClient, B2BClient>();
 
@@ -37,7 +32,7 @@ namespace RailwayWizzard.App
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IStationInfoRepository, StationInfoRepository>();
 
-            builder.Services.AddDbContextFactory<RailwayWizzardAppContext>(options =>
+            builder.Services.AddDbContext<RailwayWizzardAppContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("RailwayWizzardAppContext"),
                 npgsqlOptionsAction: npgsqlOption =>
                     {
@@ -64,16 +59,6 @@ namespace RailwayWizzard.App
 
             var app = builder.Build();
 
-            var factory = app.Services.GetRequiredService<IDbContextFactory<RailwayWizzardAppContext>>();
-            using (var context = factory.CreateDbContext())
-            {
-                //Applying migrations to run program
-                context.Database.Migrate();
-
-                //Before Run Program Update field IsWorked default value (false)
-                context.NotificationTask.ExecuteUpdate(t =>
-                    t.SetProperty(t => t.IsWorked, false));
-            }
             app.UseAuthorization();
 
             app.MapControllers();

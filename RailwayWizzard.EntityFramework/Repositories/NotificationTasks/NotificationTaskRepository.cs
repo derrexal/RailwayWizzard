@@ -1,8 +1,7 @@
-﻿using System.Globalization;
-using Abp.Domain.Entities;
+﻿using Abp.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using RailwayWizzard.Core;
-using RailwayWizzard.Shared;
+using RailwayWizzard.Core.Shared;
 
 namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
 {
@@ -16,14 +15,27 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
             _context = context;
         }
 
+        public async Task DatabaseInitialize()
+        {
+            if (await _context.Database.CanConnectAsync() == false) 
+                await Task.Delay(5000);
+
+            // Applying migrations to run program
+            await _context.Database.MigrateAsync();
+
+            // Before Run Program Update field IsWorked default value(false)
+            _context.NotificationTask.ExecuteUpdate(t =>
+                t.SetProperty(t => t.IsWorked, false));
+        }
+
         /// <inheritdoc/>
         public async Task<NotificationTask> GetNotificationTaskFromId(int id)
         {
-            var currentNotificationTask = await _context.NotificationTask.FirstAsync(t => t.Id == id);
-            if (currentNotificationTask == null) 
+            var notificationTask = await _context.NotificationTask.FirstOrDefaultAsync(t => t.Id == id);
+            if (notificationTask == null)    
                 throw new EntityNotFoundException($"Не удалось получить задачу. ID:{id}");
 
-            return currentNotificationTask;
+            return notificationTask;
         }
 
         /// <inheritdoc/>
@@ -97,24 +109,6 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
         }
 
         /// <inheritdoc/>
-        // TODO: вынести отсюда. Никакого отношения к сущности и базе не имеет...
-        public bool NotificationTaskIsActual(NotificationTask task)
-        {
-            DateTime notificationTaskDateTime = DateTime.ParseExact(
-            task.DateFrom.ToShortDateString() + " " + task.TimeFrom,
-            "MM/dd/yyyy HH:mm",
-            CultureInfo.InvariantCulture);
-
-            var moscowDateTime = Common.GetMoscowDateTime;
-
-            var notificationTaskIsActual = notificationTaskDateTime > moscowDateTime;
-            if (notificationTaskIsActual)
-                return true;
-            return false;
-        }
-
-
-        /// <inheritdoc/>
         public async Task<IList<NotificationTask>> GetNotificationTasksForWork()
         {
             await UpdateActualStatusNotificationTask();
@@ -126,7 +120,6 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
             return result;
         }
 
-
         /// <summary>
         /// Заполняет кода городов отправления и прибытия у заданий
         /// </summary>
@@ -136,12 +129,12 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
         {
             foreach (var notificationTask in notificationTasks)
             {
-                var arrivalStationInfo = await _context.StationInfo.SingleOrDefaultAsync(s => s.StationName == notificationTask.ArrivalStation);
+                var arrivalStationInfo = await _context.StationInfo.AsNoTracking().SingleOrDefaultAsync(s => s.StationName == notificationTask.ArrivalStation);
                 if (arrivalStationInfo == null) 
                     throw new EntityNotFoundException($"Не удалось получить станцию. StationName:{notificationTask.ArrivalStation}");
                 notificationTask.ArrivalStationCode = arrivalStationInfo.ExpressCode;
 
-                var departureStationInfo = await _context.StationInfo.SingleOrDefaultAsync(s => s.StationName == notificationTask.DepartureStation);
+                var departureStationInfo = await _context.StationInfo.AsNoTracking().SingleOrDefaultAsync(s => s.StationName == notificationTask.DepartureStation);
                 if (departureStationInfo == null) 
                     throw new EntityNotFoundException($"Не удалось получить станцию. StationName:{notificationTask.DepartureStation}");
                 notificationTask.DepartureStationCode = departureStationInfo.ExpressCode;
@@ -149,10 +142,9 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
             return notificationTasks;
         }
 
-
         /// <summary>
         /// Обновляет состояние таблицы по полю "IsActual" если поездка уже в прошлом
-        /// Это необходимо для проверки всех активных задач, чтобы БД отражала правильное состояние
+        /// Необходим для проверки всех активных задач, чтобы БД отражала правильное состояние
         /// </summary>
         /// <returns></returns>
         private async Task UpdateActualStatusNotificationTask()
@@ -160,21 +152,15 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
             var notificationTasks = await _context.NotificationTask.Where(t => t.IsActual == true).ToListAsync();
 
             foreach (var notificationTask in notificationTasks)
-                if (!NotificationTaskIsActual(notificationTask))
-                {
+                if (notificationTask.IsActuality() == false)
                     notificationTask.IsActual = false;
-                    // TODO: не нужно? Проверить и другие места
-                    _context.NotificationTask.Update(notificationTask);
-                }
 
             await _context.SaveChangesAsync();
-            
-            await Task.CompletedTask;
         }
 
         public async Task<int> CreateAsync(NotificationTask notificationTask)
         {
-            _context.Add(notificationTask);
+            await _context.AddAsync(notificationTask);
 
             await _context.SaveChangesAsync();
             
@@ -183,22 +169,22 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
 
         public async Task<int?> SetIsStoppedAsync(int idNotificationTask)
         {
-            var currentTask = await _context.NotificationTask.FirstOrDefaultAsync(t => t.Id == idNotificationTask);
+            var currentNotificationTask = await _context.NotificationTask.FirstOrDefaultAsync(t => t.Id == idNotificationTask);
 
-            if (currentTask is null) 
+            if (currentNotificationTask is null) 
                 return null;
 
-            currentTask.IsStopped = true;
-            currentTask.IsWorked = false;
+            currentNotificationTask.IsStopped = true;
+            currentNotificationTask.IsWorked = false;
 
             await _context.SaveChangesAsync();
             
-            return currentTask.Id;
+            return currentNotificationTask.Id;
         }
 
         public async Task<IReadOnlyCollection<NotificationTask>> GetActiveByUserAsync(long userId)
         {
-            return await _context.NotificationTask
+            return await _context.NotificationTask.AsNoTracking()
                 .Where(u => u.IsActual)
                 .Where(u => !u.IsStopped)
                 .Where(u => u.UserId == userId)

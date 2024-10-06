@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RailwayWizzard.App", "Railw
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RailwayWizzard.Core", "RailwayWizzard.Core\RailwayWizzard.Core.csproj", "{21B7D3D5-9643-4298-B0D1-973E9E3C1B47}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RailwayWizzard.Robot", "RailwayWizzard.Robot\RailwayWizzard.Robot.csproj", "{5F8A33FE-9B03-41A0-9B87-197692BBFA89}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RailwayWizzard.B2BHelper", "RailwayWizzard.Robot\RailwayWizzard.B2BHelper.csproj", "{5F8A33FE-9B03-41A0-9B87-197692BBFA89}"
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{6699C8F5-8F67-4E2B-843B-F816679DC4E8}"
 EndProject

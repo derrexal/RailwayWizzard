@@ -105,12 +105,9 @@ namespace RailwayWizzard.B2B
         /// <inheritdoc/>
         public async Task<string> GetAvailableTimesAsync(ScheduleDto scheduleDto)
         {
-            if (scheduleDto.StationTo is null || scheduleDto.StationFrom is null)
-                throw new ArgumentException($"Не найден ExpressCode по станциям {scheduleDto.StationFromName},{scheduleDto.StationToName}. Вероятно в них допущена ошибка");
-
             string url = "https://pass.rzd.ru/basic-schedule/public/ru?STRUCTURE_ID=5249&layer_id=5526&refererLayerId=5526&" +
-                         $"st_from={scheduleDto.StationFrom.ExpressCode}" +
-                         $"&st_to={scheduleDto.StationTo.ExpressCode}" +
+                         $"st_from={scheduleDto.StationFrom!.ExpressCode}" +
+                         $"&st_to={scheduleDto.StationTo!.ExpressCode}" +
                          $"&st_from_name={scheduleDto.StationFromName}" +
                          $"&st_to_name={scheduleDto.StationToName}" +
                          $"&day={scheduleDto.Date}";

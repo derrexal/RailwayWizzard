@@ -118,7 +118,7 @@ def language_input_validation(input_station):
     Проверка ввода на допустимые символы. Если проверка не пройдена - бросается Exception
     @param input_station: Название станции(UPPER)
     """
-    alphabet = set('[].,- '
+    alphabet = set('()[].,- '
                    '0123456789'
                    'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ')
     input_station_set = set(input_station)

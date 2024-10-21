@@ -26,16 +26,18 @@ namespace RailwayWizzard.Robot.App
 
             var freeSeats = await GetFreeSeatsOnTheTrainHelper(inputNotificationTask);
 
-            for (int i = 0; i <= retryCount; i++)
+            for (int i = 0; i < retryCount; i++)
             {
                 if (freeSeats.Count == 0)
                 {
-                    await Task.Delay(60000);
+                    await Task.Delay(5000);
 
                     freeSeats = await GetFreeSeatsOnTheTrainHelper(inputNotificationTask);
                 }
                 else
+                {
                     break;
+                }
             }
 
             return String.Join("\n", freeSeats.ToArray());

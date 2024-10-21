@@ -2,6 +2,7 @@
 using RailwayWizzard.Core;
 using RailwayWizzard.Core.Shared;
 using RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks;
+using System.Diagnostics;
 
 namespace RailwayWizzard.Robot.App
 {
@@ -13,6 +14,8 @@ namespace RailwayWizzard.Robot.App
         private readonly INotificationTaskRepository _notificationTaskRepository;
         private readonly ILogger<StepsUsingHttpClient> _logger;
 
+        private readonly Stopwatch _watch;
+
         public StepsUsingHttpClient(
             IRobot robot,
             IBotApi botApi,
@@ -23,6 +26,8 @@ namespace RailwayWizzard.Robot.App
             _botApi = botApi;
             _notificationTaskRepository = notificationTaskRepository;
             _logger = logger;
+            _watch = System.Diagnostics.Stopwatch.StartNew();
+
         }
 
         // TODO: сделать что-то с тем, что пользователи заблокировал бота...
@@ -108,7 +113,9 @@ namespace RailwayWizzard.Robot.App
         {
             await _notificationTaskRepository.SetIsNotWorked(notificationTask);
 
-            _logger.LogInformation($"Stop {logMessage} in Thread:{Thread.CurrentThread.ManagedThreadId} Result:{result}");
+            _watch.Stop();
+
+            _logger.LogInformation($"Stop {logMessage} in Thread:{Thread.CurrentThread.ManagedThreadId} Result:{result} Watch:{_watch.ElapsedMilliseconds}");
         }
     }
 }

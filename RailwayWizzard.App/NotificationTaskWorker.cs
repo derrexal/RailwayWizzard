@@ -6,7 +6,7 @@ namespace RailwayWizzard.App
 {
     public class NotificationTaskWorker : BackgroundService
     {
-        private const int RUN_INTERVAL = 1000 * 60 * 1; //Интервал запуска (1 мин)
+        private const int RUN_INTERVAL = 1000 * 10; //Интервал запуска (10 сек)
 
         private readonly ISteps _steps;
         private readonly INotificationTaskRepository _notificationTaskRepository;

@@ -55,12 +55,6 @@ async def send_task_info(update: Update, task: dict):
                      f"Время отправления: <strong> {task['timeFrom']} </strong>\n"
                      f"Количество мест: <strong> {str(task['numberSeats'])} </strong>\n")
 
-        # В старых задачах не выбраны типы вагонов
-        # TODO: по прошествии времени станет неактуально
-        if car_types_text:
-            task_info += f"Тип вагона: <strong> {car_types_text} </strong>"
-        # TODO
-
         await update.callback_query.message.reply_text(text=task_info, reply_markup=keyboard, parse_mode=ParseMode.HTML)
 
     except Exception as e:
@@ -84,10 +78,6 @@ async def one_step_active_task(update: Update, context: CallbackContext):
 
         await update.callback_query.edit_message_text(f"{update.callback_query.message.text_html} \n\n<strong>Остановлена</strong>",
                                                       parse_mode=ParseMode.HTML)
-
-        await update.callback_query.message.reply_text(
-            text=f"Задача № <strong> {str(task_number)} </strong> успешно остановлена.", parse_mode=ParseMode.HTML)
-
         return next_step
 
     except Exception as e:

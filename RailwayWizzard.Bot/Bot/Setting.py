@@ -31,7 +31,7 @@ MAX_NUMBER_SEATS = 10  # ни к чему не привязанное значе
 ADMIN_USERNAME = '@derrexal'
 DONATE_URL = 'pay.cloudtips.ru/p/c6b746f7'
 
-MESSAGE_FORMAT_ERROR = "Недопустимый ввод.\nРазрешается вводить только символы кириллицы и цифры"
+MESSAGE_FORMAT_ERROR = "Недопустимый ввод."
 MESSAGE_SUCCESS = 'Уведомление о поездке успешно создано. \nЗадача №'
 MESSAGE_CANCEL = 'Уведомление о поездке отменено.'
 MESSAGE_START = '\U00002388 Добро пожаловать на борт'

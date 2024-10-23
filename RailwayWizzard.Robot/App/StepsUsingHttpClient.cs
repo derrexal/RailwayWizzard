@@ -14,7 +14,7 @@ namespace RailwayWizzard.Robot.App
         private readonly INotificationTaskRepository _notificationTaskRepository;
         private readonly ILogger<StepsUsingHttpClient> _logger;
 
-        private readonly Stopwatch _watch;
+        private Stopwatch _watch;
 
         public StepsUsingHttpClient(
             IRobot robot,
@@ -26,8 +26,6 @@ namespace RailwayWizzard.Robot.App
             _botApi = botApi;
             _notificationTaskRepository = notificationTaskRepository;
             _logger = logger;
-            _watch = System.Diagnostics.Stopwatch.StartNew();
-
         }
 
         // TODO: сделать что-то с тем, что пользователи заблокировал бота...
@@ -37,6 +35,7 @@ namespace RailwayWizzard.Robot.App
         {
             string notificationTaskText = inputNotificationTask.ToCustomString();
             string notificationTaskLogMessage = $"Задача: {inputNotificationTask.Id} Рейс: {notificationTaskText}";
+            _watch = Stopwatch.StartNew();
 
             try
             {

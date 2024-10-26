@@ -4,7 +4,7 @@
 /// <summary>
 /// Описывает методы взаимодействия с ботом
 /// </summary>
-public interface IBotApi
+public interface IBotClient
 {
     /// <summary>
     /// Метод отправки сообщения пользователю

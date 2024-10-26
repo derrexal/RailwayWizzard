@@ -24,9 +24,9 @@ namespace RailwayWizzard.Robot.App
         /// <summary>
         /// Возвращает сообщение пользователю на случай если свободные места были, а сейчас их уже нет.
         /// </summary>
-        /// <param name="notificationTaskText"></param>
+        /// <param name="notificationTask"></param>
         /// <returns>Сообщение.</returns>
-        public string GetMessageSeatsIsEmpty(string notificationTaskText);
+        public string GetMessageSeatsIsEmpty(NotificationTask notificationTask);
 
         /// <summary>
         /// Возвращает сообщение пользователю на случай если свободных мест не было, а сейчас они появились.

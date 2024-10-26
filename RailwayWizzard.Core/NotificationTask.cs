@@ -40,6 +40,8 @@ namespace RailwayWizzard.Core
         [NotMapped]
         public long DepartureStationCode { get; set; }
 
+        [NotMapped]
+        public string? TrainNumber { get; set; }
         /// <summary>
         /// Дата в формате строки для отправки пользователю
         /// </summary>
@@ -56,7 +58,7 @@ namespace RailwayWizzard.Core
 
         public string ToCustomString()
         {
-            return $"{DepartureStation} - {ArrivalStation} {TimeFrom} {DateFromString}";
+            return $"{DepartureStation} - {ArrivalStation} {TimeFrom} {DateFromString} {TrainNumber}";
         }
     }
 }

@@ -5,7 +5,7 @@ from Bot.Setting import MESSAGE_START, START_INLINE_KEYBOARDS
 
 async def start_buttons_handler(update, context):
     """ Создаёт начальные inline-кнопки """
-    user_id = user = update.message.from_user.id
+    user_id = user = str(update.message.from_user.id)
     try:
         await update.message.reply_text(MESSAGE_START + user_id, reply_markup=START_INLINE_KEYBOARDS)
         await API.create_user(update.message.from_user['id'], update.message.from_user['username'])

@@ -13,7 +13,9 @@ async def donate_handler(update, context):
                     url=DONATE_URL)]])
 
     try:
-        await API.create_user(update.message.from_user['id'], update.message.from_user['username'])
+        await API.create_user(
+            update.message.from_user['id'],
+            update.message.from_user['username'])
 
         await update.message.reply_text(
             '\U0001F4B0 Если вы хотите внести свой вклад в развитие проекта нажмите на кнопку ниже',

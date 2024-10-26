@@ -40,7 +40,9 @@ namespace RailwayWizzard.Robot.App
                 }
             }
 
-            return String.Join("\n", freeSeats.ToArray());
+            return freeSeats.Count != 0 
+                ? String.Join("\n", freeSeats.ToArray())
+                : "";
         }
 
         private async Task<List<string>> GetFreeSeatsOnTheTrainHelper(NotificationTask inputNotificationTask)
@@ -58,7 +60,7 @@ namespace RailwayWizzard.Robot.App
                 _logger.LogError($"Сервис РЖД при запросе списка свободных мест вернул ответ в котором нет доступных поездок. Ответ:{textResponse}");
                 return new List<string>();
             }
-
+            //TODO: Если места были, затем РЖД ответил с Trains=null - в ответ пользователь получит сообщение о том что мест нет без номера поезда. Хранить в БД.
             inputNotificationTask.TrainNumber = GetTrainNumberFromResponse(myDeserializedClass, inputNotificationTask.TimeFrom);
 
             //вытаскиваем свободные места по запрашиваемому рейсу
@@ -246,7 +248,7 @@ namespace RailwayWizzard.Robot.App
         public string GetMessageSeatsIsEmpty(NotificationTask notificationTask)
         {
             return $"{char.ConvertFromUtf32(0x26D4)} " +
-                $"{notificationTask.ToCustomString()}" +
+                $"{notificationTask.ToBotString()}" +
                 "\nСвободных мест больше нет";
         }
 
@@ -255,13 +257,12 @@ namespace RailwayWizzard.Robot.App
             var linkToBuyTicketResponse = await GetLinkToBuyTicket(notificationTask);
 
             var linkToBuyTicket = linkToBuyTicketResponse is not null
-                ? $"\n\n<a href=\"{linkToBuyTicketResponse}\">Купить билет</a>"
+                ? $"\n<a href=\"{linkToBuyTicketResponse}\">Купить билет</a>"
                   : "";
 
             var result =
-                $"{char.ConvertFromUtf32(0x2705)} {notificationTask.ToCustomString()}" +
+                $"{char.ConvertFromUtf32(0x2705)} {notificationTask.ToBotString()}" +
                 $"\n\n{resultFreeSeats}" +
-                "\nОбнаружены свободные места" +
                 linkToBuyTicket;
 
             return result;

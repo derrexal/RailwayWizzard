@@ -50,9 +50,11 @@ car_type_inline_buttons = generate_car_type_buttons()
 async def notification_handler(update: Update, context: CallbackContext):
     """ Начало взаимодействия по клику на inline-кнопку 'Уведомление' """
     next_step = 1
+
     try:
         if update.callback_query.data != CALLBACK_NOTIFICATION:
             raise Exception('ERROR CONCAT CALLBACK QUERY')
+
         await update.callback_query.message.reply_text(text="Обратите внимание, по умолчанию не приходят уведомления о "
                                                             "местах для инвалидов. Если вам необходимо получать "
                                                             "уведомления и в таком случае - пожалуйста, обратитесь к "
@@ -62,6 +64,7 @@ async def notification_handler(update: Update, context: CallbackContext):
         await update.callback_query.message.reply_text(
             text="Укажите <strong>станцию отправления</strong>.\nНапример, <code>Москва</code>",
             parse_mode=ParseMode.HTML)
+
         return next_step
 
     except Exception as e:
@@ -81,20 +84,26 @@ async def first_step_notification(update: Update, context: CallbackContext):
         language_input_validation(expected_station_name)
 
         stations = await API.station_validate(expected_station_name)
+
         if len(stations) == 0:
-            await update.message.reply_text(text="Такой станции на сайте РЖД не котируется.\n"
-                                                 "Укажите <strong>станцию отправления</strong>.\n"
-                                                 "Например, <code>Москва</code>",
-                                            parse_mode=ParseMode.HTML)
+            await update.message.reply_text(
+                text="Такой станции на сайте РЖД не котируется.\n"
+                     "Укажите <strong>станцию отправления</strong>.\n"
+                     "Например, <code>Москва</code>",
+                parse_mode=ParseMode.HTML)
             return next_step - 1
+
         elif len(stations) > 1:
             message_text = "По вашему запросу найдено несколько станций:\n"
             for station in stations:
                 station_name = station['stationName']
                 message_text += f"<code>{station_name}</code>\n"
             message_text += "Пожалуйста укажите название станции в соответствие с предлагаемыми"
-            await update.message.reply_text(text=message_text, parse_mode=ParseMode.HTML)
+            await update.message.reply_text(
+                text=message_text,
+                parse_mode=ParseMode.HTML)
             return next_step - 1
+
         elif len(stations) == 1:
             station = stations[0]
             context.user_data[0] = station['stationName']
@@ -103,6 +112,7 @@ async def first_step_notification(update: Update, context: CallbackContext):
                                                  "Например, <code>Курск</code>",
                                             parse_mode=ParseMode.HTML)
             return next_step
+
         raise Exception("Непредвиденная ошибка в методе обработки станции")
 
     except ValueError as e:
@@ -196,7 +206,7 @@ async def third_step_notification(update: Update, context: CallbackContext):
         context.user_data[2] = date_and_date_json['date']  # Дата в формате даты
         context.user_data[22] = date_and_date_json['date_text']  # Дата в формате строки
 
-        await update.message.reply_text(text="Укажите <strong>время отправления</strong>\n"
+        await update.message.reply_text(text="Укажите <strong>время отправления</strong>.\n"
                                              "Доступное время для бронирования:\n" +
                                              '    '.join(
                                                  '<code>' + str(time) + '</code>' for time in available_times),
@@ -223,7 +233,7 @@ async def fourth_step_notification(update: Update, context: CallbackContext):
 
         if not time_format_validate(expected_input_time):
             await update.message.reply_text("Формат времени должен быть hh:mm ")
-            await update.message.reply_text(text="Укажите <strong>время отправления</strong>\n"
+            await update.message.reply_text(text="Укажите <strong>время отправления</strong>.\n"
                                                  "Доступное время для бронирования:\n" +
                                                  '    '.join(
                                                      '<code>' + str(time) + '</code>' for time in available_times),
@@ -232,11 +242,13 @@ async def fourth_step_notification(update: Update, context: CallbackContext):
 
         if validate_time is True:
             context.user_data[3] = expected_input_time
-            await update.message.reply_text(text=MESSAGE_MIN_COUNT_SEATS)
+            await update.message.reply_text(
+                text=MESSAGE_MIN_COUNT_SEATS,
+                parse_mode=ParseMode.HTML)
             return next_step
         else:
             await update.message.reply_text("Не найдено поездки с таким временем")
-            await update.message.reply_text(text="Укажите <strong>время отправления</strong>\n"
+            await update.message.reply_text(text="Укажите <strong>время отправления</strong>.\n"
                                                  "Доступное время для бронирования:\n" +
                                                  '    '.join(
                                                      '<code>' + str(time) + '</code>' for time in available_times),
@@ -263,19 +275,20 @@ async def fifth_step_notification(update: Update, context: CallbackContext):
                 context.user_data[33] = expected_amount_seats
                 set_default_car_types()
                 await update.message.reply_text(
-                    text="Выберите тип вагона который вас интересует.\n"
+                    text="Выберите <strong>тип вагона</strong> который вас интересует.\n"
                          "Проставьте все варианты, если не знаете что выбрать",
-                    reply_markup=car_type_inline_buttons)
+                    reply_markup=car_type_inline_buttons,
+                    parse_mode=ParseMode.HTML)
                 return next_step
             else:
                 await update.message.reply_text(
                     text="Ошибка. Вы ввели число более 10 или менее 1. Если вы действительно хотите создать задачу на "
                          f"появление 10 мест одновременно, пожалуйста, обратитесь к администратору бота {ADMIN_USERNAME}")
-                await update.message.reply_text(text=MESSAGE_MIN_COUNT_SEATS)
+                await update.message.reply_text(text=MESSAGE_MIN_COUNT_SEATS, parse_mode=ParseMode.HTML)
                 return next_step - 1
         else:
             await update.message.reply_text(text="Необходимо ввести цифру")
-            await update.message.reply_text(text=MESSAGE_MIN_COUNT_SEATS)
+            await update.message.reply_text(text=MESSAGE_MIN_COUNT_SEATS, parse_mode=ParseMode.HTML)
             return next_step - 1
 
     except Exception as e:
@@ -344,7 +357,7 @@ async def seventh_step_notification(update: Update, context: CallbackContext):
     try:
         if query_data == str(CALLBACK_DATA_CORRECT_NOTIFICATION):  # Уведомление успешно создано
             notification_data_id = await send_notification_data_to_robot(context)  # Отправляем данные о задаче в app
-            update_text_message = (MESSAGE_SUCCESS + "<strong>" + notification_data_id + "</strong>" + ".\n\n" + body_text_task)
+            update_text_message = (MESSAGE_SUCCESS + "<strong>" + notification_data_id + "</strong>" + "\n" + body_text_task)
             await update.callback_query.edit_message_text(update_text_message, parse_mode=ParseMode.HTML)
 
         elif query_data == str(CALLBACK_DATA_INCORRECT_NOTIFICATION):  # Создание уведомления отменено

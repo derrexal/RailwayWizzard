@@ -14,7 +14,7 @@ namespace RailwayWizzard.Robot.App
         private readonly INotificationTaskRepository _notificationTaskRepository;
         private readonly ILogger<StepsUsingHttpClient> _logger;
 
-        private Stopwatch? _watch;
+        private Stopwatch _watch;
 
         public StepsUsingHttpClient(
             IRobot robot,
@@ -26,6 +26,7 @@ namespace RailwayWizzard.Robot.App
             _botApi = botApi;
             _notificationTaskRepository = notificationTaskRepository;
             _logger = logger;
+            _watch = new Stopwatch(); // заглушка чтобы не ругался компилятор.
         }
 
         // TODO: сделать что-то с тем, что пользователи заблокировал бота...
@@ -33,8 +34,7 @@ namespace RailwayWizzard.Robot.App
         // Когда пользователь вновь написал боту (Users/CreateOrUpdate) - выставляем ему статус IsBlocked=false
         public async Task Notification(NotificationTask notificationTask)
         {
-            string notificationTaskText = notificationTask.ToCustomString();
-            string notificationTaskLogMessage = $"Задача: {notificationTask.Id} Рейс: {notificationTaskText}";
+            string notificationTaskLogMessage = $"Задача: {notificationTask.Id} Рейс: {notificationTask.ToCustomString()}";
             _watch = Stopwatch.StartNew();
 
             try

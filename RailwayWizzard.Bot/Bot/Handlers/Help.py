@@ -14,7 +14,9 @@ async def help_handler(update, context):
                     url='telegram.me/derrexal')]])
 
     try:
-        await API.create_user(update.message.from_user['id'], update.message.from_user['username'])
+        await API.create_user(
+            update.message.from_user['id'],
+            update.message.from_user['username'])
 
         await update.message.reply_text(
             '\U0001F4D8 Создано при поддержке прекрасной лапшичной BỔ и английского портера.\n',

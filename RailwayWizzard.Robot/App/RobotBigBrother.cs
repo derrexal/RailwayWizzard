@@ -243,10 +243,10 @@ namespace RailwayWizzard.Robot.App
         }
 
 
-        public string GetMessageSeatsIsEmpty(string notificationTaskText)
+        public string GetMessageSeatsIsEmpty(NotificationTask notificationTask)
         {
             return $"{char.ConvertFromUtf32(0x26D4)} " +
-                $"{notificationTaskText}" +
+                $"{notificationTask.ToCustomString()}" +
                 "\nСвободных мест больше нет";
         }
 

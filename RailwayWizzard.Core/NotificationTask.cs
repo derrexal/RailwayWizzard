@@ -58,7 +58,7 @@ namespace RailwayWizzard.Core
 
         public string ToCustomString()
         {
-            return $"{DepartureStation} - {ArrivalStation} {TimeFrom} {DateFromString}";
+            return $"{DepartureStation} - {ArrivalStation} {TimeFrom} {DateFromString} {TrainNumber}";
         }
     }
 }

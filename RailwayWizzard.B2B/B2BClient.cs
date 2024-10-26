@@ -22,7 +22,6 @@ namespace RailwayWizzard.B2B
             request.Headers.Add("Accept-Language", "ru,en;q=0.9");
             request.Headers.Add("Connection", "keep-alive");
             request.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 YaBrowser/24.7.0.0 Safari/537.36");
-            //request.Headers.Add("Cookie", "session-cookie=17f445bdc336e92bd289545f80267f93d8216047fdf2afb328ffe7a0822a63eb358b2f62bda51aa652544e9f0eab2dff");
 
             //TODO: Вынести в условный baseHttpSender?
             using var client = _httpClientFactory.CreateClient();

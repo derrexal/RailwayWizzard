@@ -19,7 +19,7 @@ namespace RailwayWizzard.Robot.App
         }
 
         /// <inheritdoc/>
-        // TODO: избавиться от этого метода
+        // TODO: избавиться от этого метода - сделать RetryPolicy
         public async Task<string> GetFreeSeatsOnTheTrain(NotificationTask inputNotificationTask)
         {
             const int retryCount = 3;
@@ -59,6 +59,8 @@ namespace RailwayWizzard.Robot.App
                 return new List<string>();
             }
 
+            inputNotificationTask.TrainNumber = GetTrainNumberFromResponse(myDeserializedClass, inputNotificationTask.TimeFrom);
+
             //вытаскиваем свободные места по запрашиваемому рейсу
             var currentRoute = GetCurrentRouteFromResponse(myDeserializedClass, inputNotificationTask);
             if (currentRoute.Count == 0) return new List<string>();
@@ -69,6 +71,20 @@ namespace RailwayWizzard.Robot.App
             return result;
         }
 
+        /// <summary>
+        /// Возвращает номер поезда.
+        /// </summary>
+        /// <param name="root"></param>
+        /// <param name="TimeFrom"></param>
+        /// <returns></returns>
+        /// <exception cref="NullReferenceException"></exception>
+        public string? GetTrainNumberFromResponse(RootBigBrother root, string TimeFrom)
+        {
+            foreach (var train in root.Trains)
+                if (train.LocalDepartureDateTime.ToString()!.Contains(TimeFrom)) //Если в ответе содержится необходимая поездка
+                    return train.DisplayTrainNumber;
+            return null;
+        }
 
         /// <summary>
         /// Получение информации о свободных местах в запрашиваемый день по запрашиваемому рейсу
@@ -167,7 +183,10 @@ namespace RailwayWizzard.Robot.App
 
                 var dateFromText = notificationTask.DateFrom.ToString("yyyy-MM-dd");
 
-                return $"{baseLink}/{departureStationNodeId}/{arrivalStationNodeId}/{dateFromText}";
+                return notificationTask.TrainNumber is null 
+                    ? $"{baseLink}/{departureStationNodeId}/{arrivalStationNodeId}/{dateFromText}"
+                    : $"{baseLink}/{departureStationNodeId}/{arrivalStationNodeId}/{dateFromText}?trainNumber={notificationTask.TrainNumber}";
+
             }
             catch (Exception ex)
             {

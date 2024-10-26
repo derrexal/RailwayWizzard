@@ -10,7 +10,7 @@
         /// </summary>
         /// <param name="date"></param>
         /// <returns></returns>
-        public static DateTime GetMoscowDateTime
+        public static DateTime MoscowNow
         {
             get
             {
@@ -35,7 +35,7 @@
             var startDownTime = new TimeOnly(03, 30);
             var endDownTime = new TimeOnly(04, 00);
 
-            var todayTime = TimeOnly.FromDateTime(GetMoscowDateTime);
+            var todayTime = TimeOnly.FromDateTime(MoscowNow);
 
             var IsDownTime = startDownTime < todayTime && todayTime < endDownTime;
 

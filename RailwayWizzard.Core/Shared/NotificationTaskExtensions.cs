@@ -20,7 +20,7 @@ namespace RailwayWizzard.Core.Shared
                 "MM/dd/yyyy HH:mm",
                 CultureInfo.InvariantCulture);
 
-            var moscowDateTime = Common.GetMoscowDateTime;
+            var moscowDateTime = Common.MoscowNow;
 
             var notificationTaskIsActual = notificationTaskDateTime > moscowDateTime;
             if (notificationTaskIsActual)

@@ -79,7 +79,7 @@ namespace RailwayWizzard.App.Services.B2B
         {
             var availableTime = new List<string>();
 
-            string moscowTodayTime = Common.GetMoscowDateTime.ToString("HH:mm");
+            string moscowTodayTime = Common.MoscowNow.ToString("HH:mm");
 
             IHtmlDocument document = new HtmlParser().ParseDocument(textResponse);
             var table = document.QuerySelector("table.basicSched_trainsInfo_table");

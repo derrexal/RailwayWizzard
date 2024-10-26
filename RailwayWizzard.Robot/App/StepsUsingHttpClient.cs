@@ -10,15 +10,15 @@ namespace RailwayWizzard.Robot.App
     public class StepsUsingHttpClient : ISteps
     {
         private readonly IRobot _robot;
-        private readonly IBotApi _botApi;
+        private readonly IBotClient _botApi;
         private readonly INotificationTaskRepository _notificationTaskRepository;
         private readonly ILogger<StepsUsingHttpClient> _logger;
 
-        private Stopwatch _watch;
+        private Stopwatch? _watch;
 
         public StepsUsingHttpClient(
             IRobot robot,
-            IBotApi botApi,
+            IBotClient botApi,
             INotificationTaskRepository notificationTaskRepository,
             ILogger<StepsUsingHttpClient> logger)
         {

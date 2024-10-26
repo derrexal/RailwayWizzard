@@ -13,12 +13,12 @@ namespace RailwayWizzard.App
         private const int MAX_RUN_TIME = 30000; // Допустимое время выполнения проверки
 
         private readonly ILogger _logger;
-        private readonly IBotApi _botApi;
+        private readonly IBotClient _botApi;
         private readonly IRobot _robot;
 
         public HealthCheckWorker(
             ILogger<HealthCheckWorker> logger,
-            IBotApi botApi,
+            IBotClient botApi,
             IRobot robot)
         {
             _botApi = botApi;
@@ -30,7 +30,7 @@ namespace RailwayWizzard.App
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                _logger.LogInformation($"{nameof(HealthCheckWorker)} running at: {Common.GetMoscowDateTime} Moscow time");
+                _logger.LogInformation($"{nameof(HealthCheckWorker)} running at: {Common.MoscowNow} Moscow time");
 
                 await DoWork();
 
@@ -55,7 +55,7 @@ namespace RailwayWizzard.App
                 CarTypes = new List<CarTypeEnum> { CarTypeEnum.Sedentary, CarTypeEnum.ReservedSeat, CarTypeEnum.Compartment, CarTypeEnum.Luxury }
             };
 
-            string baseMessage = $"[{nameof(HealthCheckWorker)}] Время:{Common.GetMoscowDateTime} Рейс {testNotificationTask.ToCustomString()} ";
+            string baseMessage = $"[{nameof(HealthCheckWorker)}] Время:{Common.MoscowNow} Рейс {testNotificationTask.ToCustomString()} ";
 
             try
             {
@@ -98,7 +98,7 @@ namespace RailwayWizzard.App
 
         public override async Task StopAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation($"{nameof(HealthCheckWorker)} stopped at: {Common.GetMoscowDateTime} Moscow time");
+            _logger.LogInformation($"{nameof(HealthCheckWorker)} stopped at: {Common.MoscowNow} Moscow time");
 
             await base.StopAsync(cancellationToken);
         }

@@ -20,7 +20,7 @@ namespace RailwayWizzard.App
 
             builder.Services.AddTransient<ISteps, StepsUsingHttpClient>();
             builder.Services.AddScoped<IRobot, RobotBigBrother>();
-            builder.Services.AddScoped<IBotApi, BotApi>();
+            builder.Services.AddScoped<IBotClient, BotClient>();
 
             builder.Services.AddScoped<IB2BClient, B2BClient>();
 

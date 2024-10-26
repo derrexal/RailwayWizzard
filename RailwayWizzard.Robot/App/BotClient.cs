@@ -6,7 +6,7 @@ using System.Net.Http.Json;
 namespace RailwayWizzard.Robot.App;
 
 /// <inheritdoc/>
-public class BotApi : IBotApi
+public class BotClient : IBotClient
 {
     private const string API_BOT_SEND_MESSAGE_URL = "http://bot_service:5000/api/sendMessageForUser";
     private const int DEFAULT_DELAY_TIME = 5000;
@@ -14,7 +14,7 @@ public class BotApi : IBotApi
     private readonly IConfiguration _configuration;
     private readonly IHttpClientFactory _httpClientFactory;
 
-    public BotApi(IConfiguration configuration, IHttpClientFactory httpClientFactory)
+    public BotClient(IConfiguration configuration, IHttpClientFactory httpClientFactory)
     {
         _configuration = configuration;
         _httpClientFactory = httpClientFactory;

@@ -260,7 +260,7 @@ namespace RailwayWizzard.Robot.App
 
             var result =
                 $"{char.ConvertFromUtf32(0x2705)} {notificationTask.ToCustomString()}" +
-                $"\n{resultFreeSeats}" +
+                $"\n\n{resultFreeSeats}" +
                 "\nОбнаружены свободные места" +
                 linkToBuyTicket;
 

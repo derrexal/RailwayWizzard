@@ -28,5 +28,7 @@ namespace RailwayWizzard.App.Dto.NotificationTask
         /// Дата в формате строки для отправки пользователю
         /// </summary>
         public string DateFromString { get; set; } = "";
+
+        public string TimeUpdated { get; set; } = "";
     }
 }

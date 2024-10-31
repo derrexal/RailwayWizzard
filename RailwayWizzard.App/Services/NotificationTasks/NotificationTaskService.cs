@@ -59,7 +59,8 @@ namespace RailwayWizzard.App.Services.NotificationTasks
                 TimeFrom = u.TimeFrom,
                 CarTypes = u.CarTypes,
                 NumberSeats = u.NumberSeats,
-                DateFromString = u.DateFromString
+                DateFromString = u.DateFromString,
+                TimeUpdated = $"{u.Updated:t}" ?? ""
             })
                 .OrderBy(u => u.Id)
                 .ToList();

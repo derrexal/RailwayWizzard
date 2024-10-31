@@ -44,6 +44,9 @@ async def send_task_info(update: Update, task: dict):
                      f"Время отправления: <strong> {task['timeFrom']} </strong>\n"
                      f"Количество мест: <strong> {str(task['numberSeats'])} </strong>\n")
 
+        if str(task['timeUpdated']) != '':
+            task_info = task_info + f"Время последней проверки: <strong> {str(task['timeUpdated'])} </strong>\n"
+
         await update.callback_query.message.reply_text(
             text=task_info,
             reply_markup=keyboard,

@@ -52,12 +52,12 @@ namespace RailwayWizzard.App
                 if (notificationTask is null)
                 {
                     //TODO: допилить - увеличивать время если задач нет до определенного максимума как в проекте с прошлого места.
-                    await Task.Delay(10000, cancellationToken);
+                    await Task.Delay(RUN_INTERVAL, cancellationToken);
                     return;
                 }
 
                 await _steps.Notification(notificationTask);
-                await Task.Delay(RUN_INTERVAL, cancellationToken);
+                await Task.Delay(10000, cancellationToken);
             }
 
             catch (Exception ex)

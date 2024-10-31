@@ -28,6 +28,7 @@ namespace RailwayWizzard.Core
         public bool IsActual { get; set; }
         
         public DateTime CreationTime { get; set; }
+        public DateTime? Updated { get; set; } = null!;
 
         [Description("Эта задача уже в работе?")]
         public bool IsWorked { get; set; }

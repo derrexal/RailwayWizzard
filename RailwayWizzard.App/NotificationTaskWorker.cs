@@ -57,7 +57,8 @@ namespace RailwayWizzard.App
                 }
 
                 await _steps.Notification(notificationTask);
-                await Task.Delay(60000, cancellationToken);
+                //TODO: возможно можно убрать
+                await Task.Delay(3000, cancellationToken);
             }
 
             catch (Exception ex)

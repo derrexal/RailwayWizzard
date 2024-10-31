@@ -144,6 +144,26 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
         }
 
         /// <summary>
+        /// Заполняет код города отправления и прибытия у задания
+        /// </summary>
+        /// <param name="notificationTasks">Задание для которого необходимо заполнить коды городов</param>
+        /// <returns></returns>
+        private async Task<NotificationTask> FillStationCodes(NotificationTask notificationTask)
+        {
+            var arrivalStationInfo = await _context.StationInfo.AsNoTracking().SingleOrDefaultAsync(s => s.StationName == notificationTask.ArrivalStation);
+            if (arrivalStationInfo == null)
+                throw new EntityNotFoundException($"Не удалось получить станцию. StationName:{notificationTask.ArrivalStation}");
+            notificationTask.ArrivalStationCode = arrivalStationInfo.ExpressCode;
+
+            var departureStationInfo = await _context.StationInfo.AsNoTracking().SingleOrDefaultAsync(s => s.StationName == notificationTask.DepartureStation);
+            if (departureStationInfo == null)
+                throw new EntityNotFoundException($"Не удалось получить станцию. StationName:{notificationTask.DepartureStation}");
+            notificationTask.DepartureStationCode = departureStationInfo.ExpressCode;
+
+            return notificationTask;
+        }
+
+        /// <summary>
         /// Обновляет состояние таблицы по полю "IsActual" если поездка уже в прошлом
         /// Необходим для проверки всех активных задач, чтобы БД отражала правильное состояние
         /// </summary>
@@ -224,6 +244,10 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
                     .Where(t => t.Updated < today)
                     .OrderBy(u => u.Updated)
                     .FirstOrDefaultAsync();
+
+            if (result == null) return null;
+            
+            result = await FillStationCodes(result);
 
             return result;
         }

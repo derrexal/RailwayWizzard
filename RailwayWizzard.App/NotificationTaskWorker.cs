@@ -6,7 +6,7 @@ namespace RailwayWizzard.App
 {
     public class NotificationTaskWorker : BackgroundService
     {
-        private const int RUN_INTERVAL = 1000 * 10; //Интервал запуска (10 сек)
+        private const int RUN_INTERVAL = 1000 * 60; //Интервал запуска (1 мин)
 
         private readonly ISteps _steps;
         private readonly INotificationTaskRepository _notificationTaskRepository;
@@ -28,30 +28,34 @@ namespace RailwayWizzard.App
             {
                 _logger.LogInformation($"{nameof(NotificationTaskWorker)} running at: {Common.MoscowNow} Moscow time");
 
-                await DoWork();
-
-                await Task.Delay(RUN_INTERVAL, cancellationToken);
+                await DoWork(cancellationToken);
             }
         }
 
-        protected async Task DoWork()
+        protected async Task DoWork(CancellationToken cancellationToken)
         {
             var isDownTime = Common.IsDownTimeRzd();
-            if (isDownTime) return;
+            if (isDownTime)
+            {
+                await Task.Delay(RUN_INTERVAL, cancellationToken);
+                return;
+            }
 
-            // TODO: отказался от этой идеи из-за проблем с контекстом. (System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext)
-            //List<Task> tasks = new();
 
             try
             {
+                //todo: Вынести туда где это будет исполнятся один раз во время запуска приложения.
                 await _notificationTaskRepository.DatabaseInitialize();
 
-                var notificationTasks = await _notificationTaskRepository.GetNotificationTasksForWork();
+                var notificationTask = await _notificationTaskRepository.GetOldestNotificationTask();
 
-                foreach (var notificationTask in notificationTasks)
-                    await _steps.Notification(notificationTask);
+                if (notificationTask is null)
+                {
+                    await Task.Delay(RUN_INTERVAL, cancellationToken);
+                    return;
+                }
 
-                //await Task.WhenAll(tasks);
+                await _steps.Notification(notificationTask);
             }
 
             catch (Exception ex)

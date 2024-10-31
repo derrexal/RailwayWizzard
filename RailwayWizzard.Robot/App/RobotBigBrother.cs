@@ -53,7 +53,7 @@ namespace RailwayWizzard.Robot.App
             //TODO: нужно смапить в DTO чтобы этот огромный объект не таскать по памяти
             RootBigBrother? myDeserializedClass = JsonConvert.DeserializeObject<RootBigBrother>(textResponse);
 
-            if (myDeserializedClass == null)
+            if (myDeserializedClass == null || myDeserializedClass.Id == null)
                 throw new NullReferenceException($"Сервис РЖД при запросе списка свободных мест вернул не стандартный ответ. Ответ:{textResponse}");
             if (myDeserializedClass.Trains.Count == 0)
             {

@@ -29,7 +29,9 @@ namespace RailwayWizzard.Core
         
         public DateTime CreationTime { get; set; }
         public DateTime? Updated { get; set; } = null!;
-
+        
+        //TODO: Сделать новое поле LastCheckResult в котором будет указано каков результат последней проверки (enum)
+        
         [Description("Эта задача уже в работе?")]
         public bool IsWorked { get; set; }
         

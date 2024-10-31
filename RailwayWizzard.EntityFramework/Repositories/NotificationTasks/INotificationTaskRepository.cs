@@ -72,6 +72,13 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
         /// <returns>Список задач</returns>
         public Task<IList<NotificationTask>> GetNotificationTasksForWork();
 
+        //TODO: потенциально - кучу лишних запросов к БД... Нужно переделать на очередь, т.к. состояние задач в плане их "устаревания" не сильно меняется (кажется)
+        /// <summary>
+        /// Возвращает задачу которую дольше всего не обрабатывали.
+        /// </summary>
+        /// <returns>Список задач</returns>
+        public Task<NotificationTask?> GetOldestNotificationTask();
+
         /// <summary>
         /// Добавляет сущность <see cref="NotificationTask"/> в БД.
         /// </summary>
@@ -85,6 +92,13 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
         /// <param name="idNotificationTask"></param>
         /// <returns>Идентификатор остановленной задачи.</returns>
         public Task<int?> SetIsStoppedAsync(int idNotificationTask);
+
+        /// <summary>
+        /// Устанавливает задаче поле "Updated".
+        /// </summary>
+        /// <param name="idNotificationTask"></param>
+        /// <returns>Идентификатор задачи.</returns>
+        public Task SetIsUpdatedAsync(int idNotificationTask);
 
         /// <summary>
         /// Получает список активных задач по идентификатору пользователя.

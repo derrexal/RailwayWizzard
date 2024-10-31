@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using RailwayWizzard.Core;
 using RailwayWizzard.Core.Shared;
+using RailwayWizzard.Shared;
 
 namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
 {
@@ -189,6 +190,36 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
                 .Where(u => !u.IsStopped)
                 .Where(u => u.UserId == userId)
                 .ToListAsync();
+        }
+
+        /// <inheritdoc/>
+        public async Task SetIsUpdatedAsync(int idNotificationTask)
+        {
+            var currentNotificationTask = await GetNotificationTaskFromId(idNotificationTask);
+
+            currentNotificationTask.Updated = Common.MoscowNow;
+
+            await UpdateNotificationTask(currentNotificationTask);
+        }
+
+        /// <inheritdoc/>
+        public async Task<NotificationTask?> GetOldestNotificationTask()
+        {
+            //var today = Common.MoscowNow;
+            //const int totalTime = 1000*10; // Чтобы задача опрашивалась не чаще чем 1 раз в 10 секунд
+
+            var result = await _context.NotificationTask
+                .Where(t => t.Updated == null)
+                .FirstOrDefaultAsync();
+            
+            if (result == null) 
+                result = await _context.NotificationTask
+                    .Where(t => t.Updated != null)
+                    //.Where(t => today.Subtract((DateTime)t.Updated!).TotalMilliseconds > totalTime) //TODO: не завелось
+                    .OrderBy(u => u.Updated)
+                    .FirstOrDefaultAsync();
+
+            return result;
         }
     }
 }

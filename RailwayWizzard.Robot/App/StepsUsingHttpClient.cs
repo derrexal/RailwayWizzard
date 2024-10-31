@@ -41,20 +41,6 @@ namespace RailwayWizzard.Robot.App
             {
                 //TODO: Во время выполнения задача была остановлена пользователем
                 
-                //TODO: Такая ситуация вообще может произойти? Актуальность задачи проверяется на предыдущем шаге (воркер.)
-                //Во время выполнения задача стала неактуальна
-                if (notificationTask.IsActuality() == false)
-                {
-                    await _notificationTaskRepository.SetIsNotActualAndIsNotWorked(notificationTask);
-
-                    //TODO: не вызываем реализованный метод  SetIsNotWorked !!! А может это вообще вырежем и не надо будет думат
-                    string notActualTaskMessage = $"Stop {notificationTaskLogMessage} in Thread:{Thread.CurrentThread.ManagedThreadId}. Task has not actual.";
-
-                    _logger.LogInformation(notActualTaskMessage);
-
-                    return;
-                }
-
                 // Задача помечается статусом "В работе"
                 await _notificationTaskRepository.SetIsWorkedNotificationTask(notificationTask);
                 _logger.LogInformation($"Run {notificationTaskLogMessage} in Thread:{Thread.CurrentThread.ManagedThreadId}");
@@ -111,6 +97,8 @@ namespace RailwayWizzard.Robot.App
         private async Task SetIsNotWorked(NotificationTask notificationTask, string logMessage, string result)
         {
             await _notificationTaskRepository.SetIsNotWorked(notificationTask);
+
+            await _notificationTaskRepository.SetIsUpdatedAsync(notificationTask.Id);
 
             _watch.Stop();
 

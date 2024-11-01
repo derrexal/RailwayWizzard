@@ -50,9 +50,23 @@ namespace RailwayWizzard.Robot.App
             string ksid = await GetKsidForGetTicketAsync();
 
             var textResponse = await _b2bClient.GetTrainInformationByParametersAsync(inputNotificationTask, ksid);
+
+            var noPlaceMessage = "МЕСТ НЕТ";
+            if (textResponse.Contains(noPlaceMessage))
+            {
+                _logger.LogWarning($"Сервис РЖД при запросе списка свободных мест вернул ошибку с текстом: {noPlaceMessage}. Ответ:{textResponse}");
+                return new List<string>();
+            }
+
+            var trainNotRunMessage = "В УКАЗАННУЮ ДАТУ ПОЕЗД НЕ ХОДИТ";
+            if (textResponse.Contains(trainNotRunMessage))
+            {
+                _logger.LogWarning($"Сервис РЖД при запросе списка свободных мест вернул ошибку с текстом: {trainNotRunMessage}. Ответ:{textResponse}");
+                return new List<string>();
+            }
+
             //TODO: нужно смапить в DTO чтобы этот огромный объект не таскать по памяти
             RootBigBrother? myDeserializedClass = JsonConvert.DeserializeObject<RootBigBrother>(textResponse);
-
             if (myDeserializedClass == null || myDeserializedClass.Id == null)
                 throw new NullReferenceException($"Сервис РЖД при запросе списка свободных мест вернул не стандартный ответ. Ответ:{textResponse}");
             if (myDeserializedClass.Trains.Count == 0)

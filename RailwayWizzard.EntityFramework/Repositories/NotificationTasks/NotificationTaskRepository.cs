@@ -229,6 +229,8 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
 
             var today = Common.MoscowNow.AddMilliseconds(-totalTime);
 
+            await UpdateActualStatusNotificationTask();
+
             // TODO: Если создать миграцию которая проставляет всем существующим таскам поле Updated - этот костыль будет не нужен
             var result = await _context.NotificationTask
                 .Where(t => t.IsActual)

@@ -1,6 +1,7 @@
 ﻿using RailwayWizzard.App.Dto.NotificationTask;
 using RailwayWizzard.Core;
 using RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks;
+using RailwayWizzard.Shared;
 
 namespace RailwayWizzard.App.Services.NotificationTasks
 {
@@ -30,10 +31,11 @@ namespace RailwayWizzard.App.Services.NotificationTasks
                 CarTypes = createNotificationTaskDto.CarTypes,
                 NumberSeats = createNotificationTaskDto.NumberSeats,
             };
-            notificationTask.CreationTime = DateTime.Now;
+            notificationTask.CreationTime = Common.MoscowNow;
             notificationTask.IsActual = true;
             notificationTask.IsWorked = false;
             notificationTask.IsStopped = false;
+            notificationTask.Updated = Common.MoscowNow;
 
             var notificationTaskId = await _notificationTaskRepository.CreateAsync(notificationTask);
 

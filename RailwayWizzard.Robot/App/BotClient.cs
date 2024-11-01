@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using RailwayWizzard.Robot.Core;
-using System.Net;
 using System.Net.Http.Json;
 
 namespace RailwayWizzard.Robot.App;
@@ -9,41 +9,30 @@ namespace RailwayWizzard.Robot.App;
 public class BotClient : IBotClient
 {
     private const string API_BOT_SEND_MESSAGE_URL = "http://bot_service:5000/api/sendMessageForUser";
-    private const int DEFAULT_DELAY_TIME = 5000;
 
     private readonly IConfiguration _configuration;
     private readonly IHttpClientFactory _httpClientFactory;
+    private readonly ILogger<BotClient> _logger;
 
-    public BotClient(IConfiguration configuration, IHttpClientFactory httpClientFactory)
+    public BotClient(IConfiguration configuration, IHttpClientFactory httpClientFactory, ILogger<BotClient> logger)
     {
         _configuration = configuration;
         _httpClientFactory = httpClientFactory;
+        _logger = logger;
     }
 
     /// <inheritdoc/>
     public async Task SendMessageForUserAsync(string message, long userId)
     {
-        ResponseToUser messageToUser = new ResponseToUser { Message = message, UserId = userId };
+        using var request = new HttpRequestMessage(HttpMethod.Post, API_BOT_SEND_MESSAGE_URL);
+        request.Content = JsonContent.Create(new ResponseToUser { Message = message, UserId = userId });
 
-        // не использую using т.к. придется внизу другую переменную юзать (Compiler Error)
-        var request = new HttpRequestMessage(HttpMethod.Post, API_BOT_SEND_MESSAGE_URL);
-        request.Content = JsonContent.Create(messageToUser);
         using var httpClient = _httpClientFactory.CreateClient(); ;
+        
+        using var response = await httpClient.SendAsync(request);
 
-        // не использую using т.к. придется внизу другую переменную юзать (Compiler Error)
-        var response = await httpClient.SendAsync(request);
-
-        // Retry send
-        if (response.StatusCode != HttpStatusCode.OK)
-        {
-            await Task.Delay(DEFAULT_DELAY_TIME);
-
-            request = new HttpRequestMessage(HttpMethod.Post, API_BOT_SEND_MESSAGE_URL);
-            request.Content = JsonContent.Create(messageToUser);
-            response = await httpClient.SendAsync(request);
-            if (response.StatusCode != HttpStatusCode.OK)
-                throw new Exception($"Метод отправки сообщения пользователю:{userId} завершился с кодом:{response.StatusCode}.\nСообщение:{message}.\nОтвет сервера:{response}");
-        }
+        if (!response.IsSuccessStatusCode)
+            _logger.LogError($"Метод отправки сообщения пользователю завершился с кодом {response.StatusCode}. Message: {message} User: {userId}");
     }
 
     /// <inheritdoc/>

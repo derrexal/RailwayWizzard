@@ -24,6 +24,15 @@ namespace RailwayWizzard.App
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
+            try
+            {
+                await _notificationTaskRepository.DatabaseInitialize();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"{nameof(NotificationTaskWorker)} {ex}");
+            }
+
             while (!cancellationToken.IsCancellationRequested)
             {
                 _logger.LogInformation($"{nameof(NotificationTaskWorker)} running at: {Common.MoscowNow} Moscow time");
@@ -41,12 +50,8 @@ namespace RailwayWizzard.App
                 return;
             }
 
-
             try
             {
-                //todo: Вынести туда где это будет исполнятся один раз во время запуска приложения.
-                await _notificationTaskRepository.DatabaseInitialize();
-
                 var notificationTask = await _notificationTaskRepository.GetOldestNotificationTask();
 
                 if (notificationTask is null)
@@ -57,8 +62,6 @@ namespace RailwayWizzard.App
                 }
 
                 await _steps.Notification(notificationTask);
-                //TODO: возможно можно убрать
-                await Task.Delay(3000, cancellationToken);
             }
 
             catch (Exception ex)

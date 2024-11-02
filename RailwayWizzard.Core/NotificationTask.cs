@@ -28,7 +28,7 @@ namespace RailwayWizzard.Core
         public bool IsActual { get; set; }
         
         public DateTime CreationTime { get; set; }
-        public DateTime? Updated { get; set; } = null!;
+        public DateTime Updated { get; set; }
         
         //TODO: Сделать новое поле LastCheckResult в котором будет указано каков результат последней проверки (enum)
         

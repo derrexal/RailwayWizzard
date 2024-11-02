@@ -59,7 +59,7 @@ namespace RailwayWizzard.App.Services.NotificationTasks
                 ArrivalStation = u.ArrivalStation,
                 DepartureStation = u.DepartureStation,
                 TimeFrom = u.TimeFrom,
-                CarTypes = string.Join(", ", u.CarTypes),
+                CarTypes = string.Join(", ", u.CarTypes.Select(c => c.GetEnumDescription())),
                 NumberSeats = u.NumberSeats,
                 DateFromString = u.DateFromString,
                 Updated = $"{u.Updated:t}" ?? ""

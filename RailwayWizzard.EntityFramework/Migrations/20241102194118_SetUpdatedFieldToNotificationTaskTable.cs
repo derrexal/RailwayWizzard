@@ -10,13 +10,13 @@ namespace RailwayWizzard.EntityFrameworkCore.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql($"UPDATE AppNotificationTasks SET Updated = {DateTime.MinValue} WHERE Updated IS NULL");
+            migrationBuilder.Sql("UPDATE AppNotificationTasks SET Updated = '1999-01-01 00:00:00' WHERE Updated IS NULL");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql($"UPDATE AppNotificationTasks SET Updated = NULL WHERE Id > 0");
+            migrationBuilder.Sql("UPDATE AppNotificationTasks SET Updated = NULL WHERE Id > 0");
         }
     }
 }

@@ -225,31 +225,16 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
         /// <inheritdoc/>
         public async Task<NotificationTask?> GetOldestNotificationTask()
         {
-            const int totalTime = 1000 * 30; // Чтобы задача опрашивалась не чаще чем 1 раз в 30 секунд
-
-            var today = Common.MoscowNow.AddMilliseconds(-totalTime);
-
             await UpdateActualStatusNotificationTask();
 
-            // TODO: Если создать миграцию которая проставляет всем существующим таскам поле Updated - этот костыль будет не нужен
             var result = await _context.NotificationTask
                 .Where(t => t.IsActual)
                 .Where(t => t.IsStopped == false)
-                .Where(t => t.Updated == null)
+                .OrderBy(u => u.Updated)
                 .FirstOrDefaultAsync();
 
-            if (result == null)
-                result = await _context.NotificationTask
-                    .Where(t => t.IsActual)
-                    .Where(t => t.IsStopped == false)
-                    .Where(t => t.Updated != null)
-                    .Where(t => t.Updated < today)
-                    .OrderBy(u => u.Updated)
-                    .FirstOrDefaultAsync();
-
-            if (result == null) return null;
-            
-            result = await FillStationCodes(result);
+            if (result != null) 
+                result = await FillStationCodes(result);
 
             return result;
         }

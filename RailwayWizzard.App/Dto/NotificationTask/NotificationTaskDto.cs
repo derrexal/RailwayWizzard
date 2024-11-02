@@ -19,7 +19,7 @@ namespace RailwayWizzard.App.Dto.NotificationTask
         public string TimeFrom { get; set; }
 
         [Description("Типы вагона")]
-        public List<CarTypeEnum> CarTypes { get; set; }
+        public string CarTypes { get; set; }
 
         [Range(1, 10)]
         public short NumberSeats { get; set; }
@@ -29,6 +29,6 @@ namespace RailwayWizzard.App.Dto.NotificationTask
         /// </summary>
         public string DateFromString { get; set; } = "";
 
-        public string TimeUpdated { get; set; } = "";
+        public string Updated { get; set; } = "";
     }
 }

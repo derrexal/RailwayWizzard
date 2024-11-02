@@ -30,12 +30,12 @@ namespace RailwayWizzard.App.Services.NotificationTasks
                 UserId = createNotificationTaskDto.UserId,
                 CarTypes = createNotificationTaskDto.CarTypes,
                 NumberSeats = createNotificationTaskDto.NumberSeats,
+                CreationTime = Common.MoscowNow,
+                IsActual = true,
+                IsWorked = false,
+                IsStopped = false,
+                Updated = Common.MoscowNow
             };
-            notificationTask.CreationTime = Common.MoscowNow;
-            notificationTask.IsActual = true;
-            notificationTask.IsWorked = false;
-            notificationTask.IsStopped = false;
-            notificationTask.Updated = Common.MoscowNow;
 
             var notificationTaskId = await _notificationTaskRepository.CreateAsync(notificationTask);
 
@@ -59,10 +59,10 @@ namespace RailwayWizzard.App.Services.NotificationTasks
                 ArrivalStation = u.ArrivalStation,
                 DepartureStation = u.DepartureStation,
                 TimeFrom = u.TimeFrom,
-                CarTypes = u.CarTypes,
+                CarTypes = string.Join(", ", u.CarTypes),
                 NumberSeats = u.NumberSeats,
                 DateFromString = u.DateFromString,
-                TimeUpdated = $"{u.Updated:t}" ?? ""
+                Updated = $"{u.Updated:t}" ?? ""
             })
                 .OrderBy(u => u.Id)
                 .ToList();

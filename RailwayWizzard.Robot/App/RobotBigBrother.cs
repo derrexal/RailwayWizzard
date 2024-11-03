@@ -26,33 +26,7 @@ namespace RailwayWizzard.Robot.App
         }
 
         /// <inheritdoc/>
-        // TODO: избавиться от этого метода - сделать RetryPolicy
         public async Task<string> GetFreeSeatsOnTheTrain(NotificationTask inputNotificationTask)
-        {
-            const int retryCount = 3;
-
-            var freeSeats = await GetFreeSeatsOnTheTrainHelper(inputNotificationTask);
-
-            for (int i = 0; i < retryCount; i++)
-            {
-                if (freeSeats.Count == 0)
-                {
-                    await Task.Delay(5000);
-
-                    freeSeats = await GetFreeSeatsOnTheTrainHelper(inputNotificationTask);
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-            return freeSeats.Count != 0
-                ? String.Join("\n", freeSeats.ToArray())
-                : "";
-        }
-
-        private async Task<List<string>> GetFreeSeatsOnTheTrainHelper(NotificationTask inputNotificationTask)
         {
             string ksid = await GetKsidForGetTicketAsync();
 
@@ -64,14 +38,14 @@ namespace RailwayWizzard.Robot.App
             if (textResponse.Contains(noPlaceMessage))
             {
                 _logger.LogWarning($"Сервис РЖД при запросе списка свободных мест вернул ошибку с текстом: {noPlaceMessage}. Ответ:{textResponse}");
-                return new List<string>();
+                return String.Empty;
             }
 
             var trainNotRunMessage = "В УКАЗАННУЮ ДАТУ ПОЕЗД НЕ ХОДИТ";
             if (textResponse.Contains(trainNotRunMessage))
             {
                 _logger.LogWarning($"Сервис РЖД при запросе списка свободных мест вернул ошибку с текстом: {trainNotRunMessage}. Ответ:{textResponse}");
-                return new List<string>();
+                return String.Empty;
             }
 
             RootShort? myDeserializedClass = JsonConvert.DeserializeObject<RootShort>(textResponse);
@@ -80,7 +54,7 @@ namespace RailwayWizzard.Robot.App
             if (myDeserializedClass.Trains.Count == 0)
             {
                 _logger.LogError($"Сервис РЖД при запросе списка свободных мест вернул ответ в котором нет доступных поездок. Ответ:{textResponse}");
-                return new List<string>();
+                return String.Empty;
             }
 
             //TODO: Если места были, затем РЖД ответил с Trains=null - в ответ пользователь получит сообщение о том что мест нет без номера поезда. Хранить в БД.
@@ -89,12 +63,14 @@ namespace RailwayWizzard.Robot.App
 
             //вытаскиваем свободные места по запрашиваемому рейсу
             var currentRoute = GetCurrentRouteFromResponse(myDeserializedClass, inputNotificationTask);
-            if (currentRoute.Count == 0) return new List<string>();
+            if (currentRoute.Count == 0) return String.Empty;
 
             //Формируем текстовый ответ пользователю
-            var result = SupportingMethod(currentRoute);
+            var freeSeats = SupportingMethod(currentRoute);
 
-            return result;
+            return freeSeats.Count != 0
+                ? String.Join("\n", freeSeats.ToArray())
+                : "";
         }
 
         /// <summary>

@@ -32,15 +32,20 @@ public class BotClient : IBotClient
         using var response = await httpClient.SendAsync(request);
 
         if (!response.IsSuccessStatusCode)
-            _logger.LogError($"Метод отправки сообщения пользователю завершился с кодом {response.StatusCode}. Message: {message} User: {userId}");
+            _logger.LogError($"Метод отправки сообщения пользователю завершился с кодом {response.StatusCode}. " +
+                $"Ответ сервера:{response}. Message: {message} User: {userId}");
     }
 
     /// <inheritdoc/>
     public async Task SendMessageForAdminAsync(string message)
     {
         var adminIdString = _configuration.GetSection("Telegram").GetSection("AdminId").Value;
-        if (string.IsNullOrEmpty(adminIdString)) throw new Exception("Не задан телеграм ID администратора");
+
+        if (string.IsNullOrEmpty(adminIdString)) 
+            throw new Exception("Не удалось отправить сообщение администратору: в конфигурации не задан ID");
+
         long adminId = Convert.ToInt64(adminIdString);
+        
         await SendMessageForUserAsync(message, adminId);
     }
 }

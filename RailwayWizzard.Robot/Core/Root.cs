@@ -108,7 +108,32 @@
         public string IsoCode { get; set; }
     }
 
-    public class RootBigBrother
+    public class RootShort
+    {
+        public int? Id { get; set; }
+        public List<TrainShort> Trains { get; } = new();
+    }
+
+    public class TrainShort
+    {
+        public List<CarGroupShort> CarGroups { get; } = new();
+        public DateTime? DepartureDateTime { get; set; }
+        public DateTime? LocalDepartureDateTime { get; set; }
+        public string DisplayTrainNumber { get; set; }
+    }
+
+    public class CarGroupShort
+    {
+        public double? MaxPrice { get; set; }
+        public string CarType { get; set; }
+        public string CarTypeName { get; set; }
+        public string ServiceClassNameRu { get; set; }
+        public bool HasPlacesForDisabledPersons { get; set; }
+        public int TotalPlaceQuantity { get; set; }
+    }
+
+    [Obsolete]
+    public class Root
     {
         public string OriginStationCode { get; set; }
         public string DestinationStationCode { get; set; }
@@ -142,7 +167,6 @@
     {
         public DateTime DepartureDateTime { get; set; }
         public DateTime? LocalDepartureDateTime { get; set; }
-
     }
 
     public class TrainFull

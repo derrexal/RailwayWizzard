@@ -73,8 +73,7 @@ namespace RailwayWizzard.Robot.App
                 return new List<string>();
             }
 
-            //TODO: нужно смапить в DTO чтобы этот огромный объект не таскать по памяти
-            RootBigBrother? myDeserializedClass = JsonConvert.DeserializeObject<RootBigBrother>(textResponse);
+            RootShort? myDeserializedClass = JsonConvert.DeserializeObject<RootShort>(textResponse);
             if (myDeserializedClass == null || myDeserializedClass.Id == null)
                 throw new NullReferenceException($"Сервис РЖД при запросе списка свободных мест вернул не стандартный ответ. Ответ:{textResponse}");
             if (myDeserializedClass.Trains.Count == 0)
@@ -102,10 +101,10 @@ namespace RailwayWizzard.Robot.App
         /// <param name="TimeFrom"></param>
         /// <returns></returns>
         /// <exception cref="NullReferenceException"></exception>
-        public string? GetTrainNumberFromResponse(RootBigBrother root, string TimeFrom)
+        public string? GetTrainNumberFromResponse(RootShort root, string TimeFrom)
         {
             foreach (var train in root.Trains)
-                if (train.LocalDepartureDateTime.ToString()!.Contains(TimeFrom)) //Если в ответе содержится необходимая поездка
+                if (train.LocalDepartureDateTime.ToString()!.Contains(TimeFrom) || train.DepartureDateTime.ToString()!.Contains(TimeFrom)) //Если в ответе содержится необходимая поездка
                     return train.DisplayTrainNumber;
             return null;
         }
@@ -116,7 +115,7 @@ namespace RailwayWizzard.Robot.App
         /// <param name="root"></param>
         /// <param name="departureTime"></param>
         /// <returns></returns>
-        private HashSet<SearchResult> GetCurrentRouteFromResponse(RootBigBrother root, NotificationTask inputNotificationTask)
+        private HashSet<SearchResult> GetCurrentRouteFromResponse(RootShort root, NotificationTask inputNotificationTask)
         {
             HashSet<SearchResult> results = new();
 

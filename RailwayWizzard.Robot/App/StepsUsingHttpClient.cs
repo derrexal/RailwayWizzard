@@ -39,7 +39,7 @@ namespace RailwayWizzard.Robot.App
 
             try
             {
-                //TODO: Во время выполнения задача была остановлена пользователем
+                //TODO: Во время выполнения задача была остановлена пользователем - вынести в конец метода?
                 
                 // Задача помечается статусом "В работе"
                 await _notificationTaskRepository.SetIsWorkedNotificationTask(notificationTask);

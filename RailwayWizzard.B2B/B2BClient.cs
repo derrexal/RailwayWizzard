@@ -68,7 +68,7 @@ namespace RailwayWizzard.B2B
             request.Headers.Add("Origin", "https://ticket.rzd.ru");
             request.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36");
             request.Headers.Add("Cookie", " LANG_SITE=ru; " + $"oxxfgh={ksid}");
-            
+
             request.Content = new StringContent(
                 "{" +
                 "\"Origin\":\"" + inputNotificationTask.DepartureStationCode + "\"," +
@@ -80,7 +80,9 @@ namespace RailwayWizzard.B2B
                 "\"GetByLocalTime\":true," +
                 "\"SpecialPlacesDemand\":\"StandardPlacesAndForDisabledPersons\"," +
                 "\"CarIssuingType\":\"All\"," +
-                $"\"GetTrainsFromSchedule\":{getTrainsFromSchedule}" +
+              //"\"GetTrainsFromSchedule\":true}"
+                "\"GetTrainsFromSchedule\":" +
+                getTrainsFromSchedule.ToString().ToLower() +
                 "}"
                 , null
                 , "application/json");

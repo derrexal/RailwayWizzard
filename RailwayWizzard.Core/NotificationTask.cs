@@ -44,13 +44,11 @@ namespace RailwayWizzard.Core
         [Range(1, 10)]
         public short NumberSeats { get; set; }
 
-        [NotMapped]
-        public long ArrivalStationCode { get; set; }
-        [NotMapped]
-        public long DepartureStationCode { get; set; }
+        public long ArrivalStationCode { get; set; } = 0;
 
-        [NotMapped]
-        public string? TrainNumber { get; set; }
+        public long DepartureStationCode { get; set; } = 0;
+
+        public string? TrainNumber { get; set; } = null!;
         
         /// <summary>
         /// Дата в формате строки для отправки пользователю

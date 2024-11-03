@@ -54,6 +54,10 @@ namespace RailwayWizzard.B2B
         /// <inheritdoc/>
         public async Task<string> GetTrainInformationByParametersAsync(NotificationTask inputNotificationTask, string ksid, bool getTrainsFromSchedule=true)
         {
+            if (inputNotificationTask.DepartureStationCode == 0 || inputNotificationTask.ArrivalStationCode == 0)
+                throw new Exception($"Отсутствует код станции у задачи номер:{inputNotificationTask.Id}");
+
+            //TODO: Можем еще улучшить этот запрос? Добавить номер поезда по которому ищем?
             string url = $"https://ticket.rzd.ru/apib2b/p/Railway/V1/Search/TrainPricing?service_provider=B2B_RZD&bs={ksid}";
 
             using var request = new HttpRequestMessage(HttpMethod.Post, url);

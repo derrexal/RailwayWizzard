@@ -37,6 +37,8 @@ namespace RailwayWizzard.App.Services.NotificationTasks
                 Updated = Common.MoscowNow
             };
 
+            notificationTask = await _notificationTaskRepository.FillStationCodes(notificationTask);
+
             var notificationTaskId = await _notificationTaskRepository.CreateAsync(notificationTask);
 
             _logger.LogInformation($"Success create NotificationTask ID: {notificationTaskId} Details: {notificationTask.ToCustomString()}");

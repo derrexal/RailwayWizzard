@@ -1,4 +1,5 @@
-﻿namespace RailwayWizzard.Robot.Core
+﻿//TODO: разбить по файлам
+namespace RailwayWizzard.Robot.Core
 {
     public class AvailableBaggageType
     {

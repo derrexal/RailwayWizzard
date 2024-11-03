@@ -47,6 +47,7 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
         /// <inheritdoc/>
         public async Task<NotificationTask?> GetOldestNotificationTask()
         {
+            //TODO: вынести в воркер который ходит хотя бы каждые 5 минут, а не 1? или 15? Подумать...
             await UpdateActualStatusNotificationTask();
 
             var notWorkedNotificationTasks = GetNotWorkedNotificationTasks();
@@ -55,7 +56,7 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
                 .OrderBy(u => u.Updated)
                 .FirstOrDefaultAsync();
 
-            if (result != null)
+            if (result != null && (result.DepartureStationCode==0 || result.ArrivalStationCode==0))
                 result = await FillStationCodes(result);
 
             return result;
@@ -128,6 +129,23 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
         }
 
         /// <inheritdoc/>
+        public async Task<NotificationTask> FillStationCodes(NotificationTask notificationTask)
+        {
+            // Станции на этом этапе уже должны быть в базе, так что отсутствие записи явно скажет о том что что-то сломалось
+            var arrivalStationInfo = await _context.StationInfo.AsNoTracking().SingleOrDefaultAsync(s => s.StationName == notificationTask.ArrivalStation);
+            if (arrivalStationInfo == null)
+                throw new EntityNotFoundException($"Не удалось получить {nameof(StationInfo)} со StationName:{notificationTask.ArrivalStation}");
+            notificationTask.ArrivalStationCode = arrivalStationInfo.ExpressCode;
+
+            var departureStationInfo = await _context.StationInfo.AsNoTracking().SingleOrDefaultAsync(s => s.StationName == notificationTask.DepartureStation);
+            if (departureStationInfo == null)
+                throw new EntityNotFoundException($"Не удалось получить {nameof(StationInfo)} со StationName:{notificationTask.DepartureStation}");
+            notificationTask.DepartureStationCode = departureStationInfo.ExpressCode;
+
+            return notificationTask;
+        }
+
+        /// <inheritdoc/>
         public async Task<bool> ResultIsLast(NotificationTask inputNotificationTask, string lastResult)
         {
             var currentNotificationTask = await GetNotificationTaskFromId(inputNotificationTask.Id);
@@ -161,26 +179,6 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
             var notificationTask = await _context.NotificationTask.FirstOrDefaultAsync(t => t.Id == id);
             if (notificationTask == null)
                 throw new EntityNotFoundException($"Не удалось получить {nameof(NotificationTask)} с ID:{id}");
-
-            return notificationTask;
-        }
-
-        /// <summary>
-        /// Заполняет код города отправления и прибытия у задания
-        /// </summary>
-        /// <param name="notificationTasks">Задание для которого необходимо заполнить коды городов</param>
-        /// <returns></returns>
-        private async Task<NotificationTask> FillStationCodes(NotificationTask notificationTask)
-        {
-            var arrivalStationInfo = await _context.StationInfo.AsNoTracking().SingleOrDefaultAsync(s => s.StationName == notificationTask.ArrivalStation);
-            if (arrivalStationInfo == null)
-                throw new EntityNotFoundException($"Не удалось получить {nameof(StationInfo)} со StationName:{notificationTask.ArrivalStation}");
-            notificationTask.ArrivalStationCode = arrivalStationInfo.ExpressCode;
-
-            var departureStationInfo = await _context.StationInfo.AsNoTracking().SingleOrDefaultAsync(s => s.StationName == notificationTask.DepartureStation);
-            if (departureStationInfo == null)
-                throw new EntityNotFoundException($"Не удалось получить {nameof(StationInfo)} со StationName:{notificationTask.DepartureStation}");
-            notificationTask.DepartureStationCode = departureStationInfo.ExpressCode;
 
             return notificationTask;
         }

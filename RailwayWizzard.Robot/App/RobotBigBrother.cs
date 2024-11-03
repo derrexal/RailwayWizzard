@@ -56,6 +56,7 @@ namespace RailwayWizzard.Robot.App
         {
             string ksid = await GetKsidForGetTicketAsync();
 
+            // TODO: раз уж здесь мы получаем только поезда в которых билеты есть? может можно упростить дальнейшую проверку? GetCurrentRouteFromResponse
             var textResponse = await _b2bClient.GetTrainInformationByParametersAsync(inputNotificationTask, ksid, false);
 
             /// Билеты перестают продавать за определенное время. Обрабатываем эти ситуации.
@@ -81,8 +82,10 @@ namespace RailwayWizzard.Robot.App
                 _logger.LogError($"Сервис РЖД при запросе списка свободных мест вернул ответ в котором нет доступных поездок. Ответ:{textResponse}");
                 return new List<string>();
             }
+
             //TODO: Если места были, затем РЖД ответил с Trains=null - в ответ пользователь получит сообщение о том что мест нет без номера поезда. Хранить в БД.
-            inputNotificationTask.TrainNumber = GetTrainNumberFromResponse(myDeserializedClass, inputNotificationTask.TimeFrom);
+            if(inputNotificationTask.TrainNumber is null)
+                inputNotificationTask.TrainNumber = GetTrainNumberFromResponse(myDeserializedClass, inputNotificationTask.TimeFrom);
 
             //вытаскиваем свободные места по запрашиваемому рейсу
             var currentRoute = GetCurrentRouteFromResponse(myDeserializedClass, inputNotificationTask);

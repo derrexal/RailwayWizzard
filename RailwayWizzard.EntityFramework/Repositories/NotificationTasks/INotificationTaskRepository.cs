@@ -72,6 +72,14 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
         public Task SetIsUpdatedAsync(int idNotificationTask);
 
         /// <summary>
+        /// Заполняет код города отправления и прибытия у задания
+        /// </summary>
+        /// <param name="notificationTasks">Задание для которого необходимо заполнить коды городов</param>
+        /// <returns></returns>
+        public Task<NotificationTask> FillStationCodes(NotificationTask notificationTask);
+
+
+        /// <summary>
         /// Возвращает результат сравнения последнего результата с текущим
         /// </summary>
         /// <param name="inputNotificationTask"></param>

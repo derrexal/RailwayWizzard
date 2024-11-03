@@ -56,7 +56,7 @@ namespace RailwayWizzard.Robot.App
         {
             string ksid = await GetKsidForGetTicketAsync();
 
-            var textResponse = await _b2bClient.GetTrainInformationByParametersAsync(inputNotificationTask, ksid);
+            var textResponse = await _b2bClient.GetTrainInformationByParametersAsync(inputNotificationTask, ksid, false);
 
             /// Билеты перестают продавать за определенное время. Обрабатываем эти ситуации.
             var noPlaceMessage = "МЕСТ НЕТ";

@@ -18,8 +18,10 @@ namespace RailwayWizzard.B2B
         /// Получение информации о рейсах по запрашиваемым параметрам
         /// </summary>
         /// <param name="inputNotificationTask">Задача</param>
+        /// <param name="ksid">Токен стороннего сервиса</param>
+        /// <param name="getTrainsFromSchedule">Необходимо ли возвращать поезда на которые билетов нет или не продаются.</param>
         /// <returns></returns>
-        public Task<string> GetTrainInformationByParametersAsync(NotificationTask inputNotificationTask, string ksid);
+        public Task<string> GetTrainInformationByParametersAsync(NotificationTask inputNotificationTask, string ksid, bool getTrainsFromSchedule=true);
 
         /// <summary>
         /// Возвращает информацию о найденных станциях.

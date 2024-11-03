@@ -52,7 +52,7 @@ namespace RailwayWizzard.B2B
         }
 
         /// <inheritdoc/>
-        public async Task<string> GetTrainInformationByParametersAsync(NotificationTask inputNotificationTask, string ksid)
+        public async Task<string> GetTrainInformationByParametersAsync(NotificationTask inputNotificationTask, string ksid, bool getTrainsFromSchedule=true)
         {
             string url = $"https://ticket.rzd.ru/apib2b/p/Railway/V1/Search/TrainPricing?service_provider=B2B_RZD&bs={ksid}";
 
@@ -75,7 +75,7 @@ namespace RailwayWizzard.B2B
                 "\"GetByLocalTime\":true," +
                 "\"SpecialPlacesDemand\":\"StandardPlacesAndForDisabledPersons\"," +
                 "\"CarIssuingType\":\"All\"," +
-                "\"GetTrainsFromSchedule\":true}"
+                $"\"GetTrainsFromSchedule\":{getTrainsFromSchedule}"
                 , null
                 , "application/json");
 

@@ -66,7 +66,8 @@ namespace RailwayWizzard.B2B
             request.Headers.Add("Cookie", " LANG_SITE=ru; " + $"oxxfgh={ksid}");
             
             request.Content = new StringContent(
-                "{\"Origin\":\"" + inputNotificationTask.DepartureStationCode + "\"," +
+                "{" +
+                "\"Origin\":\"" + inputNotificationTask.DepartureStationCode + "\"," +
                 "\"Destination\":\"" + inputNotificationTask.ArrivalStationCode + "\"," +
                 "\"DepartureDate\":\"" + inputNotificationTask.DateFrom.ToString("yyyy-MM-ddT00:00:00") + "\"," +
                 "\"TimeFrom\":0," +
@@ -75,7 +76,8 @@ namespace RailwayWizzard.B2B
                 "\"GetByLocalTime\":true," +
                 "\"SpecialPlacesDemand\":\"StandardPlacesAndForDisabledPersons\"," +
                 "\"CarIssuingType\":\"All\"," +
-                $"\"GetTrainsFromSchedule\":{getTrainsFromSchedule}"
+                $"\"GetTrainsFromSchedule\":{getTrainsFromSchedule}" +
+                "}"
                 , null
                 , "application/json");
 

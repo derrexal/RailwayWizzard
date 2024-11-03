@@ -133,6 +133,18 @@
         public DateTime? MoscowDateTime { get; set; }
     }
 
+    public class RootDepartureTime
+    {
+        public List<TrainDepartureTime> Trains { get; } = new();
+    }
+
+    public class TrainDepartureTime
+    {
+        public DateTime DepartureDateTime { get; set; }
+        public DateTime? LocalDepartureDateTime { get; set; }
+
+    }
+
     public class TrainFull
     {
         public List<CarGroup> CarGroups { get; } = new();

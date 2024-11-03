@@ -1,12 +1,11 @@
-﻿using Abp.Collections.Extensions;
-using AngleSharp.Html.Dom;
-using AngleSharp.Html.Parser;
+﻿using System.Globalization;
+using Abp.Collections.Extensions;
 using Newtonsoft.Json;
 using RailwayWizzard.App.Dto.B2B;
 using RailwayWizzard.B2B;
 using RailwayWizzard.Core;
 using RailwayWizzard.EntityFrameworkCore.Repositories.StationInfos;
-using RailwayWizzard.Shared;
+using RailwayWizzard.Robot.App;
 
 namespace RailwayWizzard.App.Services.B2B
 {
@@ -15,43 +14,44 @@ namespace RailwayWizzard.App.Services.B2B
     {
         private readonly IB2BClient _b2bClient;
         private readonly IStationInfoRepository _stationInfoRepository;
-        private readonly ILogger _logger;
-
-        // TODO: Почему тут просто логер а в воркере например типизированный?
-
+        private readonly IRobot _robot;
+        private readonly ILogger _logger;           // TODO: Почему тут просто логер а в воркере например типизированный?
 
         /// <summary>
-        /// Initialize bla bla bla
+        /// Initializes a new instance of the <see cref="B2BService" class./>
         /// </summary>
         /// <param name="b2bClient">B2B клиент для связи с РЖД.</param>
         public B2BService(
             IB2BClient b2bClient,
             IStationInfoRepository stationInfoRepository,
+            IRobot robot,
             ILogger<B2BService> logger)
         {
             _b2bClient = b2bClient;
             _stationInfoRepository = stationInfoRepository;
+            _robot = robot;
             _logger = logger;
         }
 
         /// <inheritdoc/>
         public async Task<IReadOnlyCollection<string>> GetAvailableTimesAsync(RouteDto routeDto)
         {
-            var scheduleDto = new ScheduleDto
+            var departureStationInfo = await _stationInfoRepository.FindByStationNameAsync(routeDto.StationFromName);
+            var arrivalStationInfo = await _stationInfoRepository.FindByStationNameAsync(routeDto.StationToName);
+            
+            if (departureStationInfo is null || arrivalStationInfo is null)
+                throw new ArgumentException($"Не найдена одна из станций: {routeDto.StationFromName},{routeDto.StationToName}. Вероятно в названии допущена ошибка");
+
+            var notificationTask = new NotificationTask
             {
-                Date = routeDto.Date,
-                StationFromName = routeDto.StationFromName.ToUpper(),
-                StationToName = routeDto.StationToName.ToUpper(),
-                StationFrom = await _stationInfoRepository.FindByStationNameAsync(routeDto.StationFromName),
-                StationTo = await _stationInfoRepository.FindByStationNameAsync(routeDto.StationToName)
+                DateFrom = DateTime.ParseExact(routeDto.Date, "dd.MM.yyyy", CultureInfo.InvariantCulture),
+                DepartureStation = routeDto.StationFromName,
+                ArrivalStation = routeDto.StationToName,
+                DepartureStationCode = departureStationInfo.ExpressCode,
+                ArrivalStationCode = arrivalStationInfo.ExpressCode,
             };
 
-            if (scheduleDto.StationTo is null || scheduleDto.StationFrom is null)
-                throw new ArgumentException($"Не найдена одна из станций: {scheduleDto.StationFromName},{scheduleDto.StationToName}. Вероятно в названии допущена ошибка");
-
-            /// TODO: Вынести в робота?
-            var text = await _b2bClient.GetAvailableTimesAsync(scheduleDto);
-            var availableTimes = ParseScheduleText(text, scheduleDto.Date);
+            var availableTimes = await _robot.GetAvailableTimesAsync(notificationTask);
 
             return availableTimes;
         }
@@ -69,46 +69,6 @@ namespace RailwayWizzard.App.Services.B2B
             return stations;
         }
 
-        /// <summary>
-        /// Парсит расписание в виде HTML и!
-        /// </summary>
-        /// <param name="textResponse"></param>
-        /// <param name="dateFrom"></param>
-        /// <returns></returns>
-        private IReadOnlyCollection<string> ParseScheduleText(string textResponse, string dateFrom)
-        {
-            var availableTime = new List<string>();
-
-            string moscowTodayTime = Common.MoscowNow.ToString("HH:mm");
-
-            IHtmlDocument document = new HtmlParser().ParseDocument(textResponse);
-            var table = document.QuerySelector("table.basicSched_trainsInfo_table");
-            if (table != null)
-            {
-                var rows = table.QuerySelectorAll("tr");
-                foreach (var row in rows)
-                {
-                    var cells = row.QuerySelectorAll("td");
-                    if (cells.Length > 1)
-                    {
-                        var timeRailwayStr = cells[1].TextContent;
-                        // Если поезд на сегодня - проверяем допустимое для ввода время
-                        if (dateFrom == DateTime.Now.ToString("dd.MM.yyyy"))
-                        {
-                            // Если время из расписания больше чем сейчас - добавляем его в список доступных для выбора
-                            if (string.CompareOrdinal(timeRailwayStr, moscowTodayTime) > 0)
-                                availableTime.Add(timeRailwayStr);
-                        }
-                        // Иначе просто отдаем расписание
-                        else
-                            availableTime.Add(timeRailwayStr);
-                    }
-                }
-            }
-
-            return availableTime;
-        }
-
         // Переделал. Получаю ответ только из БД.
         private async Task<StationInfo?> GetStationInfoAsync(string stationName)
         {
@@ -116,14 +76,10 @@ namespace RailwayWizzard.App.Services.B2B
             var stationInfo = await _stationInfoRepository.FindByStationNameAsync(stationName);
             if (stationInfo is not null) { return stationInfo; }
 
-            //Спрашиваем у АПИ
+            // Идем к АПИ чтобы наполнить базу
             var stations = await GetStations(stationName);
             // И у АПИ не нашли 
             if (stations.Count == 0) return null;
-
-            ////Ищем среди полученных по АПИ нашу искомую станцию
-            //var station = stations.SingleOrDefault(s => s.n.ToUpper() == stationName);
-            //if (station is not null) { return new StationInfo { ExpressCode = station.c, StationName = station.n }; }
 
             // Снова смотрим есть ли в БД
             stationInfo = await _stationInfoRepository.FindByStationNameAsync(stationName);
@@ -170,7 +126,6 @@ namespace RailwayWizzard.App.Services.B2B
 
             return stations;
         }
-
 
         /// <summary>
         /// Добавляет в таблицу AppStationInfo новые записи

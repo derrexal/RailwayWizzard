@@ -57,12 +57,14 @@ namespace RailwayWizzard.B2B
             string url = $"https://ticket.rzd.ru/apib2b/p/Railway/V1/Search/TrainPricing?service_provider=B2B_RZD&bs={ksid}";
 
             using var request = new HttpRequestMessage(HttpMethod.Post, url);
+            
             request.Headers.Add("Accept", "application/json, text/plain, */*");
             request.Headers.Add("Accept-Language", "ru-RU,ru;q=0.9");
             request.Headers.Add("Connection", "keep-alive");
             request.Headers.Add("Origin", "https://ticket.rzd.ru");
             request.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36");
             request.Headers.Add("Cookie", " LANG_SITE=ru; " + $"oxxfgh={ksid}");
+            
             request.Content = new StringContent(
                 "{\"Origin\":\"" + inputNotificationTask.DepartureStationCode + "\"," +
                 "\"Destination\":\"" + inputNotificationTask.ArrivalStationCode + "\"," +
@@ -73,8 +75,9 @@ namespace RailwayWizzard.B2B
                 "\"GetByLocalTime\":true," +
                 "\"SpecialPlacesDemand\":\"StandardPlacesAndForDisabledPersons\"," +
                 "\"CarIssuingType\":\"All\"," +
-                "\"GetTrainsFromSchedule\":false}"
-                , null, "application/json");
+                "\"GetTrainsFromSchedule\":true}"
+                , null
+                , "application/json");
 
             return await BaseHttpSender(request);
         }
@@ -85,22 +88,6 @@ namespace RailwayWizzard.B2B
             var uriInputStation = Uri.EscapeDataString(inputStation);
 
             string url = $"https://pass.rzd.ru/suggester/?stationNamePart={uriInputStation}&lang=ru";
-
-            using var request = new HttpRequestMessage(HttpMethod.Get, url);
-            request.Headers.Add("Host", "pass.rzd.ru");
-
-            return await BaseHttpSender(request);
-        }
-
-        /// <inheritdoc/>
-        public async Task<string> GetAvailableTimesAsync(ScheduleDto scheduleDto)
-        {
-            string url = "https://pass.rzd.ru/basic-schedule/public/ru?STRUCTURE_ID=5249&layer_id=5526&refererLayerId=5526&" +
-                         $"st_from={scheduleDto.StationFrom!.ExpressCode}" +
-                         $"&st_to={scheduleDto.StationTo!.ExpressCode}" +
-                         $"&st_from_name={scheduleDto.StationFromName}" +
-                         $"&st_to_name={scheduleDto.StationToName}" +
-                         $"&day={scheduleDto.Date}";
 
             using var request = new HttpRequestMessage(HttpMethod.Get, url);
             request.Headers.Add("Host", "pass.rzd.ru");

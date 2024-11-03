@@ -22,6 +22,13 @@ namespace RailwayWizzard.Robot.App
         public Task<string?> GetLinkToBuyTicket(NotificationTask notificationTask);
 
         /// <summary>
+        /// Возвращает список доступного для бронирования времени.
+        /// </summary>
+        /// <param name="notificationTask"></param>
+        /// <returns></returns>
+        public Task<IReadOnlyCollection<string>> GetAvailableTimesAsync(NotificationTask notificationTask);
+
+        /// <summary>
         /// Возвращает сообщение пользователю на случай если свободные места были, а сейчас их уже нет.
         /// </summary>
         /// <param name="notificationTask"></param>

@@ -22,13 +22,10 @@ namespace RailwayWizzard.B2B
         public Task<string> GetTrainInformationByParametersAsync(NotificationTask inputNotificationTask, string ksid);
 
         /// <summary>
-        /// Получение расписания в формате HTML разметки
+        /// Возвращает информацию о найденных станциях.
         /// </summary>
-        /// <param name="scheduleDto"></param>
+        /// <param name="inputStation"></param>
         /// <returns></returns>
-        /// <exception cref="Exception"></exception>
-        public Task<string> GetAvailableTimesAsync(ScheduleDto scheduleDto);
-
         public Task<string> GetStationsText(string inputStation);
 
         /// <summary>

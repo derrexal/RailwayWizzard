@@ -3,15 +3,22 @@ using Newtonsoft.Json;
 using RailwayWizzard.B2B;
 using RailwayWizzard.Core;
 using RailwayWizzard.Robot.Core;
+using RailwayWizzard.Shared;
 using System.Text.RegularExpressions;
 
 namespace RailwayWizzard.Robot.App
 {
+    /// <inheritdoc/>
     public class RobotBigBrother : IRobot
     {
         private readonly ILogger<RobotBigBrother> _logger;
         private readonly IB2BClient _b2bClient;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RobotBigBrother" class./>
+        /// </summary>
+        /// <param name="logger"></param>
+        /// <param name="b2bClient"></param>
         public RobotBigBrother(ILogger<RobotBigBrother> logger, IB2BClient b2bClient)
         {
             _logger = logger;
@@ -40,7 +47,7 @@ namespace RailwayWizzard.Robot.App
                 }
             }
 
-            return freeSeats.Count != 0 
+            return freeSeats.Count != 0
                 ? String.Join("\n", freeSeats.ToArray())
                 : "";
         }
@@ -50,7 +57,6 @@ namespace RailwayWizzard.Robot.App
             string ksid = await GetKsidForGetTicketAsync();
 
             var textResponse = await _b2bClient.GetTrainInformationByParametersAsync(inputNotificationTask, ksid);
-
 
             /// Билеты перестают продавать за определенное время. Обрабатываем эти ситуации.
             var noPlaceMessage = "МЕСТ НЕТ";
@@ -201,7 +207,7 @@ namespace RailwayWizzard.Robot.App
 
                 var dateFromText = notificationTask.DateFrom.ToString("yyyy-MM-dd");
 
-                return notificationTask.TrainNumber is null 
+                return notificationTask.TrainNumber is null
                     ? $"{baseLink}/{departureStationNodeId}/{arrivalStationNodeId}/{dateFromText}"
                     : $"{baseLink}/{departureStationNodeId}/{arrivalStationNodeId}/{dateFromText}?trainNumber={notificationTask.TrainNumber}";
 
@@ -282,6 +288,55 @@ namespace RailwayWizzard.Robot.App
                 linkToBuyTicket;
 
             return result;
+        }
+
+        /// <inheritdoc/>
+        public async Task<IReadOnlyCollection<string>> GetAvailableTimesAsync(NotificationTask notificationTask)
+        {
+            string ksid = await GetKsidForGetTicketAsync();
+
+            var textResponse = await _b2bClient.GetTrainInformationByParametersAsync(notificationTask, ksid);
+
+            RootDepartureTime? root = JsonConvert.DeserializeObject<RootDepartureTime>(textResponse);
+
+            if (root == null || root.Trains.Count == 0)
+                throw new NullReferenceException($"Сервис РЖД при запросе списка свободных мест вернул не стандартный ответ. Ответ:{textResponse}");
+
+            var datetimes = root.Trains.Select(x => x.LocalDepartureDateTime ?? x.DepartureDateTime).ToList();
+
+            /// Если не у каждой поездки есть время
+            if (datetimes.Count != root.Trains.Count)
+                throw new Exception($"Сервис РЖД вернул ответ в котором не у каждой поездки есть время. Ответ:{textResponse}");
+
+            // Если требуется информация не на сегодня - просто отдаем
+            if (notificationTask.DateFrom.Date > Common.MoscowNow.Date) 
+                return GetTimesText(datetimes);
+
+            // Иначе определяем актуальное для пользователя и отдаем
+            var availableDateTimes = GetAvailableTimes(datetimes);
+            return GetTimesText(availableDateTimes);
+        }
+
+        private IReadOnlyCollection<string> GetTimesText(List<DateTime> datetimes) =>
+            datetimes.Select(x => x.ToString("HH:mm")).ToList();
+
+        /// <summary>
+        /// Возвращает доступное время.
+        /// </summary>
+        /// <param name="root"></param>
+        /// <returns></returns>
+        private List<DateTime> GetAvailableTimes(List<DateTime> datetimes)
+        {
+            var moscowDateTime = Common.MoscowNow;
+            var availableTimes = new List<DateTime>();
+
+            foreach(var dateTime in datetimes)
+            {
+                if(dateTime > moscowDateTime)
+                    availableTimes.Add(dateTime);
+            }
+
+            return availableTimes;
         }
     }
 }

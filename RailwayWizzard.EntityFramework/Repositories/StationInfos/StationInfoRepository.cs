@@ -8,6 +8,10 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.StationInfos
     {
         private readonly RailwayWizzardAppContext _context;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StationInfoRepository" class./>
+        /// </summary>
+        /// <param name="context"></param>
         public StationInfoRepository(RailwayWizzardAppContext context)
         {
             _context = context;

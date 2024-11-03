@@ -24,14 +24,7 @@ namespace RailwayWizzard.App
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            try
-            {
-                await _notificationTaskRepository.DatabaseInitialize();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"{nameof(NotificationTaskWorker)} {ex}");
-            }
+            await _notificationTaskRepository.DatabaseInitialize();
 
             while (!cancellationToken.IsCancellationRequested)
             {
@@ -44,6 +37,7 @@ namespace RailwayWizzard.App
         protected async Task DoWork(CancellationToken cancellationToken)
         {
             var isDownTime = Common.IsDownTimeRzd();
+
             if (isDownTime)
             {
                 await Task.Delay(RUN_INTERVAL, cancellationToken);
@@ -66,7 +60,7 @@ namespace RailwayWizzard.App
 
             catch (Exception ex)
             {
-                _logger.LogError($"{nameof(NotificationTaskWorker)} {ex}");
+                _logger.LogError($"{ex}");
             }
         }
 

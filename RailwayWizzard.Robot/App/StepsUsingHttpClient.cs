@@ -96,7 +96,7 @@ namespace RailwayWizzard.Robot.App
 
         private async Task SetIsNotWorked(NotificationTask notificationTask, string logMessage, string result)
         {
-            await _notificationTaskRepository.SetIsNotWorked(notificationTask);
+            await _notificationTaskRepository.SetIsNotWorkedNotificationTask(notificationTask);
 
             await _notificationTaskRepository.SetIsUpdatedAsync(notificationTask.Id);
 

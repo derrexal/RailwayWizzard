@@ -14,27 +14,25 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
         public Task DatabaseInitialize();
 
         /// <summary>
-        /// Возвращает сущность задачи по ее Id
+        /// Добавляет сущность <see cref="NotificationTask"/> в БД.
         /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        /// <exception cref="EntityNotFoundException"></exception>
-        public Task<NotificationTask> GetNotificationTaskFromId(int id);
+        /// <param name="notificationTask">Задача для добавления.</param>
+        /// <returns>Идентификатор добавленной сущности.</returns>
+        public Task<int> CreateAsync(NotificationTask notificationTask);
 
+        //TODO: потенциально - кучу лишних запросов к БД... Нужно переделать на очередь, т.к. состояние задач в плане их "устаревания" не сильно меняется (кажется)
         /// <summary>
-        /// Получает список задач со статусом "Актуально", "Не остановлена" и над которыми еще не работают
+        /// Возвращает задачу которую дольше всего не обрабатывали.
         /// </summary>
         /// <returns>Список задач</returns>
-        public Task<IList<NotificationTask>> GetNotWorkedNotificationTasks();
+        public Task<NotificationTask?> GetOldestNotificationTask();
 
         /// <summary>
-        /// Возвращает результат сравнения последнего результата с текущим
+        /// Получает список активных задач по идентификатору пользователя.
         /// </summary>
-        /// <param name="inputNotificationTask"></param>
-        /// <param name="lastResult"></param>
-        /// <returns>Задача</returns>
-        /// <exception cref="NullReferenceException"></exception>
-        public Task<bool> ResultIsLast(NotificationTask inputNotificationTask, string lastResult);
+        /// <param name="userId">Идентификатор пользователя.</param>
+        /// <returns>Список активных задач.</returns>
+        public Task<IReadOnlyCollection<NotificationTask>> GetActiveByUserAsync(long userId);
 
         /// <summary>
         /// Выставляет задаче последний полученный результат
@@ -53,38 +51,11 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
         public Task SetIsWorkedNotificationTask(NotificationTask inputNotificationTask);
 
         /// <summary>
-        /// Выставляет задаче статус - не актуально и не в работе
-        /// </summary>
-        /// <param name="inputNotificationTask"></param>
-        /// <returns>Задача</returns
-        public Task SetIsNotActualAndIsNotWorked(NotificationTask inputNotificationTask);
-
-        /// <summary>
         /// Выставляет задаче статус - не в работе
         /// </summary>
         /// <param name="inputNotificationTask"></param>
         /// <returns>Задача</returns>
-        public Task SetIsNotWorked(NotificationTask inputNotificationTask);
-
-        /// <summary>
-        /// Возвращает подходящий для работы список задач
-        /// </summary>
-        /// <returns>Список задач</returns>
-        public Task<IList<NotificationTask>> GetNotificationTasksForWork();
-
-        //TODO: потенциально - кучу лишних запросов к БД... Нужно переделать на очередь, т.к. состояние задач в плане их "устаревания" не сильно меняется (кажется)
-        /// <summary>
-        /// Возвращает задачу которую дольше всего не обрабатывали.
-        /// </summary>
-        /// <returns>Список задач</returns>
-        public Task<NotificationTask?> GetOldestNotificationTask();
-
-        /// <summary>
-        /// Добавляет сущность <see cref="NotificationTask"/> в БД.
-        /// </summary>
-        /// <param name="notificationTask">Задача для добавления.</param>
-        /// <returns>Идентификатор добавленной сущности.</returns>
-        public Task<int> CreateAsync(NotificationTask notificationTask);
+        public Task SetIsNotWorkedNotificationTask(NotificationTask inputNotificationTask);
 
         /// <summary>
         /// Устанавливает задаче статус "Остановлена".
@@ -101,10 +72,12 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
         public Task SetIsUpdatedAsync(int idNotificationTask);
 
         /// <summary>
-        /// Получает список активных задач по идентификатору пользователя.
+        /// Возвращает результат сравнения последнего результата с текущим
         /// </summary>
-        /// <param name="userId">Идентификатор пользователя.</param>
-        /// <returns>Список активных задач.</returns>
-        public Task<IReadOnlyCollection<NotificationTask>> GetActiveByUserAsync(long userId);
+        /// <param name="inputNotificationTask"></param>
+        /// <param name="lastResult"></param>
+        /// <returns>Задача</returns>
+        /// <exception cref="NullReferenceException"></exception>
+        public Task<bool> ResultIsLast(NotificationTask inputNotificationTask, string lastResult);
     }
 }

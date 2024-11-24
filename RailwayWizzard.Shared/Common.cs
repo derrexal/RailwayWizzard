@@ -1,10 +1,21 @@
-﻿namespace RailwayWizzard.Shared
+﻿using System.Globalization;
+
+namespace RailwayWizzard.Shared
 {
     /// <summary>
     /// Вспомогательный класс
     /// </summary>
     public static class Common
     {
+        private static CultureInfo _russianCultureInfo = new("ru-RU");
+        public static CultureInfo RussianCultureInfo
+        {
+            get
+            {
+                return _russianCultureInfo;
+            }
+        }
+
         /// <summary>
         /// Возвращает текущую дату и время по Москве
         /// </summary>

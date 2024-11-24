@@ -1,5 +1,4 @@
-﻿using RailwayWizzard.Core;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace RailwayWizzard.App.Dto.NotificationTask
@@ -10,16 +9,16 @@ namespace RailwayWizzard.App.Dto.NotificationTask
         public int Id { get; set; }
 
         [Required]
-        public string DepartureStation { get; set; }
+        public string DepartureStation { get; set; } = null!;
 
         [Required]
-        public string ArrivalStation { get; set; }
+        public string ArrivalStation { get; set; } = null!;
 
         [Required]
-        public string TimeFrom { get; set; }
+        public string TimeFrom { get; set; } = null!;
 
         [Description("Типы вагона")]
-        public string CarTypes { get; set; }
+        public string CarTypes { get; set; } = null!;
 
         [Range(1, 10)]
         public short NumberSeats { get; set; }

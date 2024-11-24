@@ -73,7 +73,7 @@ namespace RailwayWizzard.B2B
                 "{" +
                 "\"Origin\":\"" + inputNotificationTask.DepartureStationCode + "\"," +
                 "\"Destination\":\"" + inputNotificationTask.ArrivalStationCode + "\"," +
-                "\"DepartureDate\":\"" + inputNotificationTask.DateFrom.ToString("yyyy-MM-ddT00:00:00") + "\"," +
+                "\"DepartureDate\":\"" + inputNotificationTask.DepartureDateTime.ToString("yyyy-MM-ddT00:00:00") + "\"," +
                 "\"TimeFrom\":0," +
                 "\"TimeTo\":24," +
                 "\"CarGrouping\":\"DontGroup\"," +

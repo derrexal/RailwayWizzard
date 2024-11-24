@@ -20,13 +20,14 @@ namespace RailwayWizzard.App.Services.NotificationTasks
 
         public async Task<int> CreateAsync(CreateNotificationTaskDto createNotificationTaskDto)
         {
-            //TODO: Вынести в маппинг
+            
+            // TODO: Вынести в маппинг
+
             var notificationTask = new NotificationTask
             {
                 ArrivalStation = createNotificationTaskDto.ArrivalStation,
                 DepartureStation = createNotificationTaskDto.DepartureStation,
-                DateFrom = createNotificationTaskDto.DateFrom,
-                TimeFrom = createNotificationTaskDto.TimeFrom,
+                DepartureDateTime = DateTime.ParseExact(createNotificationTaskDto.DateFrom.ToString("yyyy-MM-dd") + " " + createNotificationTaskDto.TimeFrom, "yyyy-MM-dd HH:mm", Common.RussianCultureInfo),
                 UserId = createNotificationTaskDto.UserId,
                 CarTypes = createNotificationTaskDto.CarTypes,
                 NumberSeats = createNotificationTaskDto.NumberSeats,
@@ -55,19 +56,19 @@ namespace RailwayWizzard.App.Services.NotificationTasks
         {
             var notificationTasks = await _notificationTaskRepository.GetActiveByUserAsync(userId);
 
-            var result = notificationTasks.Select(u => new NotificationTaskDto
+            var result = notificationTasks.Select(notificationTask => new NotificationTaskDto
             {
-                Id = u.Id,
-                ArrivalStation = u.ArrivalStation,
-                DepartureStation = u.DepartureStation,
-                TimeFrom = u.TimeFrom,
-                CarTypes = string.Join(", ", u.CarTypes.Select(c => c.GetEnumDescription())),
-                NumberSeats = u.NumberSeats,
-                DateFromString = u.DateFromString,
-                Updated = $"{u.Updated:t}" ?? ""
+                Id = notificationTask.Id,
+                ArrivalStation = notificationTask.ArrivalStation,
+                DepartureStation = notificationTask.DepartureStation,
+                DateFromString = notificationTask.DepartureDateTime.ToString("yyyy-MM-dd", Common.RussianCultureInfo),
+                TimeFrom = $"{notificationTask.DepartureDateTime:t}",
+                CarTypes = string.Join(", ", notificationTask.CarTypes.Select(c => c.GetEnumDescription())),
+                NumberSeats = notificationTask.NumberSeats,
+                Updated = $"{notificationTask.Updated:t}"
             })
-                .OrderBy(u => u.Id)
-                .ToList();
+            .OrderBy(notificationTask => notificationTask.Id)
+            .ToList();
 
             return result;
         }

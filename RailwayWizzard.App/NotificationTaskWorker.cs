@@ -6,7 +6,7 @@ namespace RailwayWizzard.App
 {
     public class NotificationTaskWorker : BackgroundService
     {
-        private const int RUN_INTERVAL = 1000 * 60; //Интервал запуска (1 мин)
+        private const int RUN_INTERVAL = 1000 * 60;
 
         private readonly ISteps _steps;
         private readonly INotificationTaskRepository _notificationTaskRepository;
@@ -24,8 +24,6 @@ namespace RailwayWizzard.App
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            await _notificationTaskRepository.DatabaseInitialize();
-
             while (!cancellationToken.IsCancellationRequested)
             {
                 _logger.LogInformation($"{nameof(NotificationTaskWorker)} running at: {Common.MoscowNow} Moscow time");
@@ -34,7 +32,7 @@ namespace RailwayWizzard.App
             }
         }
 
-        protected async Task DoWork(CancellationToken cancellationToken)
+        private async Task DoWork(CancellationToken cancellationToken)
         {
             var isDownTime = Common.IsDownTimeRzd();
 
@@ -50,7 +48,6 @@ namespace RailwayWizzard.App
 
                 if (notificationTask is null)
                 {
-                    //TODO: допилить - увеличивать время если задач нет до определенного максимума как в проекте с прошлого места.
                     await Task.Delay(RUN_INTERVAL, cancellationToken);
                     return;
                 }

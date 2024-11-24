@@ -8,12 +8,6 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
     public interface INotificationTaskRepository
     {
         /// <summary>
-        /// Инициализирует начальное состояние базы.
-        /// </summary>
-        /// <returns></returns>
-        public Task DatabaseInitialize();
-
-        /// <summary>
         /// Добавляет сущность <see cref="NotificationTask"/> в БД.
         /// </summary>
         /// <param name="notificationTask">Задача для добавления.</param>

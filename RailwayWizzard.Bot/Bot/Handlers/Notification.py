@@ -368,7 +368,8 @@ async def seventh_step_notification(update: Update, context: CallbackContext):
         return ConversationHandler.END
 
     except Exception as e:
-        return await base_error_handler(update, e, next_step)
+        await base_error_handler(update, e, next_step)
+        return next_step
 
 
 async def send_notification_data_to_robot(context: CallbackContext):

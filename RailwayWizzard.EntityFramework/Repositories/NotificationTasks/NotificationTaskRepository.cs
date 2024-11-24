@@ -21,20 +21,6 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
         }
 
         /// <inheritdoc/>
-        public async Task DatabaseInitialize()
-        {
-            if (await _context.Database.CanConnectAsync() == false) 
-                await Task.Delay(5000);
-
-            // Applying migrations to run program
-            await _context.Database.MigrateAsync();
-
-            // Before Run Program Update field IsWorked default value(false)
-            _context.NotificationTask.ExecuteUpdate(t =>
-                t.SetProperty(t => t.IsWorked, false));
-        }
-
-        /// <inheritdoc/>
         public async Task<int> CreateAsync(NotificationTask notificationTask)
         {
             await _context.AddAsync(notificationTask);

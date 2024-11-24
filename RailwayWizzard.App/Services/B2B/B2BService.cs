@@ -1,11 +1,11 @@
-﻿using System.Globalization;
-using Abp.Collections.Extensions;
+﻿using Abp.Collections.Extensions;
 using Newtonsoft.Json;
 using RailwayWizzard.App.Dto.B2B;
 using RailwayWizzard.B2B;
 using RailwayWizzard.Core;
 using RailwayWizzard.EntityFrameworkCore.Repositories.StationInfos;
 using RailwayWizzard.Robot.App;
+using RailwayWizzard.Shared;
 
 namespace RailwayWizzard.App.Services.B2B
 {
@@ -44,7 +44,7 @@ namespace RailwayWizzard.App.Services.B2B
 
             var notificationTask = new NotificationTask
             {
-                DateFrom = DateTime.ParseExact(routeDto.Date, "dd.MM.yyyy", CultureInfo.InvariantCulture),
+                DepartureDateTime = DateTime.ParseExact(routeDto.Date, "dd.MM.yyyy", Common.RussianCultureInfo),
                 DepartureStation = routeDto.StationFromName,
                 ArrivalStation = routeDto.StationToName,
                 DepartureStationCode = departureStationInfo.ExpressCode,

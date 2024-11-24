@@ -41,7 +41,7 @@ namespace RailwayWizzard.App
                             maxRetryDelay: TimeSpan.FromSeconds(30),
                             errorCodesToAdd: null);
                     }));
-
+            
             builder.Services.AddControllers();
 
             builder.Services.AddHostedService<NotificationTaskWorker>();
@@ -58,6 +58,20 @@ namespace RailwayWizzard.App
             builder.Services.AddHttpClient();
 
             var app = builder.Build();
+
+            // Create custom scope for initialize init state database.
+            using (var serviceScope = app.Services.CreateScope())
+            {
+                var services = serviceScope.ServiceProvider;
+                var dbContext = services.GetRequiredService<RailwayWizzardAppContext>();
+                
+                // Applying migrations to run program
+                dbContext.Database.Migrate();
+
+                // Before Run Program Update field IsWorked default value(false)
+                dbContext.NotificationTask.ExecuteUpdate(t =>
+                    t.SetProperty(notificationTask => notificationTask.IsWorked, false));
+            }
 
             app.UseAuthorization();
 

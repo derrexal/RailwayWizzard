@@ -59,7 +59,7 @@ namespace RailwayWizzard.Robot.App
 
             //TODO: Если места были, затем РЖД ответил с Trains=null - в ответ пользователь получит сообщение о том что мест нет без номера поезда. Хранить в БД.
             if(inputNotificationTask.TrainNumber is null)
-                inputNotificationTask.TrainNumber = GetTrainNumberFromResponse(myDeserializedClass, inputNotificationTask.TimeFrom);
+                inputNotificationTask.TrainNumber = GetTrainNumberFromResponse(myDeserializedClass, $"{inputNotificationTask.DepartureDateTime:t}");
 
             //вытаскиваем свободные места по запрашиваемому рейсу
             var currentRoute = GetCurrentRouteFromResponse(myDeserializedClass, inputNotificationTask);
@@ -119,7 +119,7 @@ namespace RailwayWizzard.Robot.App
                 }
 
             foreach (var train in root.Trains)
-                if (train.LocalDepartureDateTime.ToString()!.Contains(inputNotificationTask.TimeFrom)) //Если в ответе содержится необходимая поездка
+                if (train.LocalDepartureDateTime.ToString()!.Contains($"{inputNotificationTask.DepartureDateTime:t}")) //Если в ответе содержится необходимая поездка
                     foreach (var carGroup in train.CarGroups)
                         if (!carGroup.HasPlacesForDisabledPersons) // Если место не для инвалидов                               
                             if (carTypesText.Contains(carGroup.CarType)) //Если это тот тип вагонов, которые выбрал пользователь
@@ -183,7 +183,7 @@ namespace RailwayWizzard.Robot.App
                 if (departureStationNodeId == null || arrivalStationNodeId == null)
                     return null;
 
-                var dateFromText = notificationTask.DateFrom.ToString("yyyy-MM-dd");
+                var dateFromText = notificationTask.DepartureDateTime.ToString("yyyy-MM-dd");
 
                 return notificationTask.TrainNumber is null
                     ? $"{baseLink}/{departureStationNodeId}/{arrivalStationNodeId}/{dateFromText}"
@@ -287,7 +287,7 @@ namespace RailwayWizzard.Robot.App
                 throw new Exception($"Сервис РЖД вернул ответ в котором не у каждой поездки есть время. Ответ:{textResponse}");
 
             // Если требуется информация не на сегодня - просто отдаем
-            if (notificationTask.DateFrom.Date > Common.MoscowNow.Date) 
+            if (notificationTask.DepartureDateTime.Date > Common.MoscowNow.Date) 
                 return GetTimesText(datetimes);
 
             // Иначе определяем актуальное для пользователя и отдаем

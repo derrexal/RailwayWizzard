@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Globalization;
 
 namespace RailwayWizzard.Core
 {
@@ -10,18 +9,14 @@ namespace RailwayWizzard.Core
     public class NotificationTask : Entity
     {
         [Required]
-        public string DepartureStation { get; set; }
+        public string DepartureStation { get; set; } = null!;
 
         [Required]
-        public string ArrivalStation { get; set; }
-        
+        public string ArrivalStation { get; set; } = null!;
+
         [Required]
-        public DateTime DateFrom { get; set; }
-        
-        [Required]
-        //todo:Это тоже перевести бы во время)
-        public string TimeFrom { get; set; }
-        
+        public DateTime DepartureDateTime { get; set; }
+
         [Required]
         public long UserId { get; set; }
         
@@ -49,22 +44,13 @@ namespace RailwayWizzard.Core
         public long DepartureStationCode { get; set; } = 0;
 
         public string? TrainNumber { get; set; } = null!;
-        
-        /// <summary>
-        /// Дата в формате строки для отправки пользователю
-        /// </summary>
-        [NotMapped]
-        public string DateFromString
-        {
-            get => DateFrom.ToString("dd.MM.yyy", CultureInfo.InvariantCulture);
-        }
 
         public string LastResult { get; set; } = "";
 
         public string ToCustomString() =>
-            $"{TrainNumber} {DepartureStation} - {ArrivalStation} {TimeFrom} {DateFromString}";
+            $"{TrainNumber} {DepartureStation} - {ArrivalStation} {DepartureDateTime:t} {DepartureDateTime:yyyy-MM-dd}";
         
         public string ToBotString() =>
-            $"<strong>{TrainNumber}</strong> {DepartureStation} - {ArrivalStation} {TimeFrom} {DateFromString}";
+            $"<strong>{TrainNumber}</strong> {DepartureStation} - {ArrivalStation} {DepartureDateTime:t} {DepartureDateTime:yyyy-MM-dd}";
     }
 }

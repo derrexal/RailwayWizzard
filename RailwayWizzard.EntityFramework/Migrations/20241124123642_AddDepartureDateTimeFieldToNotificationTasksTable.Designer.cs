@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RailwayWizzard.EntityFrameworkCore;
@@ -11,9 +12,11 @@ using RailwayWizzard.EntityFrameworkCore;
 namespace RailwayWizzard.EntityFrameworkCore.Migrations
 {
     [DbContext(typeof(RailwayWizzardAppContext))]
-    partial class RailwayWizzardAppContextModelSnapshot : ModelSnapshot
+    [Migration("20241124123642_AddDepartureDateTimeFieldToNotificationTasksTable")]
+    partial class AddDepartureDateTimeFieldToNotificationTasksTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -44,6 +47,9 @@ namespace RailwayWizzard.EntityFrameworkCore.Migrations
                     b.Property<DateTime>("CreationTime")
                         .HasColumnType("timestamp without time zone");
 
+                    b.Property<DateTime>("DateFrom")
+                        .HasColumnType("timestamp without time zone");
+
                     b.Property<DateTime>("DepartureDateTime")
                         .HasColumnType("timestamp without time zone");
 
@@ -69,6 +75,9 @@ namespace RailwayWizzard.EntityFrameworkCore.Migrations
 
                     b.Property<short>("NumberSeats")
                         .HasColumnType("smallint");
+
+                    b.Property<string>("TimeFrom")
+                        .HasColumnType("text");
 
                     b.Property<string>("TrainNumber")
                         .HasColumnType("text");

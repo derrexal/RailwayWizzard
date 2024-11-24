@@ -1,5 +1,4 @@
 ﻿using RailwayWizzard.Shared;
-using System.Globalization;
 
 namespace RailwayWizzard.Core.Shared
 {
@@ -13,19 +12,6 @@ namespace RailwayWizzard.Core.Shared
         /// </summary>
         /// <param name="task"></param>
         /// <returns></returns>
-        public static bool IsActuality(this NotificationTask task)
-        {
-            DateTime notificationTaskDateTime = DateTime.ParseExact(
-                task.DateFrom.ToShortDateString() + " " + task.TimeFrom,
-                "MM/dd/yyyy HH:mm",
-                CultureInfo.InvariantCulture);
-
-            var moscowDateTime = Common.MoscowNow;
-
-            var notificationTaskIsActual = notificationTaskDateTime > moscowDateTime;
-            if (notificationTaskIsActual)
-                return true;
-            return false;
-        }
+        public static bool IsActuality(this NotificationTask task) => task.DepartureDateTime > Common.MoscowNow;
     }
 }

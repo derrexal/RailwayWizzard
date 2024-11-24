@@ -44,8 +44,8 @@ namespace RailwayWizzard.App
             
             builder.Services.AddControllers();
 
-            builder.Services.AddHostedService<NotificationTaskWorker>();
-            builder.Services.AddHostedService<HealthCheckWorker>();
+            //builder.Services.AddHostedService<NotificationTaskWorker>();
+            //builder.Services.AddHostedService<HealthCheckWorker>();
 
             builder.Services.AddLogging(options =>
             {

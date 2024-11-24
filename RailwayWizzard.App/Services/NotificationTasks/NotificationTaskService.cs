@@ -31,11 +31,11 @@ namespace RailwayWizzard.App.Services.NotificationTasks
                 UserId = createNotificationTaskDto.UserId,
                 CarTypes = createNotificationTaskDto.CarTypes,
                 NumberSeats = createNotificationTaskDto.NumberSeats,
-                CreationTime = Common.MoscowNow,
+                Created = Common.MoscowNow,
+                Updated = Common.MoscowNow,
                 IsActual = true,
                 IsWorked = false,
-                IsStopped = false,
-                Updated = Common.MoscowNow
+                IsStopped = false
             };
 
             notificationTask = await _notificationTaskRepository.FillStationCodes(notificationTask);

@@ -179,8 +179,7 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
             var notificationTasks = await _context.NotificationTask.Where(t => t.IsActual == true).ToListAsync();
 
             foreach (var notificationTask in notificationTasks)
-                if (notificationTask.IsActuality() == false)
-                    notificationTask.IsActual = false;
+                notificationTask.IsActual = notificationTask.IsActuality();
 
             await _context.SaveChangesAsync();
         }

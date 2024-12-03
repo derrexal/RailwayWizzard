@@ -39,6 +39,7 @@ namespace RailwayWizzard.App
             if (isDownTime)
             {
                 await Task.Delay(RUN_INTERVAL, cancellationToken);
+                _logger.LogInformation($"RZD DownTime. Today:{Common.MoscowNow}");
                 return;
             }
 
@@ -49,6 +50,7 @@ namespace RailwayWizzard.App
                 if (notificationTask is null)
                 {
                     await Task.Delay(RUN_INTERVAL, cancellationToken);
+                    _logger.LogInformation($"NotificationTask is null. Run Delay. Today:{Common.MoscowNow}");
                     return;
                 }
 

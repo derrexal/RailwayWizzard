@@ -3,39 +3,21 @@
 namespace RailwayWizzard.Shared
 {
     /// <summary>
-    /// Вспомогательный класс
+    /// Вспомогательный класс.
     /// </summary>
     public static class Common
     {
-        private static CultureInfo _russianCultureInfo = new("ru-RU");
-        public static CultureInfo RussianCultureInfo
-        {
-            get
-            {
-                return _russianCultureInfo;
-            }
-        }
+        public static CultureInfo RussianCultureInfo { get; } = new("ru-RU");
 
+        private static readonly TimeZoneInfo MoscowTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Russian Standard Time");
+        
         /// <summary>
-        /// Возвращает текущую дату и время по Москве
+        /// Возвращает текущую дату и время по Москве.
         /// </summary>
-        /// <param name="date"></param>
         /// <returns></returns>
-        public static DateTime MoscowNow
-        {
-            get
-            {
-                // Find the time zone for Moscow
-                TimeZoneInfo moscowTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Russian Standard Time");
-
-                // Convert the UTC time to Moscow time
-                DateTime moscowDateTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, moscowTimeZone);
-
-                // Return Moscow DateTime
-                return moscowDateTime;
-
-            }
-        }
+        public static DateTime MoscowNow =>
+            // Convert the UTC time to Moscow time
+            TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, MoscowTimeZone);
 
         /// <summary>
         /// Возвращает результат проверки текущего времени на попадание в технические работы у РЖД (03:30-04:00).
@@ -48,9 +30,9 @@ namespace RailwayWizzard.Shared
 
             var todayTime = TimeOnly.FromDateTime(MoscowNow);
 
-            var IsDownTime = startDownTime < todayTime && todayTime < endDownTime;
+            var isDownTime = startDownTime < todayTime && todayTime < endDownTime;
 
-            return IsDownTime;
+            return isDownTime;
         }
     }
 }

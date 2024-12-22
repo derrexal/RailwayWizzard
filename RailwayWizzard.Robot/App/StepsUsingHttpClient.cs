@@ -1,10 +1,9 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Diagnostics;
+using Microsoft.Extensions.Logging;
 using RailwayWizzard.Core;
-using RailwayWizzard.Core.Shared;
 using RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks;
-using System.Diagnostics;
 
-namespace RailwayWizzard.Robot.App
+namespace RailwayWizzard.B2BHelper.App
 {
     /// <inheritdoc/>
     public class StepsUsingHttpClient : ISteps
@@ -34,7 +33,7 @@ namespace RailwayWizzard.Robot.App
         // Когда пользователь вновь написал боту (Users/CreateOrUpdate) - выставляем ему статус IsBlocked=false
         public async Task Notification(NotificationTask notificationTask)
         {
-            string notificationTaskLogMessage = $"Задача: {notificationTask.Id} Рейс: {notificationTask.ToCustomString()}";
+            var notificationTaskLogMessage = $"Задача: {notificationTask.Id} Рейс: {notificationTask.ToCustomString()}";
             _watch = Stopwatch.StartNew();
 
             try
@@ -78,19 +77,15 @@ namespace RailwayWizzard.Robot.App
                 await _notificationTaskRepository.SetLastResultNotificationTask(notificationTask, resultFreeSeats!);
 
                 await SetIsNotWorked(notificationTask, notificationTaskLogMessage, "Result is new");
-
-                return;
             }
             catch (Exception e)
             {
-                string messageError = $"Fatal Error. {notificationTaskLogMessage} {e}";
+                var messageError = $"Fatal Error. {notificationTaskLogMessage} {e}";
                 _logger.LogError(messageError);
                 await _botApi.SendMessageForAdminAsync(messageError);
 
                 //TODO: логируем тут а потом ниже ?
                 await SetIsNotWorked(notificationTask, notificationTaskLogMessage, "Fatal");
-
-                return;
             }
         }
 

@@ -26,30 +26,22 @@ namespace RailwayWizzard.App.Controllers
             return Ok(await _notificationTaskService.CreateAsync(createNotificationTaskDto));
         }
 
-        /// <summary>
-        /// Устанавливает флаг IsStopped у конкретной сущности NotificationTask
-        /// </summary>
-        /// <param name="notificationTaskId"></param>
-        /// <returns></returns>
-
         [HttpGet("SetIsStopped")]
         public async Task<IActionResult> SetIsStopped(int notificationTaskId)
         {
             if (!ModelState.IsValid)
                 return BadRequest($"Request param is no valid: {ModelState}");
 
+            //TODO: не работает?
             var result = await _notificationTaskService.SetIsStoppedAsync(notificationTaskId);
 
+            // TODO: перенести на уровень репозитория.
             if (result is null)
                 return BadRequest($"Error search task from Id:{notificationTaskId}");
 
             return Ok(result);
-        }
+       }
 
-        /// <summary>
-        /// Получает список активных задач для конкретного пользователя
-        /// </summary>
-        /// <returns></returns>
         [HttpGet("GetActiveByUser")]
         public async Task<IActionResult> GetActiveByUser(long userId)
         {

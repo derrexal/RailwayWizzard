@@ -1,5 +1,4 @@
-﻿namespace RailwayWizzard.Robot.App;
-
+﻿namespace RailwayWizzard.B2BHelper.App;
 
 /// <summary>
 /// Описывает методы взаимодействия с ботом

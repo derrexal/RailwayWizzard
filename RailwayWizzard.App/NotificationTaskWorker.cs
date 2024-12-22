@@ -1,5 +1,5 @@
+using RailwayWizzard.B2BHelper.App;
 using RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks;
-using RailwayWizzard.Robot.App;
 using RailwayWizzard.Shared;
 
 namespace RailwayWizzard.App
@@ -34,12 +34,10 @@ namespace RailwayWizzard.App
 
         private async Task DoWork(CancellationToken cancellationToken)
         {
-            var isDownTime = Common.IsDownTimeRzd();
-
-            if (isDownTime)
+            if (Common.IsDownTimeRzd())
             {
                 await Task.Delay(RUN_INTERVAL, cancellationToken);
-                _logger.LogInformation($"RZD DownTime. Today:{Common.MoscowNow}");
+                _logger.LogInformation($"{nameof(NotificationTaskWorker)} RZD DownTime. Today:{Common.MoscowNow}");
                 return;
             }
 
@@ -50,7 +48,7 @@ namespace RailwayWizzard.App
                 if (notificationTask is null)
                 {
                     await Task.Delay(RUN_INTERVAL, cancellationToken);
-                    _logger.LogInformation($"NotificationTask is null. Run Delay. Today:{Common.MoscowNow}");
+                    _logger.LogInformation($"{nameof(NotificationTaskWorker)} NotificationTask is null. Run Delay. Today:{Common.MoscowNow}");
                     return;
                 }
 
@@ -59,7 +57,7 @@ namespace RailwayWizzard.App
 
             catch (Exception ex)
             {
-                _logger.LogError($"{ex}");
+                _logger.LogError($"{nameof(NotificationTaskWorker)} {ex}");
             }
         }
 

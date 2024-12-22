@@ -54,7 +54,7 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
         /// <summary>
         /// Устанавливает задаче статус "Остановлена".
         /// </summary>
-        /// <param name="idNotificationTask"></param>
+        /// <param name="idNotificationTask">Идентификатор останавливаемой задачи.</param>
         /// <returns>Идентификатор остановленной задачи.</returns>
         public Task<int?> SetIsStoppedAsync(int idNotificationTask);
 

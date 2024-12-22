@@ -1,7 +1,6 @@
 ﻿using RailwayWizzard.Core;
 
-
-namespace RailwayWizzard.Robot.App
+namespace RailwayWizzard.B2BHelper.App
 {
     /// <summary>
     /// Возвращает информацию от сервисов РЖД.
@@ -14,12 +13,6 @@ namespace RailwayWizzard.Robot.App
         /// <param name="inputNotificationTask">Запрашиваемый рейс.</param>
         /// <returns>Информации о свободных местах.</returns>
         public Task<string> GetFreeSeatsOnTheTrain(NotificationTask inputNotificationTask);
-
-        /// <summary>
-        /// Возвращает ссылку на сайт РЖД для покупки билета.
-        /// </summary>
-        /// <returns>Ссылка для покупки билета.</returns>
-        public Task<string?> GetLinkToBuyTicket(NotificationTask notificationTask);
 
         /// <summary>
         /// Возвращает список доступного для бронирования времени.

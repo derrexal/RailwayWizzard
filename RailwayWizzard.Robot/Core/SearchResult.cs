@@ -1,5 +1,5 @@
 ﻿
-namespace RailwayWizzard.Robot.Core
+namespace RailwayWizzard.B2BHelper.Core
 {
     public class SearchResult
     {
@@ -16,7 +16,7 @@ namespace RailwayWizzard.Robot.Core
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(CarType + Price.ToString());
+            return HashCode.Combine(CarType + Price);
         }
     }
 }

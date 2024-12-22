@@ -2,9 +2,9 @@
 using Newtonsoft.Json;
 using RailwayWizzard.App.Dto.B2B;
 using RailwayWizzard.B2B;
+using RailwayWizzard.B2BHelper.App;
 using RailwayWizzard.Core;
 using RailwayWizzard.EntityFrameworkCore.Repositories.StationInfos;
-using RailwayWizzard.Robot.App;
 using RailwayWizzard.Shared;
 
 namespace RailwayWizzard.App.Services.B2B
@@ -12,7 +12,7 @@ namespace RailwayWizzard.App.Services.B2B
     /// <inheritdoc/>
     public class B2BService : IB2BService
     {
-        private readonly IB2BClient _b2bClient;
+        private readonly IB2BClient _b2BClient;
         private readonly IStationInfoRepository _stationInfoRepository;
         private readonly IRobot _robot;
         private readonly ILogger _logger;           // TODO: Почему тут просто логер а в воркере например типизированный?
@@ -20,14 +20,17 @@ namespace RailwayWizzard.App.Services.B2B
         /// <summary>
         /// Initializes a new instance of the <see cref="B2BService" class./>
         /// </summary>
-        /// <param name="b2bClient">B2B клиент для связи с РЖД.</param>
+        /// <param name="b2BClient">B2B клиент для связи с РЖД.</param>
+        /// <param name="stationInfoRepository"></param>
+        /// <param name="robot"></param>
+        /// <param name="logger"></param>
         public B2BService(
-            IB2BClient b2bClient,
+            IB2BClient b2BClient,
             IStationInfoRepository stationInfoRepository,
             IRobot robot,
             ILogger<B2BService> logger)
         {
-            _b2bClient = b2bClient;
+            _b2BClient = b2BClient;
             _stationInfoRepository = stationInfoRepository;
             _robot = robot;
             _logger = logger;
@@ -110,7 +113,7 @@ namespace RailwayWizzard.App.Services.B2B
 
         private async Task<IReadOnlyCollection<StationFromJson>> GetStations(string inputStation)
         {
-            var textResponse = await _b2bClient.GetStationsText(inputStation);
+            var textResponse = await _b2BClient.GetStationsText(inputStation);
             if (textResponse.IsNullOrEmpty()) { return new List<StationFromJson>(); }
             var stations = DeserializeStationsText(textResponse);
 

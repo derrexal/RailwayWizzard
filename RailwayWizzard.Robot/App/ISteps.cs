@@ -1,7 +1,6 @@
 ﻿using RailwayWizzard.Core;
 
-
-namespace RailwayWizzard.Robot.App
+namespace RailwayWizzard.B2BHelper.App
 {
     /// <summary>
     /// Описывает бизнес-логику процесса.

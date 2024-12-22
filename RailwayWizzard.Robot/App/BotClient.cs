@@ -1,9 +1,9 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.Net.Http.Json;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using RailwayWizzard.Robot.Core;
-using System.Net.Http.Json;
 
-namespace RailwayWizzard.Robot.App;
+namespace RailwayWizzard.B2BHelper.App;
 
 /// <inheritdoc/>
 public class BotClient : IBotClient
@@ -44,7 +44,7 @@ public class BotClient : IBotClient
         if (string.IsNullOrEmpty(adminIdString)) 
             throw new Exception("Не удалось отправить сообщение администратору: в конфигурации не задан ID");
 
-        long adminId = Convert.ToInt64(adminIdString);
+        var adminId = Convert.ToInt64(adminIdString);
         
         await SendMessageForUserAsync(message, adminId);
     }

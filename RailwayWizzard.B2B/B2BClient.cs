@@ -1,5 +1,4 @@
-﻿using Abp.Collections.Extensions;
-using Abp.Extensions;
+﻿using Abp.Extensions;
 using RailwayWizzard.Core;
 
 namespace RailwayWizzard.B2B
@@ -10,7 +9,7 @@ namespace RailwayWizzard.B2B
         private readonly IHttpClientFactory _httpClientFactory;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="B2BClient" class./>
+        /// Initializes a new instance of the <see cref="B2BClient"/> class.
         /// </summary>
         /// <param name="httpClientFactory"></param>
         public B2BClient(IHttpClientFactory httpClientFactory)
@@ -58,7 +57,7 @@ namespace RailwayWizzard.B2B
                 throw new Exception($"Отсутствует код станции у задачи номер:{inputNotificationTask.Id}");
 
             //TODO: Можем еще улучшить этот запрос? Добавить номер поезда по которому ищем?
-            string url = $"https://ticket.rzd.ru/apib2b/p/Railway/V1/Search/TrainPricing?service_provider=B2B_RZD&bs={ksid}";
+            var url = $"https://ticket.rzd.ru/apib2b/p/Railway/V1/Search/TrainPricing?service_provider=B2B_RZD&bs={ksid}";
 
             using var request = new HttpRequestMessage(HttpMethod.Post, url);
             
@@ -95,7 +94,7 @@ namespace RailwayWizzard.B2B
         {
             var uriInputStation = Uri.EscapeDataString(inputStation);
 
-            string url = $"https://pass.rzd.ru/suggester/?stationNamePart={uriInputStation}&lang=ru";
+            var url = $"https://pass.rzd.ru/suggester/?stationNamePart={uriInputStation}&lang=ru";
 
             using var request = new HttpRequestMessage(HttpMethod.Get, url);
             request.Headers.Add("Host", "pass.rzd.ru");
@@ -106,7 +105,7 @@ namespace RailwayWizzard.B2B
         /// <inheritdoc/>
         public async Task<string> GetKsidAsync()
         {
-            string url = "https://w-22900.fp.kaspersky-labs.com/oxwdsq?cid=22900";
+            const string url = "https://w-22900.fp.kaspersky-labs.com/oxwdsq?cid=22900";
 
             using var request = new HttpRequestMessage(HttpMethod.Get, url);
 

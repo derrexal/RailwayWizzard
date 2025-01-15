@@ -19,10 +19,10 @@ namespace RailwayWizzard.App
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddTransient<ISteps, StepsUsingHttpClient>();
-            builder.Services.AddTransient<IRobot, RobotBigBrother>();
-            builder.Services.AddTransient<IBotClient, BotClient>();
+            builder.Services.AddScoped<IRobot, RobotBigBrother>();
+            builder.Services.AddScoped<IBotClient, BotClient>();
 
-            builder.Services.AddTransient<IB2BClient, B2BClient>();
+            builder.Services.AddScoped<IB2BClient, B2BClient>();
 
             builder.Services.AddScoped<IB2BService, B2BService>();
             builder.Services.AddScoped<INotificationTaskService, NotificationTaskService>();
@@ -44,8 +44,8 @@ namespace RailwayWizzard.App
             
             builder.Services.AddControllers();
 
-            //builder.Services.AddHostedService<NotificationTaskWorker>();
-            // builder.Services.AddHostedService<HealthCheckWorker>();
+            builder.Services.AddHostedService<NotificationTaskWorker>();
+            builder.Services.AddHostedService<HealthCheckWorker>();
 
             builder.Services.AddLogging(options =>
             {

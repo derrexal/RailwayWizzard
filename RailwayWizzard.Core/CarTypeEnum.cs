@@ -10,12 +10,27 @@ public enum CarTypeEnum
     [Description("Сидячий")]
     Sedentary = 1,
 
-    [Description("Плацкарт")]
-    ReservedSeat = 2,
+    [Description("Сидячий (бизнес)")]
+    SedentaryBusiness = 2,
 
-    [Description("Купе")]
-    Compartment = 3,
+    [Description("Плацкарт верхнее")]
+    ReservedSeatUpper = 3,
+
+    [Description("Плацкарт нижнее")]
+    ReservedSeatLower = 4,
+
+    [Description("Плацкарт верхнее боковое")]
+    ReservedSeatUpperSide = 5,
+
+    [Description("Плацкарт нижнее боковое")]
+    ReservedSeatLowerSide = 6,
+
+    [Description("Купе верхнее")]
+    CompartmentUpper = 7,
+
+    [Description("Купе нижнее")]
+    CompartmentLower = 8,
 
     [Description("СВ")]
-    Luxury = 4
+    Luxury = 9
 }

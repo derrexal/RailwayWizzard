@@ -1,8 +1,10 @@
-from telegram import *
+from telegram import InlineKeyboardMarkup
+from telebot.types import InlineKeyboardButton
 
-from Bot.Other import *
-from Bot.Base import *
-from Bot.Setting import (CALLBACK_ACTIVE_TASK, ADMIN_USERNAME)
+from bot.handlers.notification_handler.base_notification_handler import *
+from bot.handlers.error_handler.base_error_handler import *
+from bot.setting import (CALLBACK_ACTIVE_TASK, ADMIN_USERNAME)
+from bot.queries.robot_queries import delete_task_by_id, get_active_task_by_user_id
 
 
 async def active_task_handler(update: Update, context: CallbackContext):
@@ -16,7 +18,7 @@ async def active_task_handler(update: Update, context: CallbackContext):
             return ConversationHandler.END
 
         user_id = update.callback_query.message.chat.id
-        active_tasks = await API.get_active_task_by_user_id(user_id)
+        active_tasks = await get_active_task_by_user_id(user_id)
 
         if not active_tasks:
             await update.callback_query.message.reply_text("У вас нет активных задач")
@@ -29,6 +31,7 @@ async def active_task_handler(update: Update, context: CallbackContext):
 
     except Exception as e:
         return await base_error_handler(update, e, next_step)
+
 
 async def send_task_info(update: Update, task: dict):
     """Send task information to the user."""
@@ -69,7 +72,7 @@ async def one_step_active_task(update: Update, context: CallbackContext):
         if task_number is None:
             raise ValueError(f"ERROR: task_number:{task_number} is none")
 
-        response = await API.delete_task_by_id(task_number)
+        response = await delete_task_by_id(task_number)
         if response is None:
             raise ValueError(f"ERROR stopped task number: {str(task_number)}")
 

@@ -1,7 +1,7 @@
 from datetime import datetime, date, timedelta
 
-from Bot.Setting import MESSAGE_FORMAT_ERROR
-from Bot import API
+from bot.setting import MESSAGE_FORMAT_ERROR
+from bot.queries.robot_queries import get_available_times
 
 
 def json_serial(obj):
@@ -92,7 +92,7 @@ async def get_times(station_from_name, station_to_name, date_from):
     @return: Список доступных рейсов на запрошенный день
     """
     try:
-        available_times = await API.get_available_times(station_from_name, station_to_name, date_from)
+        available_times = await get_available_times(station_from_name, station_to_name, date_from)
         if len(available_times) == 0:
             raise Exception("Сервис: get_available_times вернул пустой ответ")
         return available_times

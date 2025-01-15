@@ -1,15 +1,6 @@
-from enum import Enum
-
 from telebot.types import InlineKeyboardButton
 from telegram import InlineKeyboardMarkup
 import pytz
-
-
-class CarType(Enum):
-    SEDENTARY = ('Сидячий', True)
-    RESERVED_SEAT = ('Плацкарт', True)
-    COMPARTMENT = ('Купе', True)
-    LUXURY = ('СВ', False)
 
 
 NON_SELECT_SMILE = '\U000025FB'
@@ -27,7 +18,9 @@ CALLBACK_DATA_INCORRECT_NOTIFICATION = 'callback_data_incorrect_notification'
  CALLBACK_CAR_TYPE_SELECT_ALL, CALLBACK_CAR_TYPE_REMOVE_ALL) = range(10)
 
 MOSCOW_TZ = pytz.timezone('Europe/Moscow')
+
 MAX_NUMBER_SEATS = 10  # ни к чему не привязанное значение, в случае чего увеличить
+
 ADMIN_USERNAME = '@derrexal'
 DONATE_URL = 'pay.cloudtips.ru/p/c6b746f7'
 
@@ -35,6 +28,7 @@ MESSAGE_FORMAT_ERROR = "Недопустимый ввод."
 MESSAGE_SUCCESS = 'Уведомление о поездке успешно создано.\n\nЗадача №'
 MESSAGE_CANCEL = 'Создание уведомления о поездке отменено.'
 MESSAGE_START = '\U00002388 Добро пожаловать на борт, '
+
 MESSAGE_MIN_COUNT_SEATS = ("Укажите <strong>количество необходимых мест</strong>.\n"
                            "Например, <code>1</code>\n\n"
                            "Пояснение: \n"
@@ -55,6 +49,6 @@ NOTIFICATION_CONFIRM_INLINE_BUTTONS = InlineKeyboardMarkup([[
 ]])
 
 FOOTER_MENU_CAR_TYPE_INLINE_BUTTONS = [
-    InlineKeyboardButton(text='Продолжить', callback_data=str(CALLBACK_CAR_TYPE_CONTINUE)),
-]
-
+    InlineKeyboardButton(text='Выбрать все', callback_data=str(CALLBACK_CAR_TYPE_SELECT_ALL)),
+    InlineKeyboardButton(text='Снять выбор', callback_data=str(CALLBACK_CAR_TYPE_REMOVE_ALL)),
+    InlineKeyboardButton(text='Продолжить', callback_data=str(CALLBACK_CAR_TYPE_CONTINUE))]

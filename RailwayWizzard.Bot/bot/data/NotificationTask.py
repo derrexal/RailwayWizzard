@@ -3,7 +3,7 @@ from typing import List
 
 
 @dataclass
-class NotificationTaskData:
+class NotificationTask:
     DepartureStation: str
     ArrivalStation: str
     DateFrom: str

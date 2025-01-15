@@ -1,10 +1,11 @@
 import asyncio
 from threading import Thread
 import server
-from Bot import TelegramBot
+from bot import telegram_bot
 
 
-#TODO: другой способ параллельного запуска бота и сервера (https://habr.com/ru/articles/709314/)
+#TODO: Перейти на другой более удобный фреймворк? Почитать про aiogram https://habr.com/ru/articles/757236/
+#TODO: Изучить другой способ параллельного запуска бота и сервера (https://habr.com/ru/articles/709314/)
 def main():
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
@@ -14,5 +15,5 @@ def main():
 
 if __name__ == '__main__':
     Thread(target=main).start()
-    TelegramBot.run()
+    telegram_bot.run()
 

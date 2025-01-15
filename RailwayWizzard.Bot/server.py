@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Body, HTTPException
 import uvicorn
-from Bot.TelegramBot import send_message_to_user
+from bot.telegram_bot_sender import send_message_to_user
 from logger import logger
 
 # Сервер для получения и обработки запросов от других сервисов приложения

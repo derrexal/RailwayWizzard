@@ -2,7 +2,7 @@ import aiohttp
 from aiohttp import ClientResponse
 
 from logger import logger
-from Bot.Data.NotificationTaskData import NotificationTaskData
+from bot.data.NotificationTask import NotificationTask
 
 API_URL = "http://railwaywizzardapp:80"
 
@@ -74,7 +74,7 @@ async def create_user(id_tg, username):
     await make_request('POST', endpoint, json_data=json_data)
 
 
-async def create_and_get_id_notification_task(notification_task_data: NotificationTaskData):
+async def create_and_get_id_notification_task(notification_task_data: NotificationTask):
     """Создает задачу"""
     endpoint = 'NotificationTask/Create'
     json_data = notification_task_data.__dict__  # Преобразование объекта в словарь

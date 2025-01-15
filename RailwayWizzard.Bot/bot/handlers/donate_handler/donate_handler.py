@@ -1,7 +1,9 @@
-from telegram import *
-from Bot.Base import base_error_handler
-from Bot.Setting import CALLBACK_DONATE, DONATE_URL
-from Bot import API
+from telegram import InlineKeyboardMarkup
+from telebot.types import InlineKeyboardButton
+
+from bot.handlers.error_handler.base_error_handler import base_error_handler
+from bot.setting import CALLBACK_DONATE, DONATE_URL
+from bot.queries.robot_queries import create_user
 
 
 async def donate_handler(update, context):
@@ -13,7 +15,7 @@ async def donate_handler(update, context):
                     url=DONATE_URL)]])
 
     try:
-        await API.create_user(
+        await create_user(
             update.message.from_user['id'],
             update.message.from_user['username'])
 

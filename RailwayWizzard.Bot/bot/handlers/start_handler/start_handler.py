@@ -1,8 +1,9 @@
 from telegram.constants import ParseMode
 
-from Bot import API
-from Bot.Base import base_error_handler
-from Bot.Setting import MESSAGE_START, START_INLINE_KEYBOARDS
+from bot.queries.robot_queries import create_user
+from bot.handlers.error_handler.base_error_handler import base_error_handler
+from bot.setting import MESSAGE_START, START_INLINE_KEYBOARDS
+
 
 async def start_buttons_handler(update, context):
     """ Создаёт начальные inline-кнопки """
@@ -15,7 +16,7 @@ async def start_buttons_handler(update, context):
             reply_markup=START_INLINE_KEYBOARDS,
             parse_mode=ParseMode.HTML)
 
-        await API.create_user(user_id, username)
+        await create_user(user_id, username)
 
     except Exception as e:
         return await base_error_handler(update, e, 1)
@@ -34,7 +35,7 @@ async def start_buttons(update, context):
             reply_markup=START_INLINE_KEYBOARDS,
             parse_mode=ParseMode.HTML)
 
-        await API.create_user(user_id, username)
+        await create_user(user_id, username)
 
     except Exception as e:
         return await base_error_handler(update, e, 1)

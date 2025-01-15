@@ -4,7 +4,7 @@ from bot.handlers.start_handler.start_handler import *
 from telegram.ext import CallbackContext, ConversationHandler
 from telegram.constants import ChatAction
 
-from bot.log.log_user_message import log_user_message
+from bot.log_user_message import log_user_message
 
 
 async def null_step_notification(update: Update, context: CallbackContext):

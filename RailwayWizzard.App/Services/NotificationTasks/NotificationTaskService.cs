@@ -61,7 +61,7 @@ namespace RailwayWizzard.App.Services.NotificationTasks
                 Id = notificationTask.Id,
                 ArrivalStation = notificationTask.ArrivalStation,
                 DepartureStation = notificationTask.DepartureStation,
-                DateFromString = notificationTask.DepartureDateTime.ToString("yyyy-MM-dd HH:mm", Common.RussianCultureInfo),
+                DateFromString = notificationTask.DepartureDateTime.ToString("dd.MM.yyyy HH:mm", Common.RussianCultureInfo),
                 CarTypes = string.Join(", ", notificationTask.CarTypes.Select(c => c.GetEnumDescription())),
                 NumberSeats = notificationTask.NumberSeats,
                 Updated = $"{notificationTask.Updated:t}",

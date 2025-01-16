@@ -289,7 +289,7 @@ async def fifth_step_notification(update: Update, context: CallbackContext):
                 context.user_data[33] = expected_amount_seats
                 set_default_car_types()
                 await update.message.reply_text(
-                    text="Выберите <strong>класс обсуживания</strong> который вас интересует\n\n" +
+                    text="Выберите <strong>класс обсуживания</strong> который вас интересует.\n\n" +
                          "Обратите внимание, выбирая, например, <strong>\"Плац низ\"</strong> вы выбираете плацкартные нижние места <strong>не включая</strong> боковых.\n\n"
                          "Для боковых мест определен отдельный фильтр.",
                     reply_markup=car_type_markup,
@@ -345,7 +345,7 @@ async def sixth_step_notification(update: Update, context: CallbackContext):
                      f"\nДата отправления: <strong>{context.user_data[22]}</strong>"
                      f"\nВремя отправления: <strong>{context.user_data[3]}</strong>"
                      f"\nВыбранные типы вагонов: <strong>{car_types_text[:-2]}</strong>"
-                     f"\nКоличество мест: <strong>{str(context.user_data[33])}</strong>",
+                     f"\nКоличество необходимых мест: <strong>{str(context.user_data[33])}</strong>",
                 reply_markup=NOTIFICATION_CONFIRM_INLINE_BUTTONS,
                 parse_mode=ParseMode.HTML)
             return next_step

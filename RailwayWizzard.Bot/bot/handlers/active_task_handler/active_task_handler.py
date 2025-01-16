@@ -50,7 +50,7 @@ async def send_task_info(update: Update, task: dict):
             f"Станция прибытия: <strong> {task['arrivalStation']} </strong>\n"
             f"Дата отправления: <strong> {task['dateFromString']} </strong>\n"
             f"Выбранные типы вагонов: <strong>{task['carTypes']}</strong>\n"
-            f"Количество мест: <strong> {str(task['numberSeats'])} </strong>\n")
+            f"Количество необходимых мест: <strong> {str(task['numberSeats'])} </strong>\n")
 
         if str(task['updated']) != '':
             task_info = task_info + f"Время последней проверки: <strong> {str(task['updated'])} </strong>\n"

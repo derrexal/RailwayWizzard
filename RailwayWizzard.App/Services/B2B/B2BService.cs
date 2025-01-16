@@ -1,4 +1,5 @@
-﻿using Abp.Collections.Extensions;
+﻿using System.Globalization;
+using Abp.Collections.Extensions;
 using Newtonsoft.Json;
 using RailwayWizzard.App.Dto.B2B;
 using RailwayWizzard.B2B;
@@ -15,7 +16,8 @@ namespace RailwayWizzard.App.Services.B2B
         private readonly IB2BClient _b2BClient;
         private readonly IStationInfoRepository _stationInfoRepository;
         private readonly IRobot _robot;
-        private readonly ILogger _logger;           // TODO: Почему тут просто логер а в воркере например типизированный?
+        // TODO: Почему тут просто логер а в воркере например типизированный?
+        private readonly ILogger _logger;           
 
         /// <summary>
         /// Initializes a new instance of the <see cref="B2BService" class./>
@@ -39,17 +41,22 @@ namespace RailwayWizzard.App.Services.B2B
         /// <inheritdoc/>
         public async Task<IReadOnlyCollection<string>> GetAvailableTimesAsync(RouteDto routeDto)
         {
-            var departureStationInfo = await _stationInfoRepository.FindByStationNameAsync(routeDto.StationFromName);
-            var arrivalStationInfo = await _stationInfoRepository.FindByStationNameAsync(routeDto.StationToName);
+            //TODO: Вынести в метод расширения DateTime
+            if(routeDto.DepartureDate.Date < Common.MoscowNow.Date)
+                throw new ArgumentException("Invalid route argument. Date is before moscow");
             
+            var departureStationInfo = await _stationInfoRepository.FindByStationNameAsync(routeDto.DepartureStationName);
+            var arrivalStationInfo = await _stationInfoRepository.FindByStationNameAsync(routeDto.ArrivalStationName);
+            
+            //TODO: Создать новый метод Get внутри которого будет проброс ошибки 
             if (departureStationInfo is null || arrivalStationInfo is null)
-                throw new ArgumentException($"Не найдена одна из станций: {routeDto.StationFromName},{routeDto.StationToName}. Вероятно в названии допущена ошибка");
+                throw new ArgumentException($"Не найдена одна из станций: {routeDto.DepartureStationName},{routeDto.ArrivalStationName}. Вероятно в названии допущена ошибка");
 
             var notificationTask = new NotificationTask
             {
-                DepartureDateTime = DateTime.ParseExact(routeDto.Date, "dd.MM.yyyy", Common.RussianCultureInfo),
-                DepartureStation = routeDto.StationFromName,
-                ArrivalStation = routeDto.StationToName,
+                DepartureDateTime = routeDto.DepartureDate,
+                DepartureStation = routeDto.DepartureStationName,
+                ArrivalStation = routeDto.ArrivalStationName,
                 DepartureStationCode = departureStationInfo.ExpressCode,
                 ArrivalStationCode = arrivalStationInfo.ExpressCode,
             };
@@ -86,9 +93,7 @@ namespace RailwayWizzard.App.Services.B2B
 
             // Снова смотрим есть ли в БД
             stationInfo = await _stationInfoRepository.FindByStationNameAsync(stationName);
-            if (stationInfo is not null) { return stationInfo; }
-
-            return null;
+            return stationInfo ?? null;
         }
 
         /// <summary>

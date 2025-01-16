@@ -3,6 +3,7 @@ import datetime
 from telegram import InlineKeyboardMarkup
 
 from bot.data.CarType import CarType
+from bot.handlers.notification_handler.notification_handler_helper import NotificationHandlerDialog
 from bot.setting import *
 from bot.validators.validators import *
 from bot.handlers.notification_handler.base_notification_handler import *
@@ -56,7 +57,7 @@ async def notification_handler(update: Update, context: CallbackContext):
         await update.callback_query.message.reply_text(text="Обратите внимание, по умолчанию не приходят уведомления о "
                                                             "местах для инвалидов. Если вам необходимо получать "
                                                             "уведомления и в таком случае - пожалуйста, обратитесь к "
-                                                            f"папочке {ADMIN_USERNAME}"
+                                                            f"разработчику {ADMIN_USERNAME}"
                                                             "\n\nДля возврата в главное меню введите /stop")
 
         await update.callback_query.message.reply_text(
@@ -171,10 +172,8 @@ async def second_step_notification(update: Update, context: CallbackContext):
             station = stations[0]
             context.user_data[1] = station['stationName']
             context.user_data[11] = station['expressCode']
-            tomorrow = (datetime.now(MOSCOW_TZ) + timedelta(days=1)).strftime("%d.%m.%Y")
-            await update.message.reply_text(text="Укажите <strong>дату отправления</strong>.\n"
-                                                 f"Например, <code>{tomorrow}</code>",
-                                            parse_mode=ParseMode.HTML)
+            await update.message.reply_text(
+                text=NotificationHandlerDialog.enter_departure_date_text(), parse_mode=ParseMode.HTML)
             return next_step
 
         raise Exception("Непредвиденная ошибка в методе обработки станции")
@@ -189,8 +188,8 @@ async def second_step_notification(update: Update, context: CallbackContext):
 async def third_step_notification(update: Update, context: CallbackContext):
     """ Обрабатывает дату отправления """
     next_step = 4
-    tomorrow = (datetime.now(MOSCOW_TZ) + timedelta(days=1)).strftime("%d.%m.%Y")
     expected_date = update.message.text
+
     try:
         base_check = await null_step_notification(update, context)
         if base_check is not None:
@@ -198,23 +197,16 @@ async def third_step_notification(update: Update, context: CallbackContext):
 
         date_and_date_json = date_format_validate(expected_date)
 
-        if date_and_date_json is None:
-            await update.message.reply_text("Формат даты должен быть dd.mm.yyyy")
-            await update.message.reply_text(text="Укажите <strong>дату отправления</strong>.\n"
-                                                 f"Например, <code>{tomorrow}</code>",
-                                            parse_mode=ParseMode.HTML)
-            return next_step - 1
-
         # Получаем доступное время для бронирования
-        available_times = await get_times(context.user_data[0], context.user_data[1], date_and_date_json['date_text'])
-        date_limits = await date_limits_validate(expected_date, available_times)
+        available_times = await get_times(context.user_data[0], context.user_data[1], date_and_date_json['date'])
+        date_limits = await date_limits_validate(date_and_date_json['date_text'], available_times)
         if date_limits is None:
             await update.message.reply_text("По указанному маршруту на указанную дату билеты не продаются")
-            await update.message.reply_text(text="Укажите <strong>дату отправления</strong>.\n"
-                                                 f"Например, <code>{tomorrow}</code>",
-                                            parse_mode=ParseMode.HTML)
+            await update.message.reply_text(
+                text=NotificationHandlerDialog.enter_departure_date_text(), parse_mode=ParseMode.HTML)
             return next_step - 1
 
+        # Success
         context.user_data[2] = date_and_date_json['date']  # Дата в формате даты
         context.user_data[22] = date_and_date_json['date_text']  # Дата в формате строки
 
@@ -225,6 +217,13 @@ async def third_step_notification(update: Update, context: CallbackContext):
                                         parse_mode=ParseMode.HTML)
         return next_step
 
+    except DateFormatError as value_error:
+        await update.message.reply_text(text=str(value_error))
+        await update.message.reply_text(
+            text=NotificationHandlerDialog.enter_departure_date_text(), parse_mode=ParseMode.HTML)
+
+        return next_step - 1
+
     except Exception as e:
         return await base_error_handler(update, e, next_step)
 
@@ -234,13 +233,14 @@ async def fourth_step_notification(update: Update, context: CallbackContext):
     global car_type_markup
     next_step = 5
     expected_input_time = update.message.text
+
     try:
         base_check = await null_step_notification(update, context)
         if base_check is not None:
             return base_check
 
         # обрабатываем время отправления
-        available_times = await get_times(context.user_data[0], context.user_data[1], context.user_data[22])
+        available_times = await get_times(context.user_data[0], context.user_data[1], context.user_data[2])
         validate_time = await time_check_validate(expected_input_time, available_times)
 
         if not time_format_validate(expected_input_time):

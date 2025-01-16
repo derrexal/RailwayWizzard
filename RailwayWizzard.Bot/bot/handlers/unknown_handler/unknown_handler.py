@@ -1,6 +1,6 @@
 from telegram import Update
 from telegram.ext import CallbackContext
-from bot.log_user_message import log_user_message
+from bot.bot_message_log import log_user_message
 
 
 async def unknown_handler(update: Update, context: CallbackContext):

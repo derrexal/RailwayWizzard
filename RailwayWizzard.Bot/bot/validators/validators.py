@@ -1,5 +1,7 @@
+from calendar import monthrange
 from datetime import datetime, date, timedelta
 
+from bot.errors.DateFormatError import DateFormatError
 from bot.setting import MESSAGE_FORMAT_ERROR
 from bot.queries.robot_queries import get_available_times
 
@@ -46,26 +48,61 @@ async def date_limits_validate(input_date_text, available_times):
 
 
 def date_format_validate(input_date_text):
+    today = date.today()
+
     try:
-        if len(input_date_text.split('.')) == 3:
-            # преобразуем строку в объект datetime
-            input_date_json = json_serial(datetime.strptime(input_date_text, '%d.%m.%Y'))
-            return {'date_text': input_date_text, 'date': input_date_json}
-        # TODO: Пока отключаю успешную валидацию даты без указания года
-        # TODO: Обязательно в валидацию добавить соответствие временному интервалу: сегодня + год (н-р)
-        # elif len(input_date.split('.')) == 2:
-        # Todo: Баг. Если в конце года создавать уведомление на январь без указания года непосредственно - дата будет н.р. 07.01.2023. А Должно быть 2024
-        #     this_year = datetime.today().year
-        #     input_date += '.' + this_year.__str__()  # добавляем год к дате
-        #     datetime.strptime(input_date, '%d.%m.%Y')
-        #     return input_date
+        # Разделяем входную строку по точке
+        parts = input_date_text.split('.')
+
+        if len(parts) == 1:
+            # Только день
+            day = int(parts[0])
+            month_days = monthrange(today.year, today.month)[1]
+            if 1 <= day <= month_days:
+                date_obj = date(today.year, today.month, day)
+            else:
+                raise DateFormatError.invalid_day_current_month(day, today.month)
+
+        elif len(parts) == 2:
+            # День и месяц
+            day, month = map(int, parts)
+            if 1 <= month <= 12:
+                month_days = monthrange(today.year, month)[1]
+                if 1 <= day <= month_days:
+                    date_obj = date(today.year, month, day)
+                else:
+                    raise DateFormatError.invalid_day(day, month)
+            else:
+                raise DateFormatError.invalid_month(month)
+
+        elif len(parts) == 3:
+            # Полный формат
+            day, month, year = map(int, parts)
+            if 1 <= month <= 12:
+                month_days = monthrange(year, month)[1]
+                if 1 <= day <= month_days:
+                    date_obj = datetime(year, month, day).date()
+                else:
+                    raise DateFormatError.invalid_day(day, month)
+            else:
+                raise DateFormatError.invalid_month(month)
         else:
-            return None
-    # Не актуально?
+            raise DateFormatError.invalid_format()
+
+        if date_obj < today:
+            raise DateFormatError.unactual_date()
+
+        return {
+            'date_text': date_obj.strftime('%d.%m.%Y'),
+            'date': json_serial(date_obj)
+        }
+
     except ValueError:
-        return None
+        raise DateFormatError.conversion_error()
+    except DateFormatError as date_format_error:
+        raise date_format_error
     except Exception as e:
-        raise e
+        raise DateFormatError.unknown(str(e))
 
 
 def time_format_validate(input_time) -> bool:

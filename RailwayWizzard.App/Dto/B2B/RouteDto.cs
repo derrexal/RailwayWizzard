@@ -1,11 +1,23 @@
 ﻿namespace RailwayWizzard.App.Dto.B2B
 {
+    /// <summary>
+    /// Модель для получения информации по маршруту.
+    /// </summary>
     public class RouteDto
     {
-        public string StationFromName { get; set; }
+        /// <summary>
+        /// Наименование станции отправления.
+        /// </summary>
+        public string DepartureStationName { get; set; } = null!;
 
-        public string StationToName { get; set; }
+        /// <summary>
+        /// Наименование станции прибытия.
+        /// </summary>
+        public string ArrivalStationName { get; set; } = null!;
 
-        public string Date { get; set; }
+        /// <summary>
+        /// Дата отправления.
+        /// </summary>
+        public DateTime DepartureDate { get; set; }
     }
 }

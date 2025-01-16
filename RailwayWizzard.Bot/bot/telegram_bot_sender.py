@@ -1,9 +1,11 @@
 from telegram.error import Forbidden
 from telegram.constants import ParseMode
+
+from bot.telegram_bot import application
 from logger import logger
 
 
-async def send_message_to_user(application, user_id, message):
+async def send_message_to_user(user_id, message):
 
     try:
         await application.bot.send_message(user_id, message, parse_mode=ParseMode.HTML)

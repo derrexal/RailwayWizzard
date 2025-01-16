@@ -19,7 +19,7 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
         /// Возвращает задачу которую дольше всего не обрабатывали.
         /// </summary>
         /// <returns>Список задач</returns>
-        public Task<NotificationTask?> GetOldestNotificationTask();
+        public Task<NotificationTask?> GetOldestAsync();
 
         /// <summary>
         /// Получает список активных задач по идентификатору пользователя.
@@ -35,21 +35,21 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
         /// <param name="lastResult"></param>
         /// <returns>Задача</returns>
         /// <exception cref="NullReferenceException"></exception>
-        public Task SetLastResultNotificationTask(NotificationTask inputNotificationTask, string lastResult);
+        public Task SetLastResultAsync(NotificationTask inputNotificationTask, string lastResult);
 
         /// <summary>
         /// Выставляем задаче статус - в работе
         /// </summary>
         /// <param name="inputNotificationTask"></param>
         /// <returns>Задача</returns>
-        public Task SetIsWorkedNotificationTask(NotificationTask inputNotificationTask);
+        public Task SetIsWorkedAsync(NotificationTask inputNotificationTask);
 
         /// <summary>
         /// Выставляет задаче статус - не в работе
         /// </summary>
         /// <param name="inputNotificationTask"></param>
         /// <returns>Задача</returns>
-        public Task SetIsNotWorkedNotificationTask(NotificationTask inputNotificationTask);
+        public Task SetIsNotWorkedAsync(NotificationTask inputNotificationTask);
 
         /// <summary>
         /// Устанавливает задаче статус "Остановлена".
@@ -68,11 +68,10 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
         /// <summary>
         /// Заполняет код города отправления и прибытия у задания
         /// </summary>
-        /// <param name="notificationTasks">Задание для которого необходимо заполнить коды городов</param>
+        /// <param name="notificationTask">Задание для которого необходимо заполнить коды городов</param>
         /// <returns></returns>
-        public Task<NotificationTask> FillStationCodes(NotificationTask notificationTask);
-
-
+        public Task<NotificationTask> FillStationCodesAsync(NotificationTask notificationTask);
+        
         /// <summary>
         /// Возвращает результат сравнения последнего результата с текущим
         /// </summary>
@@ -80,6 +79,13 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
         /// <param name="lastResult"></param>
         /// <returns>Задача</returns>
         /// <exception cref="NullReferenceException"></exception>
-        public Task<bool> ResultIsLast(NotificationTask inputNotificationTask, string lastResult);
+        public Task<bool> ResultIsLastAsync(NotificationTask inputNotificationTask, string lastResult);
+
+        /// <summary>
+        /// Возвращает список наиболее часто используемых пользователем городов.
+        /// </summary>
+        /// <param name="userId">Идентификатор пользователя.</param>
+        /// <returns>Список наиболее часто используемых пользователем городов.</returns>
+        public Task<IReadOnlyCollection<string>> GetPopularCitiesByUserAsync(long userId);
     }
 }

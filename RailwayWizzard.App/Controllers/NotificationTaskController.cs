@@ -32,7 +32,6 @@ namespace RailwayWizzard.App.Controllers
             if (!ModelState.IsValid)
                 return BadRequest($"Request param is no valid: {ModelState}");
 
-            //TODO: не работает?
             var result = await _notificationTaskService.SetIsStoppedAsync(notificationTaskId);
 
             // TODO: перенести на уровень репозитория.
@@ -50,6 +49,17 @@ namespace RailwayWizzard.App.Controllers
 
             var result = await _notificationTaskService.GetActiveByUserAsync(userId);
 
+            return Ok(result);
+        }
+                
+        [HttpGet("GetPopularCities")]
+        public async Task<IActionResult> GetPopularCities(long userId)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest($"Request param is no valid: {ModelState}");
+            
+            var result = await _notificationTaskService.GetPopularCitiesByUserAsync(userId);
+            
             return Ok(result);
         }
     }

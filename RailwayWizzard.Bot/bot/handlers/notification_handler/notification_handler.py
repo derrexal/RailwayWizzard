@@ -7,10 +7,12 @@ from bot.setting import *
 from bot.validators.validators import *
 from bot.handlers.notification_handler.base_notification_handler import *
 from bot.handlers.error_handler.base_error_handler import *
-from bot.queries.robot_queries import station_validate, create_and_get_id_notification_task
+from bot.queries.robot_queries import station_validate, create_and_get_id_notification_task, \
+    get_popular_cities_by_user_id
 from bot.data.NotificationTask import NotificationTask
 
 car_types = {car_type: car_type.is_sitting for car_type in CarType}
+popular_cities = []
 
 
 def generate_car_type_markup():
@@ -43,10 +45,13 @@ def set_default_car_types():
 async def notification_handler(update: Update, context: CallbackContext):
     """ Начало взаимодействия по клику на inline-кнопку 'Уведомление' """
     next_step = 1
-
+    global popular_cities
     try:
         if update.callback_query.data != CALLBACK_NOTIFICATION:
             raise Exception('ERROR CONCAT CALLBACK QUERY')
+
+        user_id = update.callback_query.message.chat.id
+        popular_cities = await get_popular_cities_by_user_id(user_id)
 
         await update.callback_query.message.reply_text(text="Обратите внимание, по умолчанию не приходят уведомления о "
                                                             "местах для инвалидов. Если вам необходимо получать "
@@ -55,7 +60,9 @@ async def notification_handler(update: Update, context: CallbackContext):
                                                             "\n\nДля возврата в главное меню введите /stop")
 
         await update.callback_query.message.reply_text(
-            text="Укажите <strong>станцию отправления</strong>.\nНапример, <code>Москва</code>",
+            text="Укажите <strong>станцию отправления</strong>.\nНапример:\n\n" +
+                 '    '.join(
+                '<code>' + str(city) + '</code>' for city in popular_cities),
             parse_mode=ParseMode.HTML)
 
         return next_step
@@ -68,6 +75,7 @@ async def first_step_notification(update: Update, context: CallbackContext):
     """ Обрабатывает станцию отправления """
     next_step = 2
     expected_station_name = update.message.text.upper()
+    global popular_cities
 
     try:
         base_check = await null_step_notification(update, context)
@@ -81,8 +89,9 @@ async def first_step_notification(update: Update, context: CallbackContext):
         if len(stations) == 0:
             await update.message.reply_text(
                 text="Такой станции на сайте РЖД не котируется.\n"
-                     "Укажите <strong>станцию отправления</strong>.\n"
-                     "Например, <code>Москва</code>",
+                     "Укажите <strong>станцию отправления</strong>.\nНапример:\n\n" +
+                     '    '.join(
+                    '<code>' + str(city) + '</code>' for city in popular_cities),
                 parse_mode=ParseMode.HTML)
             return next_step - 1
 
@@ -101,9 +110,12 @@ async def first_step_notification(update: Update, context: CallbackContext):
             station = stations[0]
             context.user_data[0] = station['stationName']
             context.user_data[10] = station['expressCode']
-            await update.message.reply_text(text="Укажите <strong>станцию прибытия</strong>.\n"
-                                                 "Например, <code>Курск</code>",
-                                            parse_mode=ParseMode.HTML)
+            await update.message.reply_text(
+                text="Укажите <strong>станцию прибытия</strong>.\nНапример:\n\n" +
+                     '    '.join(
+                    '<code>' + str(city) + '</code>' for city in popular_cities),
+                parse_mode=ParseMode.HTML)
+
             return next_step
 
         raise Exception("Непредвиденная ошибка в методе обработки станции")
@@ -119,6 +131,7 @@ async def second_step_notification(update: Update, context: CallbackContext):
     """ Обрабатывает станцию прибытия """
     next_step = 3
     expected_station_name = update.message.text.upper()
+    global popular_cities
 
     try:
         base_check = await null_step_notification(update, context)
@@ -129,18 +142,22 @@ async def second_step_notification(update: Update, context: CallbackContext):
 
         if expected_station_name == context.user_data[0]:
             await update.message.reply_text("Станции не могут совпадать.\n"
-                                            "Укажите станцию прибытия\n"
-                                            "Например, <code>Курск</code>",
-                                            parse_mode=ParseMode.HTML)
+                                            "Укажите станцию прибытия.\nНапример:\n\n" +
+                                            '    '.join(
+                '<code>' + str(city) + '</code>' for city in popular_cities),
+                parse_mode=ParseMode.HTML)
             return next_step - 1
 
         stations = await station_validate(expected_station_name)
         if len(stations) == 0:
-            await update.message.reply_text(text="Такой станции на сайте РЖД не котируется.\n"
-                                                 "Укажите станцию прибытия\n"
-                                                 "Например, <code>Курск</code>",
-                                            parse_mode=ParseMode.HTML)
+            await update.message.reply_text(
+                text="Такой станции на сайте РЖД не котируется.\n"
+                     "Укажите станцию прибытия.\nНапример:\n\n" +
+                     '    '.join(
+                    '<code>' + str(city) + '</code>' for city in popular_cities),
+                parse_mode=ParseMode.HTML)
             return next_step - 1
+
         elif len(stations) > 1:
             message_text = "По вашему запросу найдено несколько станций:\n"
             for station in stations:
@@ -273,8 +290,8 @@ async def fifth_step_notification(update: Update, context: CallbackContext):
                 set_default_car_types()
                 await update.message.reply_text(
                     text="Выберите <strong>класс обсуживания</strong> который вас интересует\n\n" +
-                    "Обратите внимание, выбирая, например, <strong>\"Плац низ\"</strong> вы выбираете плацкартные нижние места <strong>не включая</strong> боковых.\n\n"
-                    "Для боковых мест определен отдельный фильтр.",
+                         "Обратите внимание, выбирая, например, <strong>\"Плац низ\"</strong> вы выбираете плацкартные нижние места <strong>не включая</strong> боковых.\n\n"
+                         "Для боковых мест определен отдельный фильтр.",
                     reply_markup=car_type_markup,
                     parse_mode=ParseMode.HTML)
                 return next_step
@@ -367,7 +384,7 @@ async def seventh_step_notification(update: Update, context: CallbackContext):
         if query_data == str(CALLBACK_DATA_CORRECT_NOTIFICATION):  # Уведомление успешно создано
             notification_data_id = await send_notification_data_to_robot(context)  # Отправляем данные о задаче в app
             update_text_message = (
-                        MESSAGE_SUCCESS + "<strong>" + notification_data_id + "</strong>" + "\n" + body_text_task)
+                    MESSAGE_SUCCESS + "<strong>" + notification_data_id + "</strong>" + "\n" + body_text_task)
             await update.callback_query.edit_message_text(update_text_message, parse_mode=ParseMode.HTML)
 
         elif query_data == str(CALLBACK_DATA_INCORRECT_NOTIFICATION):  # Создание уведомления отменено

@@ -43,7 +43,7 @@ namespace RailwayWizzard.App
 
             try
             {
-                var notificationTask = await _notificationTaskRepository.GetOldestNotificationTask();
+                var notificationTask = await _notificationTaskRepository.GetOldestAsync();
 
                 if (notificationTask is null)
                 {

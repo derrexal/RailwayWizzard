@@ -27,5 +27,12 @@ namespace RailwayWizzard.App.Services.NotificationTasks
         /// <param name="userId">Идентификатор пользователя</param>
         /// <returns>Коллекция задач.</returns>
         public Task<IReadOnlyCollection<NotificationTaskDto>> GetActiveByUserAsync(long userId);
+        
+        /// <summary>
+        /// Возвращает список наиболее часто используемых пользователем городов.
+        /// </summary>
+        /// <param name="userId">Идентификатор пользователя.</param>
+        /// <returns>Список наиболее часто используемых пользователем городов.</returns>
+        public Task<IReadOnlyCollection<string>> GetPopularCitiesByUserAsync(long userId);
     }
 }

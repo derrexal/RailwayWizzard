@@ -41,14 +41,14 @@ namespace RailwayWizzard.B2BHelper.App
                 //TODO: Во время выполнения задача была остановлена пользователем - вынести в конец метода?
                 
                 // Задача помечается статусом "В работе"
-                await _notificationTaskRepository.SetIsWorkedNotificationTask(notificationTask);
+                await _notificationTaskRepository.SetIsWorkedAsync(notificationTask);
                 _logger.LogInformation($"Run {notificationTaskLogMessage} in Thread:{Thread.CurrentThread.ManagedThreadId}");
 
                 // Поиск свободных мест
                 var resultFreeSeats = await _robot.GetFreeSeatsOnTheTrain(notificationTask);
 
                 //Если текущий результат равен предыдущему - завершаем задачу
-                var resultIsLast = await _notificationTaskRepository.ResultIsLast(notificationTask, resultFreeSeats);
+                var resultIsLast = await _notificationTaskRepository.ResultIsLastAsync(notificationTask, resultFreeSeats);
                 if (resultIsLast)
                 {
                     await SetIsNotWorked(notificationTask, notificationTaskLogMessage, "Result is last");
@@ -74,7 +74,7 @@ namespace RailwayWizzard.B2BHelper.App
                 // Пока оставил для удобства отладки. В будущем записывать хэш, или какую-то более краткую версию, например base64
                 // которую можно расшифровать и она будет занимать меньше места чем исходная строка.
                 // Записываем информацию о результате поиска свободных мест
-                await _notificationTaskRepository.SetLastResultNotificationTask(notificationTask, resultFreeSeats!);
+                await _notificationTaskRepository.SetLastResultAsync(notificationTask, resultFreeSeats!);
 
                 await SetIsNotWorked(notificationTask, notificationTaskLogMessage, "Result is new");
             }
@@ -91,7 +91,7 @@ namespace RailwayWizzard.B2BHelper.App
 
         private async Task SetIsNotWorked(NotificationTask notificationTask, string logMessage, string result)
         {
-            await _notificationTaskRepository.SetIsNotWorkedNotificationTask(notificationTask);
+            await _notificationTaskRepository.SetIsNotWorkedAsync(notificationTask);
 
             await _notificationTaskRepository.SetIsUpdatedAsync(notificationTask.Id);
 

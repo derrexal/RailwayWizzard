@@ -38,7 +38,7 @@ namespace RailwayWizzard.App.Services.NotificationTasks
                 IsStopped = false
             };
 
-            notificationTask = await _notificationTaskRepository.FillStationCodes(notificationTask);
+            notificationTask = await _notificationTaskRepository.FillStationCodesAsync(notificationTask);
 
             var notificationTaskId = await _notificationTaskRepository.CreateAsync(notificationTask);
 
@@ -71,6 +71,17 @@ namespace RailwayWizzard.App.Services.NotificationTasks
             .ToList();
 
             return result;
+        }
+
+        public async Task<IReadOnlyCollection<string>> GetPopularCitiesByUserAsync(long userId)
+        {
+            var topCitiesMock = new List<string>{ "Москва", "Санкт-Петербург", "Казань", "Курск" };
+            
+            var topCitiesByUser = await _notificationTaskRepository.GetPopularCitiesByUserAsync(userId);
+
+            return topCitiesByUser.Count > 0 
+                ? topCitiesByUser 
+                : topCitiesMock;
         }
     }
 }

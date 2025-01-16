@@ -31,7 +31,7 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
         }
 
         /// <inheritdoc/>
-        public async Task<NotificationTask?> GetOldestNotificationTask()
+        public async Task<NotificationTask?> GetOldestAsync()
         {
             //TODO: вынести в воркер который ходит хотя бы каждые 5 минут, а не 1? или 15? Подумать...
             await UpdateActualStatusNotificationTask();
@@ -43,7 +43,7 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
                 .FirstOrDefaultAsync();
 
             if (result != null && (result.DepartureStationCode==0 || result.ArrivalStationCode==0))
-                result = await FillStationCodes(result);
+                result = await FillStationCodesAsync(result);
 
             return result;
         }
@@ -59,7 +59,7 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
         }
 
         /// <inheritdoc/>
-        public async Task SetLastResultNotificationTask(NotificationTask notificationTask, string lastResult)
+        public async Task SetLastResultAsync(NotificationTask notificationTask, string lastResult)
         {
             var currentNotificationTask = await GetNotificationTaskFromId(notificationTask.Id);
 
@@ -69,7 +69,7 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
         }
 
         /// <inheritdoc/>
-        public async Task SetIsWorkedNotificationTask(NotificationTask notificationTask)
+        public async Task SetIsWorkedAsync(NotificationTask notificationTask)
         {
             var currentNotificationTask = await GetNotificationTaskFromId(notificationTask.Id);
 
@@ -79,7 +79,7 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
         }
 
         /// <inheritdoc/>
-        public async Task SetIsNotWorkedNotificationTask(NotificationTask notificationTask)
+        public async Task SetIsNotWorkedAsync(NotificationTask notificationTask)
         {
             var currentNotificationTask = await GetNotificationTaskFromId(notificationTask.Id);
 
@@ -115,7 +115,7 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
         }
 
         /// <inheritdoc/>
-        public async Task<NotificationTask> FillStationCodes(NotificationTask notificationTask)
+        public async Task<NotificationTask> FillStationCodesAsync(NotificationTask notificationTask)
         {
             // Станции на этом этапе уже должны быть в базе, так что отсутствие записи явно скажет о том что что-то сломалось
             var arrivalStationInfo = await _context.StationInfo.AsNoTracking().SingleOrDefaultAsync(s => s.StationName == notificationTask.ArrivalStation);
@@ -132,14 +132,47 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
         }
 
         /// <inheritdoc/>
-        public async Task<bool> ResultIsLast(NotificationTask inputNotificationTask, string lastResult)
+        public async Task<bool> ResultIsLastAsync(NotificationTask inputNotificationTask, string lastResult)
         {
             var currentNotificationTask = await GetNotificationTaskFromId(inputNotificationTask.Id);
 
             return currentNotificationTask.LastResult == lastResult;
         }
 
+        public async Task<IReadOnlyCollection<string>> GetPopularCitiesByUserAsync(long userId)
+        {
+            var popularDepartureStation = await _context.NotificationTask
+                .Where(task => task.UserId == userId)
+                .GroupBy(task => new { task.UserId, City = task.DepartureStation })
+                .Select(g => new
+                {
+                    g.Key.UserId,
+                    g.Key.City,
+                    UsageCount = g.Count()
+                })
+                .ToListAsync();
 
+            var popularArrivalStation = await _context.NotificationTask
+                .Where(task => task.UserId == userId)
+                .GroupBy(task => new { task.UserId, City = task.ArrivalStation })
+                .Select(g => new
+                {
+                    g.Key.UserId,
+                    g.Key.City,
+                    UsageCount = g.Count()
+                })
+                .ToListAsync();
+            
+            return popularDepartureStation.Union(popularArrivalStation)
+                .GroupBy(city => city.UserId)
+                .SelectMany(group => group
+                    .OrderByDescending(city => city.UsageCount)
+                    .ThenBy(city => city.City)
+                    .Take(4))
+                .Select(group => group.City)
+                .ToList();
+        }
+        
         /// <summary>
         /// Возвращает список актуальных, неостановленных задач, над которыми еще не производится работа.
         /// </summary>

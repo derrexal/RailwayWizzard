@@ -1,3 +1,5 @@
+from typing import Any
+
 import aiohttp
 from aiohttp import ClientResponse
 
@@ -98,4 +100,14 @@ async def delete_task_by_id(task_id):
     endpoint = 'NotificationTask/SetIsStopped'
     params = {'notificationTaskId': task_id}
     response = await make_request('GET', endpoint, params=params)
+    return await response.json()
+
+
+async def get_popular_cities_by_user_id(user_id) -> list:
+    """Возвращает популярные города конкретного пользователя"""
+    endpoint = 'NotificationTask/GetPopularCities'
+    params = {'userId': user_id}
+    response = await make_request('GET', endpoint, params=params)
+    if response.status == 404:
+        raise Exception("Непредвиденная ошибка в методе получения популярных станций")
     return await response.json()

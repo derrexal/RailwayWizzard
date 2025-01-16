@@ -65,7 +65,8 @@ namespace RailwayWizzard.App.Services.NotificationTasks
                 TimeFrom = $"{notificationTask.DepartureDateTime:t}",
                 CarTypes = string.Join(", ", notificationTask.CarTypes.Select(c => c.GetEnumDescription())),
                 NumberSeats = notificationTask.NumberSeats,
-                Updated = $"{notificationTask.Updated:t}"
+                Updated = $"{notificationTask.Updated:t}",
+                TrainNumber = notificationTask.TrainNumber
             })
             .OrderBy(notificationTask => notificationTask.Id)
             .ToList();

@@ -23,6 +23,8 @@ namespace RailwayWizzard.App.Dto.NotificationTask
         [Range(1, 10)]
         public short NumberSeats { get; set; }
 
+        public string? TrainNumber { get; set; } = null!;
+
         /// <summary>
         /// Дата в формате строки для отправки пользователю
         /// </summary>

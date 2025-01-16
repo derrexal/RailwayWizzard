@@ -48,9 +48,9 @@ namespace RailwayWizzard.Core
         public string LastResult { get; set; } = "";
 
         public string ToCustomString() =>
-            $"{TrainNumber} {DepartureStation} - {ArrivalStation} {DepartureDateTime:t} {DepartureDateTime:yyyy-MM-dd}";
+            $"{TrainNumber} {DepartureStation} - {ArrivalStation} {DepartureDateTime:yyyy-MM-dd} {DepartureDateTime:t}";
         
         public string ToBotString() =>
-            $"<strong>{TrainNumber}</strong> {DepartureStation} - {ArrivalStation} {DepartureDateTime:t} {DepartureDateTime:yyyy-MM-dd}";
+            $"<strong>{TrainNumber}</strong> {DepartureStation} - {ArrivalStation} {DepartureDateTime:yyyy-MM-dd} {DepartureDateTime:t}";
     }
 }

@@ -14,9 +14,6 @@ namespace RailwayWizzard.App.Dto.NotificationTask
         [Required]
         public string ArrivalStation { get; set; } = null!;
 
-        [Required]
-        public string TimeFrom { get; set; } = null!;
-
         [Description("Типы вагона")]
         public string CarTypes { get; set; } = null!;
 
@@ -25,9 +22,6 @@ namespace RailwayWizzard.App.Dto.NotificationTask
 
         public string? TrainNumber { get; set; } = null!;
 
-        /// <summary>
-        /// Дата в формате строки для отправки пользователю
-        /// </summary>
         public string DateFromString { get; set; } = "";
 
         public string Updated { get; set; } = "";

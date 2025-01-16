@@ -40,16 +40,15 @@ async def send_task_info(update: Update, task: dict):
         callback = f"active_task_callback{task_id}"
         keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(text='Остановить поиск по задаче', callback_data=callback)]])
 
-        task_info = f"Задача № <strong> {task_id} </strong>\n"
+        task_info = f"Задача № <strong>{task_id}</strong>\n"
 
-        if str(task['trainNumber']) != '':
+        if task['trainNumber'] is not None:
             task_info = task_info + f"Номер поезда: <strong> {task['trainNumber']} </strong>\n"
 
         task_info = task_info + (
             f"Станция отправления: <strong> {task['departureStation']} </strong>\n"
             f"Станция прибытия: <strong> {task['arrivalStation']} </strong>\n"
             f"Дата отправления: <strong> {task['dateFromString']} </strong>\n"
-            f"Время отправления: <strong> {task['timeFrom']} </strong>\n"
             f"Выбранные типы вагонов: <strong>{task['carTypes']}</strong>\n"
             f"Количество мест: <strong> {str(task['numberSeats'])} </strong>\n")
 

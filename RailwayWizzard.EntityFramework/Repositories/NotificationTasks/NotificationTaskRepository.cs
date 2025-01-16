@@ -164,6 +164,7 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
                 .ToListAsync();
             
             return popularDepartureStation.Union(popularArrivalStation)
+                .Distinct()
                 .GroupBy(city => city.UserId)
                 .SelectMany(group => group
                     .OrderByDescending(city => city.UsageCount)

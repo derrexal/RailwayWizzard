@@ -64,9 +64,9 @@ namespace RailwayWizzard.B2BHelper.App
 
             //вытаскиваем свободные места из полученного ответа
             var currentRoute = ExtractFreeSeatsFromResponse(myDeserializedClass, inputNotificationTask);
-            if (currentRoute.Count == 0) 
+            if (currentRoute.Count == 0 || currentRoute.Count < inputNotificationTask.NumberSeats) 
                 return string.Empty;
-
+            
             //Формируем текстовый ответ пользователю
             var freeSeats = SupportingMethod(currentRoute);
 
@@ -126,13 +126,12 @@ namespace RailwayWizzard.B2BHelper.App
             
             if (currentTrain == null)
                 return results;
-            
-            var sumFreeSeats = 0;
+
             foreach (var carType in inputNotificationTask.CarTypes)
             {
                 var currentCarGroups = FilterCarGroups(currentTrain.CarGroups, carType);
 
-                sumFreeSeats = CalculateFreeSeats(currentCarGroups, carType);
+                var sumFreeSeats = CalculateFreeSeats(currentCarGroups, carType);
 
                 if (sumFreeSeats == 0)
                     continue;
@@ -145,9 +144,6 @@ namespace RailwayWizzard.B2BHelper.App
                 });
             }
             
-            if(sumFreeSeats < inputNotificationTask.NumberSeats)
-                results.Clear();
-            
             return results;
         }
 
@@ -155,12 +151,13 @@ namespace RailwayWizzard.B2BHelper.App
         {
             var carTypeText = GetKeyByCarType(carType);
 
-            carGroups = carGroups
-                .Where(x => !x.HasPlacesForDisabledPersons)
-                .Where(x => x.CarType == carTypeText);
-
-            if (carType == CarTypeEnum.SedentaryBusiness)
-                carGroups = carGroups.Where(x => x.HasPlacesForBusinessTravelBooking || x.ServiceClassNameRu == carType.GetEnumDescription()); // флаг HasPlacesForBusinessTravelBooking присылают через раз
+            carGroups = carType switch
+            {
+                CarTypeEnum.Sedentary => carGroups.Where(x => !x.HasPlacesForBusinessTravelBooking),
+                CarTypeEnum.SedentaryBusiness => carGroups.Where(x =>
+                    x.HasPlacesForBusinessTravelBooking || x.ServiceClassNameRu == carType.GetEnumDescription()),
+                _ => carGroups.Where(x => !x.HasPlacesForDisabledPersons).Where(x => x.CarType == carTypeText)
+            };
 
             return carGroups.ToList();
         }

@@ -154,12 +154,15 @@ namespace RailwayWizzard.B2BHelper.App
             carGroups = carType switch
             {
                 CarTypeEnum.Sedentary => carGroups.Where(x => !x.HasPlacesForBusinessTravelBooking),
-                CarTypeEnum.SedentaryBusiness => carGroups.Where(x =>
+                CarTypeEnum.SedentaryBusiness => carGroups.Where(x => 
                     x.HasPlacesForBusinessTravelBooking || x.ServiceClassNameRu == carType.GetEnumDescription()),
-                _ => carGroups.Where(x => !x.HasPlacesForDisabledPersons).Where(x => x.CarType == carTypeText)
+                _ => carGroups
             };
 
-            return carGroups.ToList();
+            return carGroups
+                .Where(x => x.CarType == carTypeText)
+                .Where(x => !x.HasPlacesForDisabledPersons)
+                .ToList();
         }
 
         /// <summary>

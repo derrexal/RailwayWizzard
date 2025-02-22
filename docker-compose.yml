@@ -6,7 +6,7 @@ services:
     image: ${DOCKER_REGISTRY-}railwaywizzardapp
     build:
       context: .
-      dockerfile: RailwayWizzard.App/Dockerfile
+      dockerfile: RailwayWizzard.Application/Dockerfile
     ports:
       - ":80"
     depends_on:

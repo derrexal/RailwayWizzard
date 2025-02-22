@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using RailwayWizzard.EntityFrameworkCore;
+using RailwayWizzard.Infrastructure;
 
 #nullable disable
 
-namespace RailwayWizzard.EntityFrameworkCore.Migrations
+namespace RailwayWizzard.Infrastructure.Migrations
 {
     [DbContext(typeof(RailwayWizzardAppContext))]
     partial class RailwayWizzardAppContextModelSnapshot : ModelSnapshot
@@ -22,7 +22,7 @@ namespace RailwayWizzard.EntityFrameworkCore.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("RailwayWizzard.Core.NotificationTask", b =>
+            modelBuilder.Entity("RailwayWizzard.Core.MessageOutbox.MessageOutbox", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -30,12 +30,40 @@ namespace RailwayWizzard.EntityFrameworkCore.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("ArrivalStation")
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<bool>("IsSending")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Message")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<long>("ArrivalStationCode")
-                        .HasColumnType("bigint");
+                    b.Property<int>("NotificationTaskId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("Send")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AppMessageOutbox");
+                });
+
+            modelBuilder.Entity("RailwayWizzard.Core.NotificationTask.NotificationTask", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ArrivalStationId")
+                        .HasColumnType("integer");
 
                     b.Property<int[]>("CarTypes")
                         .IsRequired()
@@ -44,28 +72,23 @@ namespace RailwayWizzard.EntityFrameworkCore.Migrations
                     b.Property<DateTime>("Created")
                         .HasColumnType("timestamp without time zone");
 
+                    b.Property<int>("CreatorId")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("DepartureDateTime")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<string>("DepartureStation")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<long>("DepartureStationCode")
-                        .HasColumnType("bigint");
+                    b.Property<int>("DepartureStationId")
+                        .HasColumnType("integer");
 
                     b.Property<bool>("IsActual")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsProcess")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("IsStopped")
                         .HasColumnType("boolean");
-
-                    b.Property<bool>("IsWorked")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("LastResult")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<short>("NumberSeats")
                         .HasColumnType("smallint");
@@ -76,15 +99,44 @@ namespace RailwayWizzard.EntityFrameworkCore.Migrations
                     b.Property<DateTime>("Updated")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
-
                     b.HasKey("Id");
 
                     b.ToTable("AppNotificationTasks");
                 });
 
-            modelBuilder.Entity("RailwayWizzard.Core.StationInfo", b =>
+            modelBuilder.Entity("RailwayWizzard.Core.NotificationTaskResult.NotificationTaskResult", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Error")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("Finished")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<byte[]>("HashResult")
+                        .HasMaxLength(32)
+                        .HasColumnType("bytea");
+
+                    b.Property<int>("NotificationTaskId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ResultStatus")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("Started")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AppNotificationTaskResult");
+                });
+
+            modelBuilder.Entity("RailwayWizzard.Core.StationInfo.StationInfo", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -95,7 +147,7 @@ namespace RailwayWizzard.EntityFrameworkCore.Migrations
                     b.Property<long>("ExpressCode")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("StationName")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -107,7 +159,7 @@ namespace RailwayWizzard.EntityFrameworkCore.Migrations
                     b.ToTable("AppStationInfo");
                 });
 
-            modelBuilder.Entity("RailwayWizzard.Core.User", b =>
+            modelBuilder.Entity("RailwayWizzard.Core.User.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -115,7 +167,10 @@ namespace RailwayWizzard.EntityFrameworkCore.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<long>("IdTg")
+                    b.Property<bool>("HasBlockedBot")
+                        .HasColumnType("boolean");
+
+                    b.Property<long>("TelegramUserId")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Username")

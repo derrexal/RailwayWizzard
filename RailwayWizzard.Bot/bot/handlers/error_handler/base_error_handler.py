@@ -12,11 +12,13 @@ async def base_error_handler(update: Update, e: Exception, next_step: int, messa
     message_to_user = f"{message_to_user}\nОшибка номер <code>{error_uuid}</code>"
 
     logger.exception(message_to_log)
+
     if update.callback_query is not None:
         await update.callback_query.message.reply_text(text=message_to_user, parse_mode=ParseMode.HTML)
     else:
         await update.message.reply_text(text=message_to_user, parse_mode=ParseMode.HTML)
     if next_step == 1:
         return ConversationHandler.END
+
     return next_step - 1
 

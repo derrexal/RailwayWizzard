@@ -3,19 +3,25 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34031.279
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RailwayWizzard.App", "RailwayWizzard.App\RailwayWizzard.App.csproj", "{89870705-4FC1-4A7C-B20C-EFAA5A5D0CB9}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RailwayWizzard.Core", "RailwayWizzard.Core\RailwayWizzard.Core.csproj", "{21B7D3D5-9643-4298-B0D1-973E9E3C1B47}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RailwayWizzard.B2BHelper", "RailwayWizzard.Robot\RailwayWizzard.B2BHelper.csproj", "{5F8A33FE-9B03-41A0-9B87-197692BBFA89}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RailwayWizzard.Rzd.DataEngine", "RailwayWizzard.Robot\RailwayWizzard.Rzd.DataEngine.csproj", "{5F8A33FE-9B03-41A0-9B87-197692BBFA89}"
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{6699C8F5-8F67-4E2B-843B-F816679DC4E8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RailwayWizzard.EntityFrameworkCore", "RailwayWizzard.EntityFramework\RailwayWizzard.EntityFrameworkCore.csproj", "{7BC5C4BD-7C70-418E-B877-C5FCC08489F4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RailwayWizzard.Infrastructure", "RailwayWizzard.EntityFramework\RailwayWizzard.Infrastructure.csproj", "{7BC5C4BD-7C70-418E-B877-C5FCC08489F4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RailwayWizzard.Shared", "RailwayWizzard.Shared\RailwayWizzard.Shared.csproj", "{339D0B15-3B70-42FD-AFFF-7BEFF09A916D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RailwayWizzard.Common", "RailwayWizzard.Common\RailwayWizzard.Common.csproj", "{339D0B15-3B70-42FD-AFFF-7BEFF09A916D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RailwayWizzard.B2B", "RailwayWizzard.B2B\RailwayWizzard.B2B.csproj", "{61E4177E-9A97-49CF-96E2-72524A29F8B9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RailwayWizzard.Rzd.ApiClient", "RailwayWizzard.Rzd.ApiClient\RailwayWizzard.Rzd.ApiClient.csproj", "{61E4177E-9A97-49CF-96E2-72524A29F8B9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RZD", "RZD", "{E0BAFE23-CC46-4864-A5AD-557959E2921C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RailwayWizzard.Application", "RailwayWizzard.Application\RailwayWizzard.Application.csproj", "{9E761CB9-F52B-4012-867A-8334E166C032}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RailwayWizzard.Telegram.ApiClient", "RailwayWizzard.Telegram.ApiClient\RailwayWizzard.Telegram.ApiClient.csproj", "{510C6194-2E1D-4912-A120-5CBDC9B5C4A3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RailwayWizzard.Engine", "RailwayWizzard.Engine\RailwayWizzard.Engine.csproj", "{F01656B5-02BC-4287-8ECB-C8A50DC72641}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +29,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{89870705-4FC1-4A7C-B20C-EFAA5A5D0CB9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{89870705-4FC1-4A7C-B20C-EFAA5A5D0CB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{89870705-4FC1-4A7C-B20C-EFAA5A5D0CB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{89870705-4FC1-4A7C-B20C-EFAA5A5D0CB9}.Release|Any CPU.Build.0 = Release|Any CPU
 		{21B7D3D5-9643-4298-B0D1-973E9E3C1B47}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{21B7D3D5-9643-4298-B0D1-973E9E3C1B47}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{21B7D3D5-9643-4298-B0D1-973E9E3C1B47}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -51,11 +53,27 @@ Global
 		{61E4177E-9A97-49CF-96E2-72524A29F8B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{61E4177E-9A97-49CF-96E2-72524A29F8B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{61E4177E-9A97-49CF-96E2-72524A29F8B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E761CB9-F52B-4012-867A-8334E166C032}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E761CB9-F52B-4012-867A-8334E166C032}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E761CB9-F52B-4012-867A-8334E166C032}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E761CB9-F52B-4012-867A-8334E166C032}.Release|Any CPU.Build.0 = Release|Any CPU
+		{510C6194-2E1D-4912-A120-5CBDC9B5C4A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{510C6194-2E1D-4912-A120-5CBDC9B5C4A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{510C6194-2E1D-4912-A120-5CBDC9B5C4A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{510C6194-2E1D-4912-A120-5CBDC9B5C4A3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F01656B5-02BC-4287-8ECB-C8A50DC72641}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F01656B5-02BC-4287-8ECB-C8A50DC72641}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F01656B5-02BC-4287-8ECB-C8A50DC72641}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F01656B5-02BC-4287-8ECB-C8A50DC72641}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2E506084-2FB1-4B2D-9FEE-25F166FDEC0A}
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{61E4177E-9A97-49CF-96E2-72524A29F8B9} = {E0BAFE23-CC46-4864-A5AD-557959E2921C}
+		{5F8A33FE-9B03-41A0-9B87-197692BBFA89} = {E0BAFE23-CC46-4864-A5AD-557959E2921C}
 	EndGlobalSection
 EndGlobal

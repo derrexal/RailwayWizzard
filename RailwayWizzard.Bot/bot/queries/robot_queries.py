@@ -88,7 +88,7 @@ async def create_and_get_id_notification_task(notification_task_data: Notificati
 async def get_active_task_by_user_id(user_id):
     """Возвращает активные задачи конкретного пользователя"""
     endpoint = 'NotificationTask/GetActiveByUser'
-    params = {'userId': user_id}
+    params = {'telegramUserId': user_id}
     response = await make_request('GET', endpoint, params=params)
     if response.status == 404:
         return None
@@ -106,7 +106,7 @@ async def delete_task_by_id(task_id):
 async def get_popular_cities_by_user_id(user_id) -> list:
     """Возвращает популярные города конкретного пользователя"""
     endpoint = 'NotificationTask/GetPopularCities'
-    params = {'userId': user_id}
+    params = {'telegramUserId': user_id}
     response = await make_request('GET', endpoint, params=params)
     if response.status == 404:
         raise Exception("Непредвиденная ошибка в методе получения популярных станций")

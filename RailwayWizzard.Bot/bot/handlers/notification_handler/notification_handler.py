@@ -99,7 +99,7 @@ async def first_step_notification(update: Update, context: CallbackContext):
         elif len(stations) > 1:
             message_text = "По вашему запросу найдено несколько станций:\n"
             for station in stations:
-                station_name = station['stationName']
+                station_name = station['name']
                 message_text += f"<code>{station_name}</code>\n"
             message_text += "Пожалуйста укажите название станции в соответствие с предлагаемыми"
             await update.message.reply_text(
@@ -109,7 +109,7 @@ async def first_step_notification(update: Update, context: CallbackContext):
 
         elif len(stations) == 1:
             station = stations[0]
-            context.user_data[0] = station['stationName']
+            context.user_data[0] = station['name']
             context.user_data[10] = station['expressCode']
             await update.message.reply_text(
                 text="Укажите <strong>станцию прибытия</strong>.\nНапример:\n\n" +
@@ -145,8 +145,8 @@ async def second_step_notification(update: Update, context: CallbackContext):
             await update.message.reply_text("Станции не могут совпадать.\n"
                                             "Укажите станцию прибытия.\nНапример:\n\n" +
                                             '    '.join(
-                '<code>' + str(city) + '</code>' for city in popular_cities),
-                parse_mode=ParseMode.HTML)
+                                            '<code>' + str(city) + '</code>' for city in popular_cities),
+                                            parse_mode=ParseMode.HTML)
             return next_step - 1
 
         stations = await station_validate(expected_station_name)
@@ -162,7 +162,7 @@ async def second_step_notification(update: Update, context: CallbackContext):
         elif len(stations) > 1:
             message_text = "По вашему запросу найдено несколько станций:\n"
             for station in stations:
-                station_name = station['stationName']
+                station_name = station['name']
                 message_text += f"<code>{station_name}</code>\n"
             message_text += "Пожалуйста укажите название станции в соответствие с предлагаемыми"
             await update.message.reply_text(text=message_text, parse_mode=ParseMode.HTML)
@@ -170,7 +170,7 @@ async def second_step_notification(update: Update, context: CallbackContext):
 
         elif len(stations) == 1:
             station = stations[0]
-            context.user_data[1] = station['stationName']
+            context.user_data[1] = station['name']
             context.user_data[11] = station['expressCode']
             await update.message.reply_text(
                 text=NotificationHandlerDialog.enter_departure_date_text(), parse_mode=ParseMode.HTML)
@@ -198,9 +198,9 @@ async def third_step_notification(update: Update, context: CallbackContext):
         date_and_date_json = date_format_validate(expected_date)
 
         # Получаем доступное время для бронирования
-        available_times = await get_times(context.user_data[0], context.user_data[1], date_and_date_json['date'])
-        date_limits = await date_limits_validate(date_and_date_json['date_text'], available_times)
-        if date_limits is None:
+        available_times = await get_available_times(context.user_data[0], context.user_data[1], date_and_date_json['date'])
+        date_limits = await date_limits_validate(date_and_date_json['date_text'])
+        if not date_limits:
             await update.message.reply_text("По указанному маршруту на указанную дату билеты не продаются")
             await update.message.reply_text(
                 text=NotificationHandlerDialog.enter_departure_date_text(), parse_mode=ParseMode.HTML)
@@ -240,7 +240,8 @@ async def fourth_step_notification(update: Update, context: CallbackContext):
             return base_check
 
         # обрабатываем время отправления
-        available_times = await get_times(context.user_data[0], context.user_data[1], context.user_data[2])
+        # TODO: еще раз запрашиваем время чтобы сравнить его с тем что ввел пользователь...
+        available_times = await get_available_times(context.user_data[0], context.user_data[1], context.user_data[2])
         validate_time = await time_check_validate(expected_input_time, available_times)
 
         if not time_format_validate(expected_input_time):
@@ -290,7 +291,8 @@ async def fifth_step_notification(update: Update, context: CallbackContext):
                 set_default_car_types()
                 await update.message.reply_text(
                     text="Выберите <strong>класс обсуживания</strong> который вас интересует.\n\n" +
-                         "Обратите внимание, выбирая, например, <strong>\"Плац низ\"</strong> вы выбираете плацкартные нижние места <strong>не включая</strong> боковых.\n\n"
+                         "Обратите внимание, выбирая, например, <strong>\"Плац низ\"</strong> "
+                         "вы выбираете плацкартные нижние места <strong>не включая</strong> боковых.\n\n"
                          "Для боковых мест определен отдельный фильтр.",
                     reply_markup=car_type_markup,
                     parse_mode=ParseMode.HTML)
@@ -392,7 +394,6 @@ async def seventh_step_notification(update: Update, context: CallbackContext):
             await update.callback_query.edit_message_text(update_text_message, parse_mode=ParseMode.HTML)
 
         await start_buttons(update, context)  # Возвращаемся в главное меню
-        return ConversationHandler.END
 
     except Exception as e:
         await base_error_handler(update, e, next_step)

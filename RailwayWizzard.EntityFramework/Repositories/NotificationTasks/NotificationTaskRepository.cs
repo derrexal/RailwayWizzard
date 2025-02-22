@@ -1,10 +1,9 @@
-﻿using Abp.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
-using RailwayWizzard.Core;
-using RailwayWizzard.Core.Shared;
-using RailwayWizzard.Shared;
+﻿using Microsoft.EntityFrameworkCore;
+using RailwayWizzard.Common;
+using RailwayWizzard.Core.NotificationTask;
+using RailwayWizzard.Infrastructure.Exceptions;
 
-namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
+namespace RailwayWizzard.Infrastructure.Repositories.NotificationTasks
 {
     /// <inheritdoc/>
     public class NotificationTaskRepository : INotificationTaskRepository
@@ -12,9 +11,9 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
         private readonly RailwayWizzardAppContext _context;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="NotificationTaskRepository" class./>
+        /// Initializes a new instance of the <see cref="NotificationTaskRepository" /> class.
         /// </summary>
-        /// <param name="context"></param>
+        /// <param name="context">Контекст БД.</param>
         public NotificationTaskRepository(RailwayWizzardAppContext context)
         {
             _context = context;
@@ -34,134 +33,95 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
         public async Task<NotificationTask?> GetOldestAsync()
         {
             //TODO: вынести в воркер который ходит хотя бы каждые 5 минут, а не 1? или 15? Подумать...
-            await UpdateActualStatusNotificationTask();
+            await UpdateActualStatusNotificationTaskAsync();
 
             var notWorkedNotificationTasks = GetNotWorkedNotificationTasks();
 
-            var result = await notWorkedNotificationTasks
-                .OrderBy(u => u.Updated)
+            var task = await notWorkedNotificationTasks
+                .OrderBy(t => t.Updated)
                 .FirstOrDefaultAsync();
-
-            if (result != null && (result.DepartureStationCode==0 || result.ArrivalStationCode==0))
-                result = await FillStationCodesAsync(result);
-
-            return result;
+            
+            return task;
         }
 
         /// <inheritdoc/>
         public async Task<IReadOnlyCollection<NotificationTask>> GetActiveByUserAsync(long userId)
         {
-            return await _context.NotificationTask.AsNoTracking()
+            return await _context.NotificationTasks.AsNoTracking()
                 .Where(u => u.IsActual)
                 .Where(u => !u.IsStopped)
-                .Where(u => u.UserId == userId)
+                .Where(u => u.CreatorId == userId)
                 .ToListAsync();
         }
 
         /// <inheritdoc/>
-        public async Task SetLastResultAsync(NotificationTask notificationTask, string lastResult)
+        public async Task SetIsProcessAsync(int taskId)
         {
-            var currentNotificationTask = await GetNotificationTaskFromId(notificationTask.Id);
+            var currentNotificationTask = await GetNotificationTaskFromIdAsync(taskId);
 
-            currentNotificationTask.LastResult = lastResult;
+            currentNotificationTask.IsProcess = true;
 
-            await UpdateNotificationTask(currentNotificationTask);
+            await UpdateNotificationTaskAsync(currentNotificationTask);
         }
 
         /// <inheritdoc/>
-        public async Task SetIsWorkedAsync(NotificationTask notificationTask)
+        public async Task SetIsNotWorkedAsync(int taskId)
         {
-            var currentNotificationTask = await GetNotificationTaskFromId(notificationTask.Id);
+            var currentNotificationTask = await GetNotificationTaskFromIdAsync(taskId);
 
-            currentNotificationTask.IsWorked = true;
+            currentNotificationTask.IsProcess = false;
 
-            await UpdateNotificationTask(currentNotificationTask);
+            await UpdateNotificationTaskAsync(currentNotificationTask);
         }
 
         /// <inheritdoc/>
-        public async Task SetIsNotWorkedAsync(NotificationTask notificationTask)
+        public async Task<int> SetIsStoppedAsync(int taskId)
         {
-            var currentNotificationTask = await GetNotificationTaskFromId(notificationTask.Id);
+            var task = await GetNotificationTaskFromIdAsync(taskId);
 
-            currentNotificationTask.IsWorked = false;
-
-            await UpdateNotificationTask(currentNotificationTask);
-        }
-
-        /// <inheritdoc/>
-        public async Task<int?> SetIsStoppedAsync(int id)
-        {
-            var currentNotificationTask = await _context.NotificationTask.FirstOrDefaultAsync(t => t.Id == id);
-
-            if (currentNotificationTask is null)
-                return null;
-
-            currentNotificationTask.IsStopped = true;
-            currentNotificationTask.IsWorked = false;
+            task.IsStopped = true;
+            task.IsProcess = false;
 
             await _context.SaveChangesAsync();
 
-            return currentNotificationTask.Id;
+            return task.Id;
         }
 
         /// <inheritdoc/>
-        public async Task SetIsUpdatedAsync(int id)
+        public async Task SetIsUpdatedAsync(int taskId)
         {
-            var currentNotificationTask = await GetNotificationTaskFromId(id);
+            var currentNotificationTask = await GetNotificationTaskFromIdAsync(taskId);
 
-            currentNotificationTask.Updated = Common.MoscowNow;
+            currentNotificationTask.Updated = DateTimeExtensions.MoscowNow;
 
-            await UpdateNotificationTask(currentNotificationTask);
+            await UpdateNotificationTaskAsync(currentNotificationTask);
         }
 
-        /// <inheritdoc/>
-        public async Task<NotificationTask> FillStationCodesAsync(NotificationTask notificationTask)
+        public async Task<IReadOnlyCollection<int>> GetPopularStationIdsByUserIdAsync(long userId)
         {
-            // Станции на этом этапе уже должны быть в базе, так что отсутствие записи явно скажет о том что что-то сломалось
-            var arrivalStationInfo = await _context.StationInfo.AsNoTracking().SingleOrDefaultAsync(s => s.StationName == notificationTask.ArrivalStation);
-            if (arrivalStationInfo == null)
-                throw new EntityNotFoundException($"Не удалось получить {nameof(StationInfo)} со StationName:{notificationTask.ArrivalStation}");
-            notificationTask.ArrivalStationCode = arrivalStationInfo.ExpressCode;
-
-            var departureStationInfo = await _context.StationInfo.AsNoTracking().SingleOrDefaultAsync(s => s.StationName == notificationTask.DepartureStation);
-            if (departureStationInfo == null)
-                throw new EntityNotFoundException($"Не удалось получить {nameof(StationInfo)} со StationName:{notificationTask.DepartureStation}");
-            notificationTask.DepartureStationCode = departureStationInfo.ExpressCode;
-
-            return notificationTask;
-        }
-
-        /// <inheritdoc/>
-        public async Task<bool> ResultIsLastAsync(NotificationTask inputNotificationTask, string lastResult)
-        {
-            var currentNotificationTask = await GetNotificationTaskFromId(inputNotificationTask.Id);
-
-            return currentNotificationTask.LastResult == lastResult;
-        }
-
-        public async Task<IReadOnlyCollection<string>> GetPopularCitiesByUserAsync(long userId)
-        {
-            var popularDepartureStation = await _context.NotificationTask
-                .Where(task => task.UserId == userId)
-                .GroupBy(task => new { task.UserId, City = task.DepartureStation })
+            const int stationsLimit = 4;
+            
+            var popularDepartureStation = await _context.NotificationTasks
+                .Where(task => task.CreatorId == userId)
+                .GroupBy(task => new { UserId = task.CreatorId, City = task.DepartureStationId })
                 .Select(g => new
                 {
                     g.Key.UserId,
                     g.Key.City,
                     UsageCount = g.Count()
                 })
-                .ToListAsync();
+                .ToArrayAsync();
 
-            var popularArrivalStation = await _context.NotificationTask
-                .Where(task => task.UserId == userId)
-                .GroupBy(task => new { task.UserId, City = task.ArrivalStation })
+            var popularArrivalStation = await _context.NotificationTasks
+                .Where(task => task.CreatorId == userId)
+                .GroupBy(task => new { UserId = task.CreatorId, City = task.ArrivalStationId })
                 .Select(g => new
                 {
                     g.Key.UserId,
                     g.Key.City,
                     UsageCount = g.Count()
                 })
-                .ToListAsync();
+                .ToArrayAsync();
             
             return popularDepartureStation.Union(popularArrivalStation)
                 .DistinctBy(x => x.City)
@@ -169,34 +129,34 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
                 .SelectMany(group => group
                     .OrderByDescending(city => city.UsageCount)
                     .ThenBy(city => city.City)
-                    .Take(4))
+                    .Take(stationsLimit))
                 .Select(group => group.City)
-                .ToList();
+                .ToArray();
         }
         
         /// <summary>
         /// Возвращает список актуальных, неостановленных задач, над которыми еще не производится работа.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Список задач.</returns>
         private IQueryable<NotificationTask> GetNotWorkedNotificationTasks()
         {
-            var notWorkedNotificationTasks = _context.NotificationTask
+            var notWorkedNotificationTasks = _context.NotificationTasks
                 .Where(t => t.IsActual == true)
                 .Where(t => t.IsStopped == false)
-                .Where(t => t.IsWorked == false);
+                .Where(t => t.IsProcess == false);
 
             return notWorkedNotificationTasks;
         }
 
         /// <summary>
-        /// Возвращает сущность задачи по ее Id
+        /// Возвращает сущность задачи по ее Id.
         /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
+        /// <param name="id">Идентификатор задачи.</param>
+        /// <returns>Задача.</returns>
         /// <exception cref="EntityNotFoundException"></exception>
-        private async Task<NotificationTask> GetNotificationTaskFromId(int id)
+        private async Task<NotificationTask> GetNotificationTaskFromIdAsync(int id)
         {
-            var notificationTask = await _context.NotificationTask.FirstOrDefaultAsync(t => t.Id == id);
+            var notificationTask = await _context.NotificationTasks.FirstOrDefaultAsync(t => t.Id == id);
             if (notificationTask == null)
                 throw new EntityNotFoundException($"Не удалось получить {nameof(NotificationTask)} с ID:{id}");
 
@@ -207,27 +167,27 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
         /// Обновляет состояние таблицы по полю "IsActual" если поездка уже в прошлом
         /// Необходим для проверки всех активных задач, чтобы БД отражала правильное состояние
         /// </summary>
-        /// <returns></returns>
-        private async Task UpdateActualStatusNotificationTask()
+        /// <returns>Задача <see cref="Task"/>.</returns>
+        private async Task UpdateActualStatusNotificationTaskAsync()
         {
-            var notificationTasks = await _context.NotificationTask.Where(t => t.IsActual == true).ToListAsync();
+            var tasks = await _context.NotificationTasks.Where(t => t.IsActual == true).ToListAsync();
 
-            foreach (var notificationTask in notificationTasks)
-                notificationTask.IsActual = notificationTask.IsActuality();
+            foreach (var task in tasks)
+                task.IsActual = task.IsActuality();
 
             await _context.SaveChangesAsync();
         }
 
         /// <summary>
-        /// Обновляет сущность.
+        /// Обновляет задачу.
         /// </summary>
-        /// <param name="notificationTask"></param>
-        /// <returns></returns>
-        private async Task UpdateNotificationTask(NotificationTask notificationTask)
+        /// <param name="notificationTask">Задача.</param>
+        /// <returns>Задача <see cref="Task"/>.</returns>
+        private async Task UpdateNotificationTaskAsync(NotificationTask notificationTask)
         {
-            _context.NotificationTask.Update(notificationTask);
+            _context.NotificationTasks.Update(notificationTask);
+            
             await _context.SaveChangesAsync();
-            await Task.CompletedTask;
         }
     }
 }

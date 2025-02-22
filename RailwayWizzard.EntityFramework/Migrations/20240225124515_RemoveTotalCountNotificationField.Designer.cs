@@ -2,12 +2,12 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
-using RailwayWizzard.EntityFrameworkCore;
+using RailwayWizzard.Infrastructure;
 
 
 #nullable disable
 
-namespace RailwayWizzard.EntityFrameworkCore.Migrations
+namespace RailwayWizzard.Infrastructure.Migrations
 {
     [DbContext(typeof(RailwayWizzardAppContext))]
     [Migration("20240225124515_RemoveTotalCountNotificationField")]

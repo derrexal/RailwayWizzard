@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace RailwayWizzard.EntityFrameworkCore.Migrations
+namespace RailwayWizzard.Infrastructure.Migrations
 {
     /// <inheritdoc />
     public partial class UpdateCarTypesFieldNotificationTaskTable : Migration

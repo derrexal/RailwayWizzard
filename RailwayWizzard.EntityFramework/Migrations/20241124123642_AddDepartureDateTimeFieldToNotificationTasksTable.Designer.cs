@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using RailwayWizzard.EntityFrameworkCore;
+using RailwayWizzard.Infrastructure;
 
 #nullable disable
 
-namespace RailwayWizzard.EntityFrameworkCore.Migrations
+namespace RailwayWizzard.Infrastructure.Migrations
 {
     [DbContext(typeof(RailwayWizzardAppContext))]
     [Migration("20241124123642_AddDepartureDateTimeFieldToNotificationTasksTable")]

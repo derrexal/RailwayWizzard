@@ -7,11 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Abp" Version="9.1.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\RailwayWizzard.Shared\RailwayWizzard.Shared.csproj" />
+    <ProjectReference Include="..\RailwayWizzard.Common\RailwayWizzard.Common.csproj" />
   </ItemGroup>
 
 </Project>

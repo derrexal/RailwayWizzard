@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
+	<GenerateRuntimeConfigurationFiles>True</GenerateRuntimeConfigurationFiles>
+	<RootNamespace>RailwayWizzard.Application</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RailwayWizzard.Engine\RailwayWizzard.Engine.csproj" />
+    <ProjectReference Include="..\RailwayWizzard.Rzd.ApiClient\RailwayWizzard.Rzd.ApiClient.csproj" />
+    <ProjectReference Include="..\RailwayWizzard.Core\RailwayWizzard.Core.csproj" />
+    <ProjectReference Include="..\RailwayWizzard.EntityFramework\RailwayWizzard.Infrastructure.csproj" />
+    <ProjectReference Include="..\RailwayWizzard.Robot\RailwayWizzard.Rzd.DataEngine.csproj" />
+    <ProjectReference Include="..\RailwayWizzard.Common\RailwayWizzard.Common.csproj" />
+  </ItemGroup>
+
+</Project>

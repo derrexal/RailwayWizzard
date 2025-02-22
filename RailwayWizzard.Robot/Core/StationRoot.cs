@@ -1,55 +1,55 @@
-﻿namespace RailwayWizzard.Robot.Core
+﻿namespace RailwayWizzard.Rzd.DataEngine.Core
 {
     public class StationRoot
     {
-        public List<City> city { get; set; }
-        public List<Train> train { get; set; }
-        public List<Avium> avia { get; set; }
+        public List<City> city { get; set; } = null!;
+        public List<Train> train { get; set; } = null!;
+        public List<Avium> avia { get; set; } = null!;
     }
 
     public class Avium
     {
-        public string nodeId { get; set; }
-        public string name { get; set; }
-        public string nodeType { get; set; }
-        public string transportType { get; set; }
-        public string region { get; set; }
-        public string regionIso { get; set; }
-        public string countryIso { get; set; }
-        public string aviaCode { get; set; }
+        public string nodeId { get; set; } = null!;
+        public string name { get; set; } = null!;
+        public string nodeType { get; set; } = null!;
+        public string transportType { get; set; } = null!;
+        public string region { get; set; } = null!;
+        public string regionIso { get; set; } = null!;
+        public string countryIso { get; set; } = null!;
+        public string aviaCode { get; set; } = null!;
         public bool hasAeroExpress { get; set; }
     }
 
     public class City
     {
-        public string nodeId { get; set; }
-        public string expressCode { get; set; }
-        public string name { get; set; }
-        public string nodeType { get; set; }
-        public string transportType { get; set; }
-        public string region { get; set; }
-        public string regionIso { get; set; }
-        public string countryIso { get; set; }
-        public string busCode { get; set; }
-        public string suburbanCode { get; set; }
-        public string foreignCode { get; set; }
-        public string expressCodes { get; set; }
+        public string nodeId { get; set; } = null!;
+        public string expressCode { get; set; } = null!;
+        public string name { get; set; } = null!;
+        public string nodeType { get; set; } = null!;
+        public string transportType { get; set; } = null!;
+        public string region { get; set; } = null!;
+        public string regionIso { get; set; } = null!;
+        public string countryIso { get; set; } = null!;
+        public string busCode { get; set; } = null!;
+        public string suburbanCode { get; set; } = null!;
+        public string foreignCode { get; set; } = null!;
+        public string expressCodes { get; set; } = null!;
         public bool hasAeroExpress { get; set; }
-        public string aviaCode { get; set; }
+        public string aviaCode { get; set; } = null!;
     }
 
     public class Train
     {
-        public string nodeId { get; set; }
-        public string expressCode { get; set; }
-        public string name { get; set; }
-        public string nodeType { get; set; }
-        public string transportType { get; set; }
-        public string region { get; set; }
-        public string regionIso { get; set; }
-        public string countryIso { get; set; }
-        public string suburbanCode { get; set; }
-        public string foreignCode { get; set; }
+        public string nodeId { get; set; } = null!;
+        public string expressCode { get; set; } = null!;
+        public string name { get; set; } = null!;
+        public string nodeType { get; set; } = null!;
+        public string transportType { get; set; } = null!;
+        public string region { get; set; } = null!;
+        public string regionIso { get; set; } = null!;
+        public string countryIso { get; set; } = null!;
+        public string suburbanCode { get; set; } = null!;
+        public string foreignCode { get; set; } = null!;
         public bool hasAeroExpress { get; set; }
     }
 }

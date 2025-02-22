@@ -14,7 +14,7 @@ def json_serial(obj):
     raise TypeError("Type %s not serializable" % type(obj))
 
 
-async def date_limits_validate(input_date_text, available_times):
+async def date_limits_validate(input_date_text):
     """
     Валидация даты, введенной пользователем.
     Проверяется на допустимые границы:
@@ -25,7 +25,6 @@ async def date_limits_validate(input_date_text, available_times):
     Сравнивается со списком поездок на этот день.
     Если таких нет - значит и билет купить нельзя - значит и валидацию не проходит
     @param input_date_text: Дата введенная пользователем
-    @param available_times: Список доступных рейсов на запрошенный день
     @return: Результат валидации
     """
     try:
@@ -33,13 +32,10 @@ async def date_limits_validate(input_date_text, available_times):
         today_date = datetime.now().date()
 
         if input_date < today_date:
-            return None
+            return False
 
         if input_date >= today_date + timedelta(120):
-            return None
-
-        if len(available_times) == 0:
-            return None
+            return False
 
         return True
 
@@ -114,25 +110,10 @@ def time_format_validate(input_time) -> bool:
     try:
         datetime.strptime(input_time, '%H:%M')
         return True
+
     except ValueError:
         return False
-    except Exception as e:
-        raise e
 
-
-async def get_times(station_from_name, station_to_name, date_from):
-    """
-    Получает список доступного для бронирования времени. Если таковых нет - возвращает exception
-    @param station_from_name: Станция отправления
-    @param station_to_name: Станция прибытия
-    @param date_from: Дата отправления
-    @return: Список доступных рейсов на запрошенный день
-    """
-    try:
-        available_times = await get_available_times(station_from_name, station_to_name, date_from)
-        if len(available_times) == 0:
-            raise Exception("Сервис: get_available_times вернул пустой ответ")
-        return available_times
     except Exception as e:
         raise e
 
@@ -147,6 +128,7 @@ async def time_check_validate(input_time, available_times) -> bool:
     for time in available_times:
         if time == input_time:
             return True
+
     return False
 
 

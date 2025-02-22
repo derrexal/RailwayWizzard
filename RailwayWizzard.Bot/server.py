@@ -1,5 +1,7 @@
 from fastapi import FastAPI, Body, HTTPException
 import uvicorn
+from telegram.error import Forbidden
+
 from bot.telegram_bot_sender import send_message_to_user
 from logger import logger
 
@@ -16,7 +18,24 @@ async def run():
 @app.post("/api/sendMessageForUser")
 async def send_message(data=Body()):
     if data is None:
-        error_message = "Ошибка валидации входящего запроса по адресу /api/sendMessageForUser"
+        error_message = "Incorrect input parameters. Url: /api/sendMessageForUser"
         logger.exception(error_message)
         raise HTTPException(status_code=400, detail=error_message)
-    await send_message_to_user(data["userId"], data["message"])
+
+    user_id = data["telegramUserId"]
+    message = data["message"]
+
+    try:
+        await send_message_to_user(user_id, message)
+
+    except Forbidden as eF:
+        error_message = f'User {user_id} has blocked bot. Details: \n {eF.message}'
+        logger.warning(error_message)
+        raise HTTPException(status_code=409, detail=error_message)
+
+    except Exception as e:
+        error_message = f'В ходе отправки сообщения {message} пользователю {user_id} возникла следующая ошибка:\n{e}'
+        logger.exception(error_message)
+        raise HTTPException(status_code=500, detail=error_message)
+
+    return {"detail": f"Success send message {message} to user {user_id}"}

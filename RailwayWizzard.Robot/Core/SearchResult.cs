@@ -1,5 +1,5 @@
 ﻿
-namespace RailwayWizzard.B2BHelper.Core
+namespace RailwayWizzard.Rzd.DataEngine.Core
 {
     public class SearchResult
     {

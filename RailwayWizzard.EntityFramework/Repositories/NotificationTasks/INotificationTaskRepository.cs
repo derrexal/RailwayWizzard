@@ -1,6 +1,7 @@
-﻿using RailwayWizzard.Core;
+﻿using RailwayWizzard.Core.NotificationTask;
+using RailwayWizzard.Core.StationInfo;
 
-namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
+namespace RailwayWizzard.Infrastructure.Repositories.NotificationTasks
 {
     /// <summary>
     /// Репозиторий сущности <see cref="StationInfo"/>.
@@ -18,7 +19,7 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
         /// <summary>
         /// Возвращает задачу которую дольше всего не обрабатывали.
         /// </summary>
-        /// <returns>Список задач</returns>
+        /// <returns>Наиболее старая задача.</returns>
         public Task<NotificationTask?> GetOldestAsync();
 
         /// <summary>
@@ -29,63 +30,38 @@ namespace RailwayWizzard.EntityFrameworkCore.Repositories.NotificationTasks
         public Task<IReadOnlyCollection<NotificationTask>> GetActiveByUserAsync(long userId);
 
         /// <summary>
-        /// Выставляет задаче последний полученный результат
+        /// Выставляем задаче статус - в работе.
         /// </summary>
-        /// <param name="inputNotificationTask"></param>
-        /// <param name="lastResult"></param>
-        /// <returns>Задача</returns>
-        /// <exception cref="NullReferenceException"></exception>
-        public Task SetLastResultAsync(NotificationTask inputNotificationTask, string lastResult);
+        /// <param name="taskId">Идентификатор задачи.</param>
+        /// <returns>Задача <see cref="Task"/>.</returns>
+        public Task SetIsProcessAsync(int taskId);
 
         /// <summary>
-        /// Выставляем задаче статус - в работе
+        /// Выставляет задаче статус - не в работе.
         /// </summary>
-        /// <param name="inputNotificationTask"></param>
-        /// <returns>Задача</returns>
-        public Task SetIsWorkedAsync(NotificationTask inputNotificationTask);
-
-        /// <summary>
-        /// Выставляет задаче статус - не в работе
-        /// </summary>
-        /// <param name="inputNotificationTask"></param>
-        /// <returns>Задача</returns>
-        public Task SetIsNotWorkedAsync(NotificationTask inputNotificationTask);
+        /// <param name="taskId">Идентификатор задачи.</param>
+        /// <returns>Задача <see cref="Task"/>.</returns>
+        public Task SetIsNotWorkedAsync(int taskId);
 
         /// <summary>
         /// Устанавливает задаче статус "Остановлена".
         /// </summary>
-        /// <param name="idNotificationTask">Идентификатор останавливаемой задачи.</param>
+        /// <param name="taskId">Идентификатор задачи.</param>
         /// <returns>Идентификатор остановленной задачи.</returns>
-        public Task<int?> SetIsStoppedAsync(int idNotificationTask);
+        public Task<int> SetIsStoppedAsync(int taskId);
 
         /// <summary>
         /// Устанавливает задаче поле "Updated".
         /// </summary>
-        /// <param name="idNotificationTask"></param>
-        /// <returns>Идентификатор задачи.</returns>
-        public Task SetIsUpdatedAsync(int idNotificationTask);
-
-        /// <summary>
-        /// Заполняет код города отправления и прибытия у задания
-        /// </summary>
-        /// <param name="notificationTask">Задание для которого необходимо заполнить коды городов</param>
-        /// <returns></returns>
-        public Task<NotificationTask> FillStationCodesAsync(NotificationTask notificationTask);
+        /// <param name="taskId">Идентификатор задачи.</param>
+        /// <returns>Задача <see cref="Task"/>.</returns>
+        public Task SetIsUpdatedAsync(int taskId);
         
         /// <summary>
-        /// Возвращает результат сравнения последнего результата с текущим
-        /// </summary>
-        /// <param name="inputNotificationTask"></param>
-        /// <param name="lastResult"></param>
-        /// <returns>Задача</returns>
-        /// <exception cref="NullReferenceException"></exception>
-        public Task<bool> ResultIsLastAsync(NotificationTask inputNotificationTask, string lastResult);
-
-        /// <summary>
-        /// Возвращает список наиболее часто используемых пользователем городов.
+        /// Возвращает список идентификаторов наиболее часто используемых пользователем городов (до 4 штук). 
         /// </summary>
         /// <param name="userId">Идентификатор пользователя.</param>
         /// <returns>Список наиболее часто используемых пользователем городов.</returns>
-        public Task<IReadOnlyCollection<string>> GetPopularCitiesByUserAsync(long userId);
+        public Task<IReadOnlyCollection<int>> GetPopularStationIdsByUserIdAsync(long userId);
     }
 }

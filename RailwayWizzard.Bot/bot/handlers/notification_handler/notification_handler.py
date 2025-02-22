@@ -394,6 +394,7 @@ async def seventh_step_notification(update: Update, context: CallbackContext):
             await update.callback_query.edit_message_text(update_text_message, parse_mode=ParseMode.HTML)
 
         await start_buttons(update, context)  # Возвращаемся в главное меню
+        return ConversationHandler.END
 
     except Exception as e:
         await base_error_handler(update, e, next_step)

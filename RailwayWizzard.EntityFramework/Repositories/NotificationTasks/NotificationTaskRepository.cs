@@ -140,10 +140,13 @@ namespace RailwayWizzard.Infrastructure.Repositories.NotificationTasks
         /// <returns>Список задач.</returns>
         private IQueryable<NotificationTask> GetNotWorkedNotificationTasks()
         {
+            var hasBlockedUsers = _context.Users.Where(user => user.HasBlockedBot);
+
             var notWorkedNotificationTasks = _context.NotificationTasks
                 .Where(t => t.IsActual == true)
                 .Where(t => t.IsStopped == false)
-                .Where(t => t.IsProcess == false);
+                .Where(t => t.IsProcess == false)
+                .Where(x => !hasBlockedUsers.Any(user => user.Id == x.CreatorId));
 
             return notWorkedNotificationTasks;
         }

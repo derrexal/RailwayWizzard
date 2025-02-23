@@ -21,6 +21,7 @@ namespace RailwayWizzard.Infrastructure.Repositories.MessagesOutbox
             _context = context;
         }
 
+        //TODO: Что делать с message которые не могут отправиться из-за того что пользователь заблокировал бота
         public async Task<IEnumerable<MessageOutbox>> GetNotSendMessagesAsync()
         {
             var hasBlockedUsers = _context.Users.Where(user => user.HasBlockedBot);

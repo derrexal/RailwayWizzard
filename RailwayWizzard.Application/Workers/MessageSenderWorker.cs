@@ -29,7 +29,7 @@ namespace RailwayWizzard.Application.Workers
             while (!cancellationToken.IsCancellationRequested)
             {
                 //_logger.LogInformation($"{nameof(MessageSenderWorker)} running at: {DateTimeExtensions.MoscowNow} Moscow time");
-                await Task.Delay(1000, cancellationToken);
+                await Task.Delay(1500, cancellationToken);
                 await DoWork(cancellationToken);
             }
         }

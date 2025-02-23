@@ -56,11 +56,12 @@ namespace RailwayWizzard.Application.Workers
                     return;
                 }
 
+                /// TODO: сюда по идее никогда не попадем
                 var user = await userRepository.GetUserByIdAsync(notificationTask.CreatorId);
 
                 if (user.HasBlockedBot)
                 {
-                    _logger.LogInformation(
+                    _logger.LogError(
                         $"{nameof(NotificationTaskWorker)} Task Id {notificationTask.Id} is not run process. " +
                         $"User blocked bot. Today:{DateTimeExtensions.MoscowNow}");
                     return;

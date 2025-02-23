@@ -51,7 +51,7 @@ namespace RailwayWizzard.Application.Workers
             var testNotificationTask = new NotificationTask
             {
                 DepartureStationId = 5, // Москва
-                ArrivalStationId = 386,   // Орел
+                ArrivalStationId = 159,   // Орел
                 DepartureDateTime = DateTime.Today.AddDays(30).AddHours(8).AddMinutes(46), // 08:46
                 CarTypes = new List<CarType> { CarType.Sedentary, CarType.SedentaryBusiness}
             };

@@ -28,7 +28,7 @@ namespace RailwayWizzard.Application.Workers
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                _logger.LogInformation($"{nameof(MessageSenderWorker)} running at: {DateTimeExtensions.MoscowNow} Moscow time");
+                //_logger.LogInformation($"{nameof(MessageSenderWorker)} running at: {DateTimeExtensions.MoscowNow} Moscow time");
 
                 await DoWork(cancellationToken);
             }
@@ -73,7 +73,7 @@ namespace RailwayWizzard.Application.Workers
 
         public override async Task StopAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation($"{nameof(MessageSenderWorker)} stopped at: {DateTimeExtensions.MoscowNow} Moscow time");
+            //_logger.LogInformation($"{nameof(MessageSenderWorker)} stopped at: {DateTimeExtensions.MoscowNow} Moscow time");
 
             await base.StopAsync(cancellationToken);
         }

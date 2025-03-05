@@ -53,7 +53,8 @@ namespace RailwayWizzard.Application
                             maxRetryCount: 3,
                             maxRetryDelay: TimeSpan.FromSeconds(10),
                             errorCodesToAdd: null);
-                    }));
+                    }
+                ));
             
             builder.Services.AddControllers();
 

@@ -1,4 +1,3 @@
-using RailwayWizzard.Common;
 using RailwayWizzard.Infrastructure.Repositories.MessagesOutbox;
 using RailwayWizzard.Infrastructure.Repositories.Users;
 using RailwayWizzard.Telegram.ApiClient.Exceptions;
@@ -13,14 +12,14 @@ namespace RailwayWizzard.Application.Workers
     // - 1 сообщение - 512 байт
     public class MessageSenderWorker : BackgroundService
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly ILogger<NotificationTaskWorker> _logger;
 
         public MessageSenderWorker(
-            IServiceProvider serviceProvider,
+            IServiceScopeFactory serviceScopeFactory,
             ILogger<NotificationTaskWorker> logger)
         {
-            _serviceProvider = serviceProvider;
+            _serviceScopeFactory = serviceScopeFactory;
             _logger = logger;
         }
 
@@ -36,7 +35,7 @@ namespace RailwayWizzard.Application.Workers
 
         private async Task DoWork(CancellationToken cancellationToken)
         {
-            using var scope = _serviceProvider.CreateScope();
+            using var scope = _serviceScopeFactory.CreateScope();
             var messageOutboxRepository = scope.ServiceProvider.GetRequiredService<IMessageOutboxRepository>();
             var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
             var botClient = scope.ServiceProvider.GetRequiredService<IBotClient>();

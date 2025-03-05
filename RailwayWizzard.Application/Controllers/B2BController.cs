@@ -2,7 +2,6 @@
 using RailwayWizzard.Application.Dto.B2B;
 using RailwayWizzard.Application.Services.B2B;
 
-
 namespace RailwayWizzard.Application.Controllers
 {
     //Контроллер для получения данных от сервисов РЖД

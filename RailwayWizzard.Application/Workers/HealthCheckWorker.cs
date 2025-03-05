@@ -14,14 +14,14 @@ namespace RailwayWizzard.Application.Workers
         private const int RUN_INTERVAL = 1000 * 60 * 3; // Интервал запуска (3 мин)
         private const int MAX_RUN_TIME = 1000 * 30; // Допустимое время выполнения проверки (30 сек)
 
-        private readonly IServiceProvider _serviceProvider;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly ILogger<HealthCheckWorker> _logger;
 
         public HealthCheckWorker(
-            IServiceProvider serviceProvider,
+            IServiceScopeFactory serviceScopeFactory,
             ILogger<HealthCheckWorker> logger)
         {
-            _serviceProvider = serviceProvider;
+            _serviceScopeFactory = serviceScopeFactory;
             _logger = logger;
         }
 
@@ -58,7 +58,7 @@ namespace RailwayWizzard.Application.Workers
 
             var baseMessage = $"[{nameof(HealthCheckWorker)}] Время:{DateTimeExtensions.MoscowNow} Рейс {testNotificationTask.ToLogString()} ";
 
-            using var scope = _serviceProvider.CreateScope();
+            using var scope = _serviceScopeFactory.CreateScope();
             var dataExtractor = scope.ServiceProvider.GetRequiredService<IDataExtractor>();
             var messageOutboxRepository = scope.ServiceProvider.GetRequiredService<IMessageOutboxRepository>();
 

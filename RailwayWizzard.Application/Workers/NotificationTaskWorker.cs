@@ -9,14 +9,14 @@ namespace RailwayWizzard.Application.Workers
     {
         private const int RUN_INTERVAL = 1000 * 60;
 
-        private readonly IServiceProvider _serviceProvider;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly ILogger<NotificationTaskWorker> _logger;
 
         public NotificationTaskWorker(
-        IServiceProvider serviceProvider,
+        IServiceScopeFactory serviceScopeFactory,
         ILogger<NotificationTaskWorker> logger)
         {
-            _serviceProvider = serviceProvider;
+            _serviceScopeFactory = serviceScopeFactory;
             _logger = logger;
         }
 
@@ -39,7 +39,7 @@ namespace RailwayWizzard.Application.Workers
 
         private async Task DoWork(CancellationToken cancellationToken)
         {
-            using var scope = _serviceProvider.CreateScope();
+            using var scope = _serviceScopeFactory.CreateScope();
             var notificationTaskRepository = scope.ServiceProvider.GetRequiredService<INotificationTaskRepository>();
             var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
             var dataProcessor = scope.ServiceProvider.GetRequiredService<IDataProcessor>();

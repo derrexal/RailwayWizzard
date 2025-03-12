@@ -200,7 +200,7 @@ async def third_step_notification(update: Update, context: CallbackContext):
         # Получаем доступное время для бронирования
         available_times = await get_available_times(context.user_data[0], context.user_data[1], date_and_date_json['date'])
         date_limits = await date_limits_validate(date_and_date_json['date_text'])
-        if not date_limits:
+        if not available_times or not date_limits:
             await update.message.reply_text("По указанному маршруту на указанную дату билеты не продаются")
             await update.message.reply_text(
                 text=NotificationHandlerDialog.enter_departure_date_text(), parse_mode=ParseMode.HTML)

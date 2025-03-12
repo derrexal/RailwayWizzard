@@ -9,7 +9,6 @@ namespace RailwayWizzard.Application.Controllers
     [Route("[controller]")]
     public class NotificationTaskController : Controller
     {
-
         private readonly INotificationTaskService _notificationTaskService;
 
         public NotificationTaskController(INotificationTaskService notificationTaskService)

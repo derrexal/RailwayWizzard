@@ -81,10 +81,12 @@ namespace RailwayWizzard.Application.Services.NotificationTasks
                         TrainNumber = task.TrainNumber
                     };
                 })
-            .OrderBy(notificationTask => notificationTask.Id)
-            .ToList();
+                .Select(t=>t.Result)
+                .Where(i => true)
+                .OrderByDescending(notificationTask => notificationTask.Id)
+                .ToList();
 
-            return await Task.WhenAll(result);
+            return result;
         }
 
         public async Task<IReadOnlyCollection<string>> GetPopularCitiesByUserAsync(long userId)
@@ -94,7 +96,7 @@ namespace RailwayWizzard.Application.Services.NotificationTasks
             var topCitiesByUser = await _notificationTaskRepository.GetPopularStationIdsByUserIdAsync(userId);
             
             var topCitiesTasks = topCitiesByUser
-                .Select(x => _stationInfoRepository.GetByIdAsync(x));
+                .Select(async x => await _stationInfoRepository.GetByIdAsync(x));
 
             var topCities = await Task.WhenAll(topCitiesTasks);
             

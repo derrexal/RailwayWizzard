@@ -56,8 +56,7 @@ async def notification_handler(update: Update, context: CallbackContext):
 
         await update.callback_query.message.reply_text(text="Обратите внимание, по умолчанию не приходят уведомления о "
                                                             "местах для инвалидов. Если вам необходимо получать "
-                                                            "уведомления и в таком случае - пожалуйста, обратитесь к "
-                                                            f"разработчику {ADMIN_USERNAME}"
+                                                            "уведомления и в таком случае - пожалуйста сообщите об этом"
                                                             "\n\nДля возврата в главное меню введите /stop")
 
         await update.callback_query.message.reply_text(
@@ -346,7 +345,7 @@ async def sixth_step_notification(update: Update, context: CallbackContext):
                      f"\nСтанция прибытия: <strong>{context.user_data[1]}</strong>"
                      f"\nДата отправления: <strong>{context.user_data[22]}</strong>"
                      f"\nВремя отправления: <strong>{context.user_data[3]}</strong>"
-                     f"\nВыбранные типы вагонов: <strong>{car_types_text[:-2]}</strong>"
+                     f"\nКласс обслуживания: <strong>{car_types_text[:-2]}</strong>"
                      f"\nКоличество необходимых мест: <strong>{str(context.user_data[33])}</strong>",
                 reply_markup=NOTIFICATION_CONFIRM_INLINE_BUTTONS,
                 parse_mode=ParseMode.HTML)

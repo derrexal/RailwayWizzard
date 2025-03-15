@@ -22,12 +22,13 @@ MOSCOW_TZ = pytz.timezone('Europe/Moscow')
 MAX_NUMBER_SEATS = 10  # ни к чему не привязанное значение, в случае чего увеличить
 
 ADMIN_USERNAME = '@derrexal'
+ADMIN_URL = 't.me/derrexal'
 DONATE_URL = 'pay.cloudtips.ru/p/c6b746f7'
 
 MESSAGE_FORMAT_ERROR = "Недопустимый ввод."
 MESSAGE_SUCCESS = 'Уведомление о поездке успешно создано.\n\nЗадача №'
 MESSAGE_CANCEL = 'Создание уведомления о поездке отменено.'
-MESSAGE_START = '\U00002388 Добро пожаловать на борт, '
+MESSAGE_START = '\U00002388 Добро пожаловать на борт'
 
 MESSAGE_MIN_COUNT_SEATS = ("Укажите <strong>количество необходимых мест</strong>.\n"
                            "Например, <code>1</code>\n\n"

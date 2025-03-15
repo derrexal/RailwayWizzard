@@ -22,7 +22,6 @@ MOSCOW_TZ = pytz.timezone('Europe/Moscow')
 MAX_NUMBER_SEATS = 10  # ни к чему не привязанное значение, в случае чего увеличить
 
 ADMIN_USERNAME = '@derrexal'
-ADMIN_URL = 't.me/derrexal'
 DONATE_URL = 'pay.cloudtips.ru/p/c6b746f7'
 
 MESSAGE_FORMAT_ERROR = "Недопустимый ввод."

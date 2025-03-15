@@ -3,7 +3,7 @@ from telegram.ext import ConversationHandler
 
 from bot.queries.robot_queries import create_user
 from bot.handlers.error_handler.base_error_handler import base_error_handler
-from bot.setting import MESSAGE_START, START_INLINE_KEYBOARDS
+from bot.setting import MESSAGE_START, START_INLINE_KEYBOARDS, ADMIN_USERNAME
 
 
 async def start_buttons_handler(update, context):
@@ -13,7 +13,7 @@ async def start_buttons_handler(update, context):
 
     try:
         await update.message.reply_text(
-            text=f"{MESSAGE_START}, <code>{user_id}</code>\nПо всем вопросам: <code>{admin_link}</code>",
+            text=f"{MESSAGE_START}, <code>{user_id}</code>\nПо всем вопросам: <code>{ADMIN_USERNAME}</code>",
             reply_markup=START_INLINE_KEYBOARDS,
             parse_mode=ParseMode.HTML)
 
@@ -34,7 +34,7 @@ async def start_buttons(update, context):
     try:
         await context.bot.send_message(
             chat_id=chat_id,
-            text=f"{MESSAGE_START}, <code>{user_id}</code>\nПо всем вопросам: <code>{admin_link}</code>",
+            text=f"{MESSAGE_START}, <code>{user_id}</code>\nПо всем вопросам: <code>{ADMIN_USERNAME}</code>",
             reply_markup=START_INLINE_KEYBOARDS,
             parse_mode=ParseMode.HTML)
 

@@ -13,7 +13,7 @@ async def start_buttons_handler(update, context):
 
     try:
         await update.message.reply_text(
-            text=f"{MESSAGE_START}, <code>{user_id}</code>\nПо всем вопросам: <code>{ADMIN_USERNAME}</code>",
+            text=f"{MESSAGE_START}, <code>{user_id}</code>\nПо всем вопросам: {ADMIN_USERNAME}",
             reply_markup=START_INLINE_KEYBOARDS,
             parse_mode=ParseMode.HTML)
 
@@ -34,7 +34,7 @@ async def start_buttons(update, context):
     try:
         await context.bot.send_message(
             chat_id=chat_id,
-            text=f"{MESSAGE_START}, <code>{user_id}</code>\nПо всем вопросам: <code>{ADMIN_USERNAME}</code>",
+            text=f"{MESSAGE_START}, <code>{user_id}</code>\nПо всем вопросам: {ADMIN_USERNAME}",
             reply_markup=START_INLINE_KEYBOARDS,
             parse_mode=ParseMode.HTML)
 

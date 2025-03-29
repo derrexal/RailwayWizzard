@@ -300,7 +300,7 @@ async def fifth_step_notification(update: Update, context: CallbackContext):
             else:
                 await update.message.reply_text(
                     text="Ошибка. Вы ввели число более 10 или менее 1. Если вы действительно хотите создать задачу на "
-                         f"появление 10 мест одновременно, пожалуйста, обратитесь к администратору бота {ADMIN_USERNAME}")
+                         f"появление более 10 мест одновременно, пожалуйста, обратитесь к администратору бота {ADMIN_USERNAME}")
                 await update.message.reply_text(text=MESSAGE_MIN_COUNT_SEATS, parse_mode=ParseMode.HTML)
                 return next_step - 1
 

@@ -50,10 +50,20 @@ namespace RailwayWizzard.Infrastructure.Repositories.StationsInfo
         /// <inheritdoc/>
         public async Task<IReadOnlyCollection<StationInfo>> ContainsByStationNameAsync(string name)
         {
-            return await _context.StationsInfo
-                .Where(s => s.Name.Contains(name))
-                .Take(MaxStationsCount)
+            var searchTerm = name.ToUpper();
+
+            var stations = await _context.StationsInfo
+                .Where(s => s.Name.Contains(searchTerm))
                 .ToListAsync();
+
+            var result = stations
+                .OrderByDescending(s => s.Name.StartsWith(searchTerm, StringComparison.OrdinalIgnoreCase))
+                .ThenBy(s => s.Name.IndexOf(searchTerm, StringComparison.OrdinalIgnoreCase))
+                .ThenBy(s => s.Name.Length)
+                .Take(MaxStationsCount)
+                .ToList();
+
+            return result;
         }
 
         /// <inheritdoc/>

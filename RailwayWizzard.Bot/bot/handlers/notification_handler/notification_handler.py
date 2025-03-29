@@ -14,7 +14,7 @@ from bot.data.NotificationTask import NotificationTask
 
 car_types = {car_type: car_type.is_sitting for car_type in CarType}
 popular_cities = []
-
+min_length_station_name = 2
 
 def generate_car_type_markup():
     buttons = [create_car_type_button(car_type) for car_type in car_types]
@@ -82,6 +82,10 @@ async def first_step_notification(update: Update, context: CallbackContext):
         if base_check is not None:
             return base_check
 
+        if len(expected_station_name) < min_length_station_name:
+            await update.message.reply_text(text="Введите строку более 1 символа")
+            return next_step - 1
+
         language_input_validation(expected_station_name)
 
         stations = await station_validate(expected_station_name)
@@ -137,6 +141,10 @@ async def second_step_notification(update: Update, context: CallbackContext):
         base_check = await null_step_notification(update, context)
         if base_check is not None:
             return base_check
+
+        if len(expected_station_name) < min_length_station_name:
+            await update.message.reply_text(text="Введите строку более 1 символа")
+            return next_step - 1
 
         language_input_validation(expected_station_name)
 

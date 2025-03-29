@@ -11,7 +11,8 @@ namespace RailwayWizzard.Application.Workers
     /// </summary>
     public class HealthCheckWorker : BackgroundService
     {
-        private const int RUN_INTERVAL = 1000 * 60 * 3; // Интервал запуска (3 мин)
+        private const int RUN_INTERVAL = 1000 * 60; // 1 min
+        private const int DOWN_TIME_INTERVAL = 1000 * 60 * 30; // 30 mim
         private const int MAX_RUN_TIME = 1000 * 30; // Допустимое время выполнения проверки (30 сек)
 
         private readonly IServiceScopeFactory _serviceScopeFactory;
@@ -31,9 +32,9 @@ namespace RailwayWizzard.Application.Workers
             {
                 if (DateTimeExtensions.IsDownTimeRzd())
                 {
-                    _logger.LogInformation($"{nameof(NotificationTaskWorker)} RZD DownTime. Today:{DateTimeExtensions.MoscowNow}");
-                    await Task.Delay(RUN_INTERVAL, cancellationToken);
-                    return;
+                    _logger.LogInformation($"{nameof(HealthCheckWorker)} RZD DownTime. Today:{DateTimeExtensions.MoscowNow}");
+                    await Task.Delay(DOWN_TIME_INTERVAL, cancellationToken);
+                    continue;
                 }
 
                 _logger.LogInformation($"{nameof(HealthCheckWorker)} running at: {DateTimeExtensions.MoscowNow} Moscow time");

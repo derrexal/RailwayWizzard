@@ -12,6 +12,8 @@ namespace RailwayWizzard.Application.Workers
     // - 1 сообщение - 512 байт
     public class MessageSenderWorker : BackgroundService
     {
+        private const int RUN_INTERVAL = 1000 * 3; // 3 second
+        
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly ILogger<NotificationTaskWorker> _logger;
 
@@ -28,7 +30,7 @@ namespace RailwayWizzard.Application.Workers
             while (!cancellationToken.IsCancellationRequested)
             {
                 //_logger.LogInformation($"{nameof(MessageSenderWorker)} running at: {DateTimeExtensions.MoscowNow} Moscow time");
-                await Task.Delay(1500, cancellationToken);
+                await Task.Delay(RUN_INTERVAL, cancellationToken);
                 await DoWork(cancellationToken);
             }
         }

@@ -20,7 +20,7 @@ namespace RailwayWizzard.Infrastructure.Repositories.NotificationTasks
         /// Возвращает задачу которую дольше всего не обрабатывали.
         /// </summary>
         /// <returns>Наиболее старая задача.</returns>
-        public Task<NotificationTask?> GetOldestAsync();
+        public Task<NotificationTask?> FindOldestAsync();
 
         /// <summary>
         /// Получает список активных задач по идентификатору пользователя.

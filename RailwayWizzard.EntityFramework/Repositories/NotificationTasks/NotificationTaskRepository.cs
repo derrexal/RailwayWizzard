@@ -30,12 +30,12 @@ namespace RailwayWizzard.Infrastructure.Repositories.NotificationTasks
         }
 
         /// <inheritdoc/>
-        public async Task<NotificationTask?> GetOldestAsync()
+        public async Task<NotificationTask?> FindOldestAsync()
         {
             //TODO: вынести в воркер который ходит хотя бы каждые 5 минут, а не 1? или 15? Подумать...
             await UpdateActualStatusNotificationTaskAsync();
 
-            var notWorkedNotificationTasks = GetNotWorkedNotificationTasks();
+            var notWorkedNotificationTasks = FindNotWorkedNotificationTasks();
 
             var task = await notWorkedNotificationTasks
                 .OrderBy(t => t.Updated)
@@ -138,7 +138,7 @@ namespace RailwayWizzard.Infrastructure.Repositories.NotificationTasks
         /// Возвращает список актуальных, неостановленных задач, над которыми еще не производится работа.
         /// </summary>
         /// <returns>Список задач.</returns>
-        private IQueryable<NotificationTask> GetNotWorkedNotificationTasks()
+        private IQueryable<NotificationTask> FindNotWorkedNotificationTasks()
         {
             var hasBlockedUsers = _context.Users.Where(user => user.HasBlockedBot);
 

@@ -1,13 +1,13 @@
 using RailwayWizzard.Common;
 using RailwayWizzard.Engine.Services;
 using RailwayWizzard.Infrastructure.Repositories.NotificationTasks;
-using RailwayWizzard.Infrastructure.Repositories.Users;
 
 namespace RailwayWizzard.Application.Workers
 {
     public class NotificationTaskWorker : BackgroundService
     {
-        private const int RUN_INTERVAL = 1000 * 60;
+        private const int RUN_INTERVAL = 1000 * 60; // 1 min
+        private const int DOWN_TIME_INTERVAL = 1000 * 60 * 30; // 30 mim
 
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly ILogger<NotificationTaskWorker> _logger;
@@ -27,8 +27,8 @@ namespace RailwayWizzard.Application.Workers
                 if (DateTimeExtensions.IsDownTimeRzd())
                 {
                     _logger.LogInformation($"{nameof(NotificationTaskWorker)} RZD DownTime. Today:{DateTimeExtensions.MoscowNow}");
-                    await Task.Delay(RUN_INTERVAL, cancellationToken);
-                    return;
+                    await Task.Delay(DOWN_TIME_INTERVAL, cancellationToken);
+                    continue;
                 }
 
                 _logger.LogInformation($"{nameof(NotificationTaskWorker)} running at: {DateTimeExtensions.MoscowNow} Moscow time");
@@ -41,29 +41,16 @@ namespace RailwayWizzard.Application.Workers
         {
             using var scope = _serviceScopeFactory.CreateScope();
             var notificationTaskRepository = scope.ServiceProvider.GetRequiredService<INotificationTaskRepository>();
-            var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
             var dataProcessor = scope.ServiceProvider.GetRequiredService<IDataProcessor>();
 
             try
             {
-                var notificationTask = await notificationTaskRepository.GetOldestAsync();
-
+                var notificationTask = await notificationTaskRepository.FindOldestAsync(); 
                 if (notificationTask is null)
                 {
                     _logger.LogInformation($"{nameof(NotificationTaskWorker)} No tasks found for execution. " +
                                            $"Process delay by {RUN_INTERVAL} ms. Today:{DateTimeExtensions.MoscowNow}");
                     await Task.Delay(RUN_INTERVAL, cancellationToken);
-                    return;
-                }
-
-                /// TODO: сюда по идее никогда не попадем
-                var user = await userRepository.GetUserByIdAsync(notificationTask.CreatorId);
-
-                if (user.HasBlockedBot)
-                {
-                    _logger.LogError(
-                        $"{nameof(NotificationTaskWorker)} Task Id {notificationTask.Id} is not run process. " +
-                        $"User blocked bot. Today:{DateTimeExtensions.MoscowNow}");
                     return;
                 }
 

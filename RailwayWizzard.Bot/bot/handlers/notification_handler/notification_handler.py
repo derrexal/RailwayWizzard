@@ -100,7 +100,7 @@ async def first_step_notification(update: Update, context: CallbackContext):
             for station in stations:
                 station_name = station['name']
                 message_text += f"<code>{station_name}</code>\n"
-            message_text += "Пожалуйста укажите название станции в соответствие с предлагаемыми"
+            message_text += "\nПожалуйста укажите название станции в соответствие с предлагаемыми"
             await update.message.reply_text(
                 text=message_text,
                 parse_mode=ParseMode.HTML)
@@ -163,7 +163,7 @@ async def second_step_notification(update: Update, context: CallbackContext):
             for station in stations:
                 station_name = station['name']
                 message_text += f"<code>{station_name}</code>\n"
-            message_text += "Пожалуйста укажите название станции в соответствие с предлагаемыми"
+            message_text += "\nПожалуйста укажите название станции в соответствие с предлагаемыми"
             await update.message.reply_text(text=message_text, parse_mode=ParseMode.HTML)
             return next_step - 1
 

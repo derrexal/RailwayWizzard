@@ -24,14 +24,14 @@ namespace RailwayWizzard.Application.Services.NotificationTasks
         /// <summary>
         /// Получить список активных задач пользователя.
         /// </summary>
-        /// <param name="userId">Идентификатор пользователя</param>
+        /// <param name="telegramUserId">Идентификатор пользователя</param>
         /// <returns>Коллекция задач.</returns>
         public Task<IReadOnlyCollection<NotificationTaskDto>> GetActiveByUserAsync(long telegramUserId);
         
         /// <summary>
         /// Возвращает список наиболее часто используемых пользователем городов.
         /// </summary>
-        /// <param name="userId">Идентификатор пользователя.</param>
+        /// <param name="telegramUserId">Идентификатор пользователя.</param>
         /// <returns>Список наиболее часто используемых пользователем городов.</returns>
         public Task<IReadOnlyCollection<string>> GetPopularCitiesByUserAsync(long telegramUserId);
     }

@@ -117,8 +117,8 @@ namespace RailwayWizzard.Application.Services.B2B
             var textResponse = await _stationsByNameService.GetDataAsync(inputStation);
             if (string.IsNullOrEmpty(textResponse)) 
                 return new List<StationFromJson>();
-            var stations = DeserializeStationsText(textResponse);
             
+            var stations = DeserializeStationsText(textResponse);
             if (stations.Count > 0) 
                 await CreateStationsInfoAsync(stations);
             

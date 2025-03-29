@@ -7,6 +7,8 @@ namespace RailwayWizzard.Infrastructure.Repositories.StationsInfo
     /// <inheritdoc/>
     public class StationInfoRepository : IStationInfoRepository
     {
+        private const int MaxStationsCount = 20;
+        
         private readonly RailwayWizzardAppContext _context;
 
         /// <summary>
@@ -50,6 +52,7 @@ namespace RailwayWizzard.Infrastructure.Repositories.StationsInfo
         {
             return await _context.StationsInfo
                 .Where(s => s.Name.Contains(name))
+                .Take(MaxStationsCount)
                 .ToListAsync();
         }
 

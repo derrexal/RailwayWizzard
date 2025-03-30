@@ -22,6 +22,8 @@ namespace RailwayWizzard.Rzd.DataEngine.Services
         
         private readonly ILogger<DataExtractor> _logger;
 
+        private static string _prevToken = string.Empty;
+        
         /// <summary>
         /// Initializes a new instance of the <see cref="DataExtractor"/> class.
         /// </summary>
@@ -47,7 +49,19 @@ namespace RailwayWizzard.Rzd.DataEngine.Services
         /// <inheritdoc/>
         public async Task<string> FindFreeSeatsAsync(NotificationTask task)
         {
-            var token = await _tokenService.GetDataAsync();
+            string token;
+            try
+            {
+                token = await _tokenService.GetDataAsync();
+                _prevToken = token;
+            }
+            catch (TaskCanceledException)
+            {
+                if(!_prevToken.Equals(string.Empty))
+                    token = _prevToken;
+                else
+                    throw;
+            }
             
             var departureStation = await _stationInfoRepository.GetByIdAsync(task.DepartureStationId);
             var arrivalStation = await _stationInfoRepository.GetByIdAsync(task.ArrivalStationId);

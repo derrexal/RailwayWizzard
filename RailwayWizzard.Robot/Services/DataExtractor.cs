@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 using RailwayWizzard.Common;
 using RailwayWizzard.Core.NotificationTask;
 using RailwayWizzard.Infrastructure.Repositories.StationsInfo;
-using RailwayWizzard.Rzd.ApiClient.Services.GetFirewallTokenService;
+// using RailwayWizzard.Rzd.ApiClient.Services.GetFirewallTokenService;
 using RailwayWizzard.Rzd.ApiClient.Services.GetStationDetailsService;
 using RailwayWizzard.Rzd.ApiClient.Services.GetTrainInformationService;
 using RailwayWizzard.Rzd.ApiClient.Services.GetTrainInformationService.Models;
@@ -16,32 +16,31 @@ namespace RailwayWizzard.Rzd.DataEngine.Services
     {
         private readonly IGetTrainInformationService _trainInformationService;
         private readonly IGetStationDetailsService _stationDetailsService;
-        private readonly IGetFirewallTokenService _tokenService;
+        // private readonly IGetFirewallTokenService _tokenService;
 
         private readonly IStationInfoRepository _stationInfoRepository;
         
         private readonly ILogger<DataExtractor> _logger;
 
-        private static string _prevToken = string.Empty;
+        // private static string _prevToken = string.Empty;
         
         /// <summary>
         /// Initializes a new instance of the <see cref="DataExtractor"/> class.
         /// </summary>
         /// <param name="trainInformationService">Сервис получения информации о запрашиваемом рейсе.</param>
         /// <param name="stationDetailsService">Сервис получения информации о станциях по имени.</param>
-        /// <param name="tokenService">Сервис получения токена от фаервола.</param>
         /// <param name="stationInfoRepository"></param>
         /// <param name="logger">Логер.</param>
         public DataExtractor(
             IGetTrainInformationService trainInformationService, 
             IGetStationDetailsService stationDetailsService,
-            IGetFirewallTokenService tokenService,
+            // IGetFirewallTokenService tokenService,
             IStationInfoRepository stationInfoRepository,
             ILogger<DataExtractor> logger)
         {
             _trainInformationService = trainInformationService;
             _stationDetailsService = stationDetailsService;
-            _tokenService = tokenService;
+            // _tokenService = tokenService;
             _stationInfoRepository = stationInfoRepository;
             _logger = logger;
         }
@@ -49,19 +48,19 @@ namespace RailwayWizzard.Rzd.DataEngine.Services
         /// <inheritdoc/>
         public async Task<string> FindFreeSeatsAsync(NotificationTask task)
         {
-            string token;
-            try
-            {
-                token = await _tokenService.GetDataAsync();
-                _prevToken = token;
-            }
-            catch (TaskCanceledException)
-            {
-                if(!_prevToken.Equals(string.Empty))
-                    token = _prevToken;
-                else
-                    throw;
-            }
+            // string token;
+            // try
+            // {
+            //     token = await _tokenService.GetDataAsync();
+            //     _prevToken = token;
+            // }
+            // catch (TaskCanceledException)
+            // {
+            //     if(!_prevToken.Equals(string.Empty))
+            //         token = _prevToken;
+            //     else
+            //         throw;
+            // }
             
             var departureStation = await _stationInfoRepository.GetByIdAsync(task.DepartureStationId);
             var arrivalStation = await _stationInfoRepository.GetByIdAsync(task.ArrivalStationId);
@@ -70,13 +69,23 @@ namespace RailwayWizzard.Rzd.DataEngine.Services
                 departureStation.ExpressCode,
                 arrivalStation.ExpressCode,
                 task.DepartureDateTime,
-                token,
+                // token,
                 false);
             var trainInfoResponse = await _trainInformationService.GetDataAsync(trainInfoRequest);
 
-            /// Билеты перестают продавать за определенное время. Обрабатываем эти ситуации.
+            /// Билеты перестают продавать за определенное время. Обрабатываем эти и другие ситуации.
             
             //TODO: вынести в Exceptions
+            //TODO: Переделать на определение состояния по Code
+            const string noTrainsMessage = "В запрашиваемую дату поездов нет";
+            if (trainInfoResponse.Contains(noTrainsMessage))
+            {
+                _logger.LogWarning(
+                    $"Task ID: {task.Id} Сервис РЖД при запросе списка свободных мест вернул ошибку: {noTrainsMessage}. " +
+                    $"Ответ:{trainInfoResponse}");
+                return string.Empty;
+            }
+            
             const string noPlaceMessage = "МЕСТ НЕТ";
             if (trainInfoResponse.Contains(noPlaceMessage))
             {
@@ -311,8 +320,8 @@ namespace RailwayWizzard.Rzd.DataEngine.Services
         /// <inheritdoc/>
         public async Task<IReadOnlyCollection<string>> GetAvailableTimesAsync(GetTrainInformationRequest request)
         {
-            var token = await _tokenService.GetDataAsync();
-            request = request with { FirewallToken = token };
+            // var token = await _tokenService.GetDataAsync();
+            // request = request with { FirewallToken = token };
 
             var trainInfoResponse = await _trainInformationService.GetDataAsync(request);
 

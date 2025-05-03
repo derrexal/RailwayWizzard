@@ -7,5 +7,5 @@ public record GetTrainInformationRequest(
     long DepartureStationCode, 
     long ArrivalStationCode, 
     DateTime DepartureDateTime, 
-    string FirewallToken = "", 
+    // string FirewallToken = "", 
     bool GetTrainsFromSchedule=true);

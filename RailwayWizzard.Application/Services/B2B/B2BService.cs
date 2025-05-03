@@ -127,6 +127,7 @@ namespace RailwayWizzard.Application.Services.B2B
         private static List<StationFromJson> DeserializeStationsText(string textResponse)
         {
             var stations = JsonConvert.DeserializeObject<List<StationFromJson>>(textResponse);
+            
             if (stations!.Count == 0)
                 throw new NullReferenceException(
                     $"Сервис РЖД при запросе списка свободных мест вернул ответ в котором нет поездок. Ответ:{textResponse}");

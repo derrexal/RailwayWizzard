@@ -73,9 +73,19 @@ namespace RailwayWizzard.Rzd.DataEngine.Services
                 false);
             var trainInfoResponse = await _trainInformationService.GetDataAsync(trainInfoRequest);
 
-            /// Билеты перестают продавать за определенное время. Обрабатываем эти ситуации.
+            /// Билеты перестают продавать за определенное время. Обрабатываем эти и другие ситуации.
             
             //TODO: вынести в Exceptions
+            //TODO: Переделать на определение состояния по Code
+            const string noTrainsMessage = "В запрашиваемую дату поездов нет";
+            if (trainInfoResponse.Contains(noTrainsMessage))
+            {
+                _logger.LogWarning(
+                    $"Task ID: {task.Id} Сервис РЖД при запросе списка свободных мест вернул ошибку: {noTrainsMessage}. " +
+                    $"Ответ:{trainInfoResponse}");
+                return string.Empty;
+            }
+            
             const string noPlaceMessage = "МЕСТ НЕТ";
             if (trainInfoResponse.Contains(noPlaceMessage))
             {

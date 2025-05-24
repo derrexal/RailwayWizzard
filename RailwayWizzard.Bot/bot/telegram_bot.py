@@ -25,7 +25,7 @@ application = (Application.builder()
                .build())
 
 
-def run():
+async def run_async():
     try:
         application.add_handler(CommandHandler('start', start_buttons_handler))
         application.add_handler(CommandHandler('help', help_handler))
@@ -36,7 +36,7 @@ def run():
                                                & ~filters.Regex('/start')
                                                & ~filters.Regex('/help'),
                                                unknown_handler))  # обрабатываем неизвестные команды
-        application.run_polling()
+        await application.run_polling()
 
     except Exception as e:
         logger.exception(e)

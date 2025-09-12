@@ -5,11 +5,11 @@ VisualStudioVersion = 17.7.34031.279
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RailwayWizzard.Core", "RailwayWizzard.Core\RailwayWizzard.Core.csproj", "{21B7D3D5-9643-4298-B0D1-973E9E3C1B47}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RailwayWizzard.Rzd.DataEngine", "RailwayWizzard.Robot\RailwayWizzard.Rzd.DataEngine.csproj", "{5F8A33FE-9B03-41A0-9B87-197692BBFA89}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RailwayWizzard.Rzd.DataEngine", "RailwayWizzard.Rzd.DataEngine\RailwayWizzard.Rzd.DataEngine.csproj", "{5F8A33FE-9B03-41A0-9B87-197692BBFA89}"
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{6699C8F5-8F67-4E2B-843B-F816679DC4E8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RailwayWizzard.Infrastructure", "RailwayWizzard.EntityFramework\RailwayWizzard.Infrastructure.csproj", "{7BC5C4BD-7C70-418E-B877-C5FCC08489F4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RailwayWizzard.Infrastructure", "RailwayWizzard.Infrastructure\RailwayWizzard.Infrastructure.csproj", "{7BC5C4BD-7C70-418E-B877-C5FCC08489F4}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RailwayWizzard.Common", "RailwayWizzard.Common\RailwayWizzard.Common.csproj", "{339D0B15-3B70-42FD-AFFF-7BEFF09A916D}"
 EndProject

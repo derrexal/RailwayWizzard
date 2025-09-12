@@ -1,7 +1,7 @@
 namespace RailwayWizzard.Rzd.ApiClient.Services.GetStationsByNameService;
 
 /// <summary>
-/// Сервис получения информации о станциях по имени.
+/// Сервис получения информации о станции по наименованию.
 /// </summary>
 public interface IGetStationsByNameService
 {

@@ -255,5 +255,5 @@ paket-files/
 /RailwayWizzard.RzdApi/vendor/
 
 #PYTHON Bot
-./RailwayWizzard.Bot/Bot/.env
+*.env
 ./RailwayWizzard.Bot/__pycache__/

@@ -1,6 +1,6 @@
 namespace RailwayWizzard.Rzd.ApiClient.Services.GetStationsByNameService;
 
-/// <inheritdoc/>
+/// <inheritdoc cref="IGetStationsByNameService"/>/>
 public class GetStationsByNameService: BaseGetDataService, IGetStationsByNameService
 {
     /// <summary>
@@ -13,14 +13,20 @@ public class GetStationsByNameService: BaseGetDataService, IGetStationsByNameSer
     /// <inheritdoc/>
     public async Task<string> GetDataAsync(string inputStation)
     {
-        var uriInputStation = Uri.EscapeDataString(inputStation);
+        var inputStationUri = Uri.EscapeDataString(inputStation);
 
-        var url = $"https://pass.rzd.ru/suggester/?stationNamePart={uriInputStation}&lang=ru";
+        var url =
+            $"https://ticket.rzd.ru/api/v1/suggests?" +
+            $"GroupResults=true" +
+            $"&RailwaySortPriority=true" +
+            $"&MergeSuburban=true" +
+            $"&Query={inputStationUri}" +
+            $"&Language=ru" +
+            $"&TransportType=rail,suburban,boat,bus,aeroexpress"; // avia сознательно не запрашиваем 
 
         using var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add("Host", "pass.rzd.ru");
 
         return await BaseHttpSenderAsync(request);
     }
-
 }

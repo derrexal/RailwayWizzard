@@ -4,7 +4,7 @@ using RailwayWizzard.Core.StationInfo;
 namespace RailwayWizzard.Infrastructure.Repositories.NotificationTasks
 {
     /// <summary>
-    /// Репозиторий сущности <see cref="StationInfo"/>.
+    /// Репозиторий сущности <see cref="NotificationTask"/>.
     /// </summary>
     public interface INotificationTaskRepository
     {

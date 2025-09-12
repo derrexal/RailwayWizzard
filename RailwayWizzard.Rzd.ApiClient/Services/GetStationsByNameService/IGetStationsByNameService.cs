@@ -8,7 +8,7 @@ public interface IGetStationsByNameService
     /// <summary>
     /// Метод получения данных.
     /// </summary>
-    /// <param name="request">Запрос.</param>
+    /// <param name="request">Запрос (минимум 2 символа).</param>
     /// <returns>Строка с ответом.</returns>
     public Task<string> GetDataAsync(string request);
 }

@@ -251,9 +251,18 @@ paket-files/
 .idea/
 *.sln.iml
 
-#PHP
-/RailwayWizzard.RzdApi/vendor/
-
-#PYTHON Bot
-./RailwayWizzard.Bot/Bot/.env
+# Bot
 ./RailwayWizzard.Bot/__pycache__/
+
+# Environment files
+.env
+.env.local
+.env.development
+.env.production
+
+# Docker compose override files
+docker-compose.override.yml
+
+# App specific
+appsettings.Development.json
+appsettings.Production.json

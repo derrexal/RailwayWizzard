@@ -18,8 +18,8 @@
     <ProjectReference Include="..\RailwayWizzard.Engine\RailwayWizzard.Engine.csproj" />
     <ProjectReference Include="..\RailwayWizzard.Rzd.ApiClient\RailwayWizzard.Rzd.ApiClient.csproj" />
     <ProjectReference Include="..\RailwayWizzard.Core\RailwayWizzard.Core.csproj" />
-    <ProjectReference Include="..\RailwayWizzard.EntityFramework\RailwayWizzard.Infrastructure.csproj" />
-    <ProjectReference Include="..\RailwayWizzard.Robot\RailwayWizzard.Rzd.DataEngine.csproj" />
+    <ProjectReference Include="..\RailwayWizzard.Infrastructure\RailwayWizzard.Infrastructure.csproj" />
+    <ProjectReference Include="..\RailwayWizzard.Rzd.DataEngine\RailwayWizzard.Rzd.DataEngine.csproj" />
     <ProjectReference Include="..\RailwayWizzard.Common\RailwayWizzard.Common.csproj" />
   </ItemGroup>
 

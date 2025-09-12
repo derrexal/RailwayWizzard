@@ -9,7 +9,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\RailwayWizzard.Core\RailwayWizzard.Core.csproj" />
-      <ProjectReference Include="..\RailwayWizzard.Robot\RailwayWizzard.Rzd.DataEngine.csproj" />
+      <ProjectReference Include="..\RailwayWizzard.Rzd.DataEngine\RailwayWizzard.Rzd.DataEngine.csproj" />
       <ProjectReference Include="..\RailwayWizzard.Telegram.ApiClient\RailwayWizzard.Telegram.ApiClient.csproj" />
     </ItemGroup>
 

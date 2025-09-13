@@ -35,7 +35,7 @@ namespace RailwayWizzard.Application.Workers
             }
         }
 
-        private async Task DoWork(CancellationToken cancellationToken)
+        private async Task DoWork(CancellationToken cancellationToken) // TODO: прокинуть cancellationToken
         {
             using var scope = _serviceScopeFactory.CreateScope();
             var messageOutboxRepository = scope.ServiceProvider.GetRequiredService<IMessageOutboxRepository>();

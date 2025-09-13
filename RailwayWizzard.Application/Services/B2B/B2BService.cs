@@ -130,7 +130,7 @@ namespace RailwayWizzard.Application.Services.B2B
             
             if (stations!.Count == 0)
                 throw new NullReferenceException(
-                    $"Сервис РЖД при запросе списка свободных мест вернул ответ в котором нет поездок. Ответ:{textResponse}");
+                    $"Сервис РЖД при запросе списка свободных мест вернул ответ в котором нет станций. Ответ:{textResponse}");
 
             return stations;
         }

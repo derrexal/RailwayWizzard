@@ -17,8 +17,11 @@ namespace RailwayWizzard.Infrastructure
 
         public DbSet<User> Users { get; init; }
 
+        [Obsolete("Удалить после успешного переезда на новую таблицу + переименовать старую таблицу в old + переименовать новую сущность")]
         public DbSet<StationInfo> StationsInfo { get; init; }
         
+        public DbSet<StationInfoExtended> StationsInfoExtended { get; init; }
+
         public DbSet<NotificationTask> NotificationTasks { get; init; }
         
         public DbSet<NotificationTaskResult> NotificationTasksProcess { get; init; }

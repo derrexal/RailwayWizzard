@@ -3,6 +3,7 @@
     /// <summary>
     /// Класс станции получаемой путем десериализации из json.
     /// </summary>
+    [Obsolete("Эта модель использовалась на прошлой версии API. (https://pass.rzd.ru/suggester/?stationNamePart={uriInputStation}&lang=ru;)")]
     public class StationFromJson
     {
         public string n { get; set; } = null!;

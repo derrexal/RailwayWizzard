@@ -47,7 +47,8 @@ namespace RailwayWizzard.Application.Workers
 
         private async Task DoWork()
         {
-            // TODO: Это работает пока у нас имеются записи в базе. Если с нуля разворачивать бота без проиниализированных значений - поверка помрет.
+            // TODO: Это работает пока у нас имеются записи в базе.
+            // Если с нуля разворачивать бота без проиниализированных значений - поверка помрет.
             // Изменить input dto в FindFreeSeatsAsync и передавать туда ExpressCode который статичен
             var testNotificationTask = new NotificationTask
             {

@@ -66,9 +66,6 @@ namespace RailwayWizzard.Application
             builder.Services.AddHostedService<NotificationTaskWorker>();
             builder.Services.AddHostedService<MessageSenderWorker>();
             builder.Services.AddHostedService<HealthCheckWorker>();
-            
-            //TODO: Удалить после полного перехода
-            builder.Services.AddHostedService<FillStationInfoExtendedWorker>();
 
             builder.Services.AddLogging(options =>
             {

@@ -153,10 +153,38 @@ namespace RailwayWizzard.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.ToTable("AppStationInfo");
+                });
+
+            modelBuilder.Entity("RailwayWizzard.Core.StationInfo.StationInfoExtended", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<long>("ExpressCode")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("NodeId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("NodeType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
                     b.HasIndex("ExpressCode")
                         .IsUnique();
 
-                    b.ToTable("AppStationInfo");
+                    b.ToTable("AppStationInfoExtended");
                 });
 
             modelBuilder.Entity("RailwayWizzard.Core.User.User", b =>

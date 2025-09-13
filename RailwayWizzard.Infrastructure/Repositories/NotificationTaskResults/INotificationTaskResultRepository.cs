@@ -1,9 +1,9 @@
-using RailwayWizzard.Core.StationInfo;
+using RailwayWizzard.Core.NotificationTaskResult;
 
 namespace RailwayWizzard.Infrastructure.Repositories.NotificationTaskResults
 {
     /// <summary>
-    /// Репозиторий сущности <see cref="StationInfo"/>.
+    /// Репозиторий сущности <see cref="NotificationTaskResult"/>.
     /// </summary>
     public interface INotificationTaskResultRepository
     {
@@ -12,13 +12,13 @@ namespace RailwayWizzard.Infrastructure.Repositories.NotificationTaskResults
         /// </summary>
         /// <param name="taskId"></param>
         /// <returns></returns>
-        public Task<Core.NotificationTaskResult.NotificationTaskResult?> GetLastNotificationTaskProcessAsync(int taskId);
+        public Task<NotificationTaskResult?> GetLastNotificationTaskProcessAsync(int taskId);
 
         /// <summary>
         /// Создает запись о выполнении задачи.
         /// </summary>
         /// <param name="notificationTaskResult">Модель выполненной задаче.</param>
         /// <returns></returns>
-        public Task CreateAsync(Core.NotificationTaskResult.NotificationTaskResult notificationTaskResult);
+        public Task CreateAsync(NotificationTaskResult notificationTaskResult);
     }
 }

@@ -11,8 +11,8 @@ WORKDIR /src
 COPY ["RailwayWizzard.Application/RailwayWizzard.Application.csproj", "RailwayWizzard.Application/"]
 COPY ["RailwayWizzard.Rzd.ApiClient/RailwayWizzard.Rzd.ApiClient.csproj", "RailwayWizzard.Rzd.ApiClient/"]
 COPY ["RailwayWizzard.Core/RailwayWizzard.Core.csproj", "RailwayWizzard.Core/"]
-COPY ["RailwayWizzard.EntityFramework/RailwayWizzard.Infrastructure.csproj", "RailwayWizzard.EntityFramework/"]
-COPY ["RailwayWizzard.Robot/RailwayWizzard.Rzd.DataEngine.csproj", "RailwayWizzard.Robot/"]
+COPY ["RailwayWizzard.Infrastructure/RailwayWizzard.Infrastructure.csproj", "RailwayWizzard.EntityFramework/"]
+COPY ["RailwayWizzard.Rzd.DataEngine/RailwayWizzard.Rzd.DataEngine.csproj", "RailwayWizzard.Robot/"]
 COPY ["RailwayWizzard.Common/RailwayWizzard.Common.csproj", "RailwayWizzard.Common/"]
 RUN dotnet restore "./RailwayWizzard.Application/./RailwayWizzard.Application.csproj"
 COPY . .

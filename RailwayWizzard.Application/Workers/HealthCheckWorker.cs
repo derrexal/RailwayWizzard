@@ -52,7 +52,7 @@ namespace RailwayWizzard.Application.Workers
             // Изменить input dto в FindFreeSeatsAsync и передавать туда ExpressCode который статичен
             var testNotificationTask = new NotificationTask
             {
-                DepartureStationId = 5, // Москва
+                DepartureStationId = 4, // Москва
                 ArrivalStationId = 159,   // Орел
                 DepartureDateTime = DateTime.Today.AddDays(30).AddHours(8).AddMinutes(46), // 08:46
                 CarTypes = new List<CarType> { CarType.Sedentary, CarType.SedentaryBusiness}

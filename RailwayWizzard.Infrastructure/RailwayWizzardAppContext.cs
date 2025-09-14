@@ -33,8 +33,7 @@ namespace RailwayWizzard.Infrastructure
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<StationInfoExtended>()
-                .HasIndex(s => s.ExpressCode)
-                .IsUnique();
+                .HasIndex(s => s.ExpressCode);
         }
     }
 }

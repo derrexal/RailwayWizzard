@@ -16,7 +16,7 @@ namespace RailwayWizzard.Infrastructure.Repositories.NotificationTasks
         /// <param name="context">Контекст БД.</param>
         public NotificationTaskRepository(RailwayWizzardAppContext context)
         {
-            _context = context;
+            _context = Ensure.NotNull(context);
         }
 
         /// <inheritdoc/>

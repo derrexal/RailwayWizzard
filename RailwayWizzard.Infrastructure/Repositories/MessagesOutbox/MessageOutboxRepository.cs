@@ -18,7 +18,7 @@ namespace RailwayWizzard.Infrastructure.Repositories.MessagesOutbox
         /// <param name="context">Контекст БД.</param>
         public MessageOutboxRepository(RailwayWizzardAppContext context)
         {
-            _context = context;
+            _context = Ensure.NotNull(context);
         }
 
         //TODO: Что делать с message которые не могут отправиться из-за того что пользователь заблокировал бота

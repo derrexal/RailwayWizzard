@@ -12,7 +12,7 @@ namespace RailwayWizzard.Application.Services.NotificationTasks
         private readonly INotificationTaskRepository _notificationTaskRepository;
         private readonly IUserRepository _userRepository;
         private readonly IStationInfoRepository _stationInfoRepository;
-        private readonly ILogger _logger;
+        private readonly ILogger<NotificationTaskService> _logger;
 
         public NotificationTaskService(
             INotificationTaskRepository notificationTaskRepository,
@@ -20,10 +20,10 @@ namespace RailwayWizzard.Application.Services.NotificationTasks
             IStationInfoRepository stationInfoRepository,
             ILogger<NotificationTaskService> logger)
         {
-            _notificationTaskRepository = notificationTaskRepository;
-            _userRepository = userRepository;
-            _stationInfoRepository = stationInfoRepository;
-            _logger = logger;
+            _notificationTaskRepository = Ensure.NotNull(notificationTaskRepository);
+            _userRepository = Ensure.NotNull(userRepository);
+            _stationInfoRepository = Ensure.NotNull(stationInfoRepository);
+            _logger = Ensure.NotNull(logger);
         }
 
         public async Task<int> CreateAsync(CreateNotificationTaskDto createNotificationTaskDto)

@@ -22,8 +22,8 @@ namespace RailwayWizzard.Application.Workers
             IServiceScopeFactory serviceScopeFactory,
             ILogger<HealthCheckWorker> logger)
         {
-            _serviceScopeFactory = serviceScopeFactory;
-            _logger = logger;
+            _serviceScopeFactory = Ensure.NotNull(serviceScopeFactory);
+            _logger = Ensure.NotNull(logger);
         }
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using RailwayWizzard.Common;
 using RailwayWizzard.Core.NotificationTaskResult;
 
 namespace RailwayWizzard.Infrastructure.Repositories.NotificationTaskResults
@@ -14,7 +15,7 @@ namespace RailwayWizzard.Infrastructure.Repositories.NotificationTaskResults
         /// <param name="context">Контекст БД.</param>
         public NotificationTaskResultRepository(RailwayWizzardAppContext context)
         {
-            _context = context;
+            _context = Ensure.NotNull(context);
         }
 
         public Task<NotificationTaskResult?> GetLastNotificationTaskProcessAsync(int taskId)

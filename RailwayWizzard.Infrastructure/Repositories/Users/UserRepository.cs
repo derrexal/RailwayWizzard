@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using RailwayWizzard.Common;
 using RailwayWizzard.Core.User;
 using RailwayWizzard.Infrastructure.Exceptions;
 
@@ -15,7 +16,7 @@ namespace RailwayWizzard.Infrastructure.Repositories.Users
         /// <param name="context">Контекст БД.</param>
         public UserRepository (RailwayWizzardAppContext context)
         {
-            _context = context;
+            _context = Ensure.NotNull(context);
         }
 
         public async Task<User> GetUserByIdAsync(int userId)

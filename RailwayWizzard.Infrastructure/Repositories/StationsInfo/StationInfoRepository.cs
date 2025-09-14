@@ -8,7 +8,7 @@ namespace RailwayWizzard.Infrastructure.Repositories.StationsInfo
     /// <inheritdoc/>
     public class StationInfoRepository : IStationInfoRepository
     {
-        private const int MaxStationsCount = 20;
+        private const int MaxStationsSearchCount = 20;
         
         private readonly RailwayWizzardAppContext _context;
 
@@ -63,7 +63,7 @@ namespace RailwayWizzard.Infrastructure.Repositories.StationsInfo
                 .OrderByDescending(s => s.Name.StartsWith(searchTerm, StringComparison.OrdinalIgnoreCase))
                 .ThenBy(s => s.Name.IndexOf(searchTerm, StringComparison.OrdinalIgnoreCase))
                 .ThenBy(s => s.Name.Length)
-                .Take(MaxStationsCount)
+                .Take(MaxStationsSearchCount)
                 .ToList();
 
             return result;

@@ -124,6 +124,7 @@ namespace RailwayWizzard.Application.Services.B2B
                 if (string.IsNullOrEmpty(textResponse)) 
                     throw new NullReferenceException($"РЖД не нашел доступных станция по наименованию: '{inputStation}'. Ответ: {textResponse}");
             
+                // TODO: Дессериализации здесь не место...
                 var stations = DeserializeStationsText(textResponse);
                 var stationInfos = await CreateStationsInfoAsync(stations);
             
@@ -140,7 +141,7 @@ namespace RailwayWizzard.Application.Services.B2B
         {
             var stations = JsonConvert.DeserializeObject<StationInfoFromJson>(textResponse);
             
-            if (stations is null || (!stations.city.Any() && !stations.train.Any() && !stations.city.Any()))
+            if (stations is null || !stations.city.Any())
                 throw new NullReferenceException($"РЖД не нашел доступных станция по наименованию. Ответ: {textResponse}");
 
             return stations;
@@ -153,33 +154,15 @@ namespace RailwayWizzard.Application.Services.B2B
         /// <returns></returns>
         private async Task<IReadOnlyCollection<StationInfoExtended>> CreateStationsInfoAsync(StationInfoFromJson rootStations)
         {
-            var stationInfos = new List<StationInfoExtended>();
-            
-            foreach (var city in rootStations.city)
-            {
-                var stationInfo = new StationInfoExtended
-                {
-                    Name = city.name, 
-                    ExpressCode = city.expressCode, 
-                    NodeId = city.nodeId,
-                    NodeType = city.nodeType,
-                };
-                stationInfos.Add(stationInfo);
-            }
-            
-            foreach (var train in rootStations.train)
-            {
-                var stationInfo = new StationInfoExtended
-                {
-                    Name = train.name, 
-                    ExpressCode = train.expressCode, 
-                    NodeId = train.nodeId,
-                    NodeType = train.nodeType,
-                };
-                stationInfos.Add(stationInfo);
-            }
-
-            // avia из StationInfoFromJson просто игнорируем.  
+            var stationInfos = rootStations.city.Select(city => 
+                    new StationInfoExtended 
+                    { 
+                        Name = city.name, 
+                        ExpressCode = city.expressCode, 
+                        NodeId = city.nodeId, 
+                        NodeType = city.nodeType,
+                    })
+                .ToList();
 
             await _stationInfoRepository.AddRangeStationInfosAsync(stationInfos);            
 

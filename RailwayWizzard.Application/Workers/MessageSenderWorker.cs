@@ -1,3 +1,4 @@
+using RailwayWizzard.Common;
 using RailwayWizzard.Infrastructure.Repositories.MessagesOutbox;
 using RailwayWizzard.Infrastructure.Repositories.Users;
 using RailwayWizzard.Telegram.ApiClient.Exceptions;
@@ -15,14 +16,14 @@ namespace RailwayWizzard.Application.Workers
         private const int RUN_INTERVAL = 1000 * 3; // 3 second
         
         private readonly IServiceScopeFactory _serviceScopeFactory;
-        private readonly ILogger<NotificationTaskWorker> _logger;
+        private readonly ILogger<MessageSenderWorker> _logger;
 
         public MessageSenderWorker(
             IServiceScopeFactory serviceScopeFactory,
-            ILogger<NotificationTaskWorker> logger)
+            ILogger<MessageSenderWorker> logger)
         {
-            _serviceScopeFactory = serviceScopeFactory;
-            _logger = logger;
+            _serviceScopeFactory = Ensure.NotNull(serviceScopeFactory);
+            _logger = Ensure.NotNull(logger);
         }
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)

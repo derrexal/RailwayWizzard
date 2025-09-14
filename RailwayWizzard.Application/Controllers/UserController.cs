@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RailwayWizzard.Application.Dto.User;
 using RailwayWizzard.Application.Services.Users;
+using RailwayWizzard.Common;
 
 namespace RailwayWizzard.Application.Controllers
 {
@@ -12,7 +13,7 @@ namespace RailwayWizzard.Application.Controllers
 
         public UserController(IUserService userService)
         {
-            _userService = userService;
+            _userService = Ensure.NotNull(userService);
         }
 
         [HttpPost("CreateOrUpdate")]

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RailwayWizzard.Application.Dto.B2B;
 using RailwayWizzard.Application.Services.B2B;
+using RailwayWizzard.Common;
 
 namespace RailwayWizzard.Application.Controllers
 {
@@ -11,8 +12,10 @@ namespace RailwayWizzard.Application.Controllers
     {
         private readonly IB2BService _b2BService;
 
-        public B2BController(IB2BService b2BService) =>
-            _b2BService = b2BService;
+        public B2BController(IB2BService b2BService)
+        {
+            _b2BService = Ensure.NotNull(b2BService);
+        }
 
 
         [HttpGet("GetAvailableTimes")]

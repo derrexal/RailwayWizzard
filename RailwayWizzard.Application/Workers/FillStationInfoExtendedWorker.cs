@@ -78,7 +78,7 @@ namespace RailwayWizzard.Application.Workers
                         continue;
                     }
 
-                    var result = extendedStation.city.ToArray();
+                    var result = extendedStation.city.Where(x => x.expressCode > 0).ToArray();
                     
                     var newStationCompleteMatch = result.FirstOrDefault(station => station.expressCode == oldStation.ExpressCode && station.name == oldStation.Name);
                     if (newStationCompleteMatch is not null)
@@ -86,7 +86,7 @@ namespace RailwayWizzard.Application.Workers
                         context.StationsInfoExtended.Add(new StationInfoExtended
                         {
                             Id = oldStation.Id,
-                            ExpressCode = oldStation.ExpressCode,
+                            ExpressCode = newStationCompleteMatch.expressCode,
                             Name = newStationCompleteMatch.name,
                             NodeId = newStationCompleteMatch.nodeId,
                             NodeType = newStationCompleteMatch.nodeType,
@@ -101,7 +101,7 @@ namespace RailwayWizzard.Application.Workers
                             context.StationsInfoExtended.Add(new StationInfoExtended
                             {
                                 Id = oldStation.Id,
-                                ExpressCode = oldStation.ExpressCode,
+                                ExpressCode = newStationNoCompleteMatch.expressCode,
                                 Name = newStationNoCompleteMatch.name,
                                 NodeId = newStationNoCompleteMatch.nodeId,
                                 NodeType = newStationNoCompleteMatch.nodeType,

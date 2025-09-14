@@ -1,6 +1,6 @@
 namespace RailwayWizzard.Rzd.ApiClient.Services.GetStationsByNameService;
 
-/// <inheritdoc/>
+/// <inheritdoc cref="IGetStationsByNameService"/>/>
 public class GetStationsByNameService: BaseGetDataService, IGetStationsByNameService
 {
     /// <summary>
@@ -12,19 +12,6 @@ public class GetStationsByNameService: BaseGetDataService, IGetStationsByNameSer
     
     /// <inheritdoc/>
     public async Task<string> GetDataAsync(string inputStation)
-    {
-        var uriInputStation = Uri.EscapeDataString(inputStation);
-
-        var url = $"https://pass.rzd.ru/suggester/?stationNamePart={uriInputStation}&lang=ru";
-
-        using var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add("Host", "pass.rzd.ru");
-
-        return await BaseHttpSenderAsync(request);
-    }
-    
-    /// <inheritdoc/>
-    public async Task<string> GetDataExtendedAsync(string inputStation)
     {
         var inputStationUri = Uri.EscapeDataString(inputStation);
 

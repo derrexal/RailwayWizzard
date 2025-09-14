@@ -1,4 +1,5 @@
 ﻿using RailwayWizzard.Application.Dto.User;
+using RailwayWizzard.Common;
 using RailwayWizzard.Core.User;
 using RailwayWizzard.Infrastructure.Repositories.Users;
 
@@ -8,14 +9,14 @@ namespace RailwayWizzard.Application.Services.Users
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
-        private readonly ILogger _logger;
+        private readonly ILogger<UserService> _logger;
 
         public UserService(
             IUserRepository userRepository,
             ILogger<UserService> logger)
         {
-            _userRepository = userRepository;
-            _logger = logger;
+            _userRepository = Ensure.NotNull(userRepository);
+            _logger = Ensure.NotNull(logger);
         }
 
         /// <inheritdoc/>

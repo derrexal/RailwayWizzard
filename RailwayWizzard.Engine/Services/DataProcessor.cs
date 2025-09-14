@@ -31,14 +31,16 @@ namespace RailwayWizzard.Engine.Services
             INotificationTaskRepository taskRepository,
             INotificationTaskResultRepository taskResultRepository,
             IMessageOutboxRepository messageOutboxRepository,
-            ILogger<DataProcessor> logger, IStationInfoRepository stationInfoRepository)
+            ILogger<DataProcessor> logger, 
+            IStationInfoRepository stationInfoRepository)
         {
-            _dataExtractor = dataExtractor;
-            _taskRepository = taskRepository;
-            _taskResultRepository = taskResultRepository;
-            _messageOutboxRepository = messageOutboxRepository;
-            _logger = logger;
-            _stationInfoRepository = stationInfoRepository;
+            _dataExtractor = Ensure.NotNull(dataExtractor);
+            _taskRepository = Ensure.NotNull(taskRepository);
+            _taskResultRepository = Ensure.NotNull(taskResultRepository);
+            _messageOutboxRepository = Ensure.NotNull(messageOutboxRepository);
+            _logger = Ensure.NotNull(logger);
+            _stationInfoRepository = Ensure.NotNull(stationInfoRepository);
+            
             _watch = Stopwatch.StartNew();
             _started = DateTime.Now;
         }

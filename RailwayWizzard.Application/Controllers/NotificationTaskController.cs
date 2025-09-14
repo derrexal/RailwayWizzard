@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RailwayWizzard.Application.Dto.NotificationTask;
 using RailwayWizzard.Application.Services.NotificationTasks;
+using RailwayWizzard.Common;
 
 namespace RailwayWizzard.Application.Controllers
 {
@@ -13,7 +14,7 @@ namespace RailwayWizzard.Application.Controllers
 
         public NotificationTaskController(INotificationTaskService notificationTaskService)
         {
-            _notificationTaskService = notificationTaskService;
+            _notificationTaskService = Ensure.NotNull(notificationTaskService);
         }
 
         [HttpPost("Create")]

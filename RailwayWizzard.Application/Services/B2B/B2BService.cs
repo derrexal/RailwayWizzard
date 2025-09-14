@@ -16,10 +16,10 @@ namespace RailwayWizzard.Application.Services.B2B
         private readonly IStationInfoRepository _stationInfoRepository;
         private readonly IDataExtractor _dataExtractor;
         
-        private readonly ILogger _logger;           
+        private readonly ILogger<B2BService> _logger;           
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="B2BService" class./>
+        /// Initializes a new instance of the <see cref="B2BService"/> class.
         /// </summary>
         /// <param name="stationsByNameService">Сервис получения информации о станциях по имени.</param>
         /// <param name="stationInfoRepository"></param>
@@ -31,10 +31,10 @@ namespace RailwayWizzard.Application.Services.B2B
             IDataExtractor dataExtractor,
             ILogger<B2BService> logger)
         {
-            _stationsByNameService = stationsByNameService;
-            _stationInfoRepository = stationInfoRepository;
-            _dataExtractor = dataExtractor;
-            _logger = logger;
+            _stationsByNameService = Ensure.NotNull(stationsByNameService);
+            _stationInfoRepository = Ensure.NotNull(stationInfoRepository);
+            _dataExtractor = Ensure.NotNull(dataExtractor);
+            _logger = Ensure.NotNull(logger);
         }
 
         /// <inheritdoc/>
@@ -54,83 +54,95 @@ namespace RailwayWizzard.Application.Services.B2B
 
             var availableTimes = await _dataExtractor.GetAvailableTimesAsync(request);
 
-            return availableTimes;
+            return availableTimes; 
         }
 
         /// <inheritdoc/>
-        public async Task<IReadOnlyCollection<StationInfo>> StationValidateAsync(string stationName)
+        public async Task<IReadOnlyCollection<StationInfoExtended>> StationValidateAsync(string stationName)
         {
             //Ищем станцию по полному соответствию
             var station = await GetStationInfoAsync(stationName);
-            if (station is not null) return new List<StationInfo> { station };
+            if (station is not null) 
+                return new List<StationInfoExtended> { station };
 
-            //Ищем станцию по НЕполному соответствию
+            //Ищем станцию по неполному соответствию
             var stations = await GetStationsInfoAsync(stationName);
 
             return stations;
         }
 
-        // Переделал. Получаю ответ только из БД.
-        private async Task<StationInfo?> GetStationInfoAsync(string stationName)
+        /// <summary>
+        /// Получение станции по полному совпадению.
+        /// </summary>
+        /// <param name="stationName">Наименование станции.</param>
+        /// <returns>Модель найденной станции.</returns>
+        private async Task<StationInfoExtended?> GetStationInfoAsync(string stationName)
         {
-            // Если есть в БД
-            var stationInfo = await _stationInfoRepository.FindByNameAsync(stationName);
+            // Сначала проверяем - может станция уже есть в БД
+            var stationInfo = await _stationInfoRepository.FindByNameExactAsync(stationName);
             if (stationInfo is not null) 
                 return stationInfo;
 
             // Идем к АПИ чтобы наполнить базу
-            var stations = await GetStationsAsync(stationName);
-            if (stations.Count == 0) 
+            var stations = await GetStationsFromApiAsync(stationName);
+            if (!stations.Any()) 
                 return null;
              
             // Снова смотрим есть ли в БД
             // Зачем снова идти в БД? GetStationsAsync присылает информацию о нескольких станциях, а мы хотим найти одну.
-            stationInfo = await _stationInfoRepository.FindByNameAsync(stationName);
+            stationInfo = await _stationInfoRepository.FindByNameExactAsync(stationName);
             return stationInfo ?? null;
         }
 
         /// <summary>
-        /// Получение станций по НЕполному совпадению
+        /// Получение станций по неполному совпадению.
         /// </summary>
-        /// <param name="stationName"></param>
-        /// <returns></returns>
-        private async Task<IReadOnlyCollection<StationInfo>> GetStationsInfoAsync(string stationName)
+        /// <param name="stationName">Наименование станции.</param>
+        /// <returns>Коллекция найденных станций.</returns>
+        private async Task<IReadOnlyCollection<StationInfoExtended>> GetStationsInfoAsync(string stationName)
         {
             //Ищем в БД
-            var stationsInfo = await _stationInfoRepository.ContainsByStationNameAsync(stationName);
+            var stationsInfo = await _stationInfoRepository.FindByNameContainsAsync(stationName);
             if (stationsInfo.Any()) 
                 return stationsInfo;
 
             //Ищем в данных полученных по АПИ
-            var stations = await GetStationsAsync(stationName);
-            if (stations.Count == 0) 
-                return new List<StationInfo>();
+            var stations = await GetStationsFromApiAsync(stationName);
+            if (!stations.Any()) 
+                return new List<StationInfoExtended>();
 
             return stations
-                .Where(s => s.n.ToUpper().Contains(stationName.ToUpper()))
-                .Select(s => new StationInfo { ExpressCode = s.c, Name = s.n })
+                .Where(s => s.Name.ToUpper().Contains(stationName.ToUpper()))
                 .ToList();
         }
 
-        private async Task<IReadOnlyCollection<StationFromJson>> GetStationsAsync(string inputStation)
+        private async Task<IReadOnlyCollection<StationInfoExtended>> GetStationsFromApiAsync(string inputStation)
         {
-            var textResponse = await _stationsByNameService.GetDataAsync(inputStation);
-            if (string.IsNullOrEmpty(textResponse)) 
-                return new List<StationFromJson>();
+            try
+            {
+                var textResponse = await _stationsByNameService.GetDataAsync(inputStation);
+                if (string.IsNullOrEmpty(textResponse)) 
+                    throw new NullReferenceException($"РЖД не нашел доступных станция по наименованию: '{inputStation}'. Ответ: {textResponse}");
             
-            var stations = DeserializeStationsText(textResponse);
-            if (stations.Count > 0) 
-                await CreateStationsInfoAsync(stations);
+                // TODO: Дессериализации здесь не место...
+                var stations = DeserializeStationsText(textResponse);
+                var stationInfos = await CreateStationsInfoAsync(stations);
             
-            return stations;
+                return stationInfos;
+            }
+            catch (NullReferenceException e)
+            {
+                _logger.LogWarning(e, "РЖД не нашел доступных станция по наименованию:'{0}'", inputStation);
+                return new List<StationInfoExtended>();
+            }
         }
-        private static List<StationFromJson> DeserializeStationsText(string textResponse)
+        
+        private static StationInfoFromJson DeserializeStationsText(string textResponse)
         {
-            var stations = JsonConvert.DeserializeObject<List<StationFromJson>>(textResponse);
+            var stations = JsonConvert.DeserializeObject<StationInfoFromJson>(textResponse);
             
-            if (stations!.Count == 0)
-                throw new NullReferenceException(
-                    $"Сервис РЖД при запросе списка свободных мест вернул ответ в котором нет станций. Ответ:{textResponse}");
+            if (stations is null || !stations.city.Any())
+                throw new NullReferenceException($"РЖД не нашел доступных станция по наименованию. Ответ: {textResponse}");
 
             return stations;
         }
@@ -140,25 +152,21 @@ namespace RailwayWizzard.Application.Services.B2B
         /// </summary>
         /// <param name="rootStations"></param>
         /// <returns></returns>
-        private async Task CreateStationsInfoAsync(IReadOnlyCollection<StationFromJson> rootStations)
+        private async Task<IReadOnlyCollection<StationInfoExtended>> CreateStationsInfoAsync(StationInfoFromJson rootStations)
         {
-            var addedStationInfo = new List<StationInfo>();
+            var stationInfos = rootStations.city.Select(city => 
+                    new StationInfoExtended 
+                    { 
+                        Name = city.name, 
+                        ExpressCode = city.expressCode, 
+                        NodeId = city.nodeId, 
+                        NodeType = city.nodeType,
+                    })
+                .ToList();
 
-            foreach (var rootStation in rootStations)
-            {
-                var anyStationInfo = await _stationInfoRepository.AnyByExpressCodeAsync(rootStation.c);
+            await _stationInfoRepository.AddRangeStationInfosAsync(stationInfos);            
 
-                if (anyStationInfo is false)
-                {
-                    addedStationInfo.Add(new StationInfo
-                    {
-                        ExpressCode = rootStation.c,
-                        Name = rootStation.n,
-                    });
-                }
-            }
-
-            await _stationInfoRepository.AddRangeStationInfoAsync(addedStationInfo);
+            return stationInfos;
         }
     }
 }

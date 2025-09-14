@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using RailwayWizzard.Common;
 using RailwayWizzard.Core.StationInfo;
 using RailwayWizzard.Infrastructure.Exceptions;
 
@@ -7,7 +8,7 @@ namespace RailwayWizzard.Infrastructure.Repositories.StationsInfo
     /// <inheritdoc/>
     public class StationInfoRepository : IStationInfoRepository
     {
-        private const int MaxStationsCount = 20;
+        private const int MaxStationsSearchCount = 20;
         
         private readonly RailwayWizzardAppContext _context;
 
@@ -17,42 +18,44 @@ namespace RailwayWizzard.Infrastructure.Repositories.StationsInfo
         /// <param name="context">Контекст БД.</param>
         public StationInfoRepository(RailwayWizzardAppContext context)
         {
-            _context = context;
+            _context = Ensure.NotNull(context);
         }
 
-        public async Task<StationInfo> GetByIdAsync(int id)
+        /// <inheritdoc/>
+        public async Task<StationInfoExtended> GetByIdAsync(int id)
         {
-            var station = await _context.StationsInfo.FirstOrDefaultAsync(x => x.Id == id);
+            var station = await _context.StationsInfoExtended.FirstOrDefaultAsync(x => x.Id == id);
             
             if(station == null)
-                throw new EntityNotFoundException($"{typeof(StationInfo)} with Id: {id} not found");
+                throw new EntityNotFoundException($"{typeof(StationInfoExtended)} with Id: {id} not found");
 
             return station;
         }
         
-        public async Task<StationInfo> GetByNameAsync(string name)
+        /// <inheritdoc/>
+        public async Task<StationInfoExtended> GetByNameAsync(string name)
         {
-            var station = await FindByNameAsync(name);
+            var station = await FindByNameExactAsync(name);
             
             if(station == null)
-                throw new EntityNotFoundException($"{typeof(StationInfo)} with Name: {name} not found");
+                throw new EntityNotFoundException($"{typeof(StationInfoExtended)} with Name: {name} not found");
 
             return station;
         }
 
         /// <inheritdoc/>
-        public async Task<StationInfo?> FindByNameAsync(string name)
+        public async Task<StationInfoExtended?> FindByNameExactAsync(string name)
         {
-            return await _context.StationsInfo
+            return await _context.StationsInfoExtended
                 .SingleOrDefaultAsync(s => s.Name == name);
         }
 
         /// <inheritdoc/>
-        public async Task<IReadOnlyCollection<StationInfo>> ContainsByStationNameAsync(string name)
+        public async Task<IReadOnlyCollection<StationInfoExtended>> FindByNameContainsAsync(string name)
         {
             var searchTerm = name.ToUpper();
 
-            var stations = await _context.StationsInfo
+            var stations = await _context.StationsInfoExtended
                 .Where(s => s.Name.Contains(searchTerm))
                 .ToListAsync();
 
@@ -60,25 +63,30 @@ namespace RailwayWizzard.Infrastructure.Repositories.StationsInfo
                 .OrderByDescending(s => s.Name.StartsWith(searchTerm, StringComparison.OrdinalIgnoreCase))
                 .ThenBy(s => s.Name.IndexOf(searchTerm, StringComparison.OrdinalIgnoreCase))
                 .ThenBy(s => s.Name.Length)
-                .Take(MaxStationsCount)
+                .Take(MaxStationsSearchCount)
                 .ToList();
 
             return result;
         }
 
         /// <inheritdoc/>
-        public async Task<bool> AnyByExpressCodeAsync(long expressCode)
+        public async Task AddRangeStationInfosAsync(IReadOnlyCollection<StationInfoExtended> stationInfos)
         {
-            return await _context.StationsInfo
-                .AnyAsync(s => s.ExpressCode == expressCode);
+            foreach (var stationInfo in stationInfos)
+            {
+                var anyStationInfo = await AnyByExpressCodeAsync(stationInfo.ExpressCode);
+            
+                if (anyStationInfo is false)
+                    _context.StationsInfoExtended.Add(stationInfo);                
+            }
+            
+            await _context.SaveChangesAsync();
         }
 
-        /// <inheritdoc/>
-        public async Task AddRangeStationInfoAsync(IReadOnlyCollection<StationInfo> stationInfo)
+        private async Task<bool> AnyByExpressCodeAsync(long expressCode)
         {
-            await _context.StationsInfo.AddRangeAsync(stationInfo);
-
-            await _context.SaveChangesAsync();
+            return await _context.StationsInfoExtended
+                .AnyAsync(s => s.ExpressCode == expressCode);
         }
     }
 }

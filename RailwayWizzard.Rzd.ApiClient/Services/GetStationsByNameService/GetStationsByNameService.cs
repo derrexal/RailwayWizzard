@@ -22,5 +22,23 @@ public class GetStationsByNameService: BaseGetDataService, IGetStationsByNameSer
 
         return await BaseHttpSenderAsync(request);
     }
+    
+    /// <inheritdoc/>
+    public async Task<string> GetDataExtendedAsync(string inputStation)
+    {
+        var inputStationUri = Uri.EscapeDataString(inputStation);
 
+        var url =
+            $"https://ticket.rzd.ru/api/v1/suggests?" +
+            $"GroupResults=true" +
+            $"&RailwaySortPriority=true" +
+            $"&MergeSuburban=true" +
+            $"&Query={inputStationUri}" +
+            $"&Language=ru" +
+            $"&TransportType=rail,suburban,boat,bus,aeroexpress"; // avia сознательно не запрашиваем 
+
+        using var request = new HttpRequestMessage(HttpMethod.Get, url);
+
+        return await BaseHttpSenderAsync(request);
+    }
 }

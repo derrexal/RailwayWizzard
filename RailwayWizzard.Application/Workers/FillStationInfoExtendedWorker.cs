@@ -78,9 +78,7 @@ namespace RailwayWizzard.Application.Workers
                         continue;
                     }
 
-                    var result = new List<SharedStationInfo>(extendedStation.city)
-                        .Concat(extendedStation.train)
-                        .ToList();
+                    var result = extendedStation.city.ToArray();
                     
                     var newStationCompleteMatch = result.FirstOrDefault(station => station.expressCode == oldStation.ExpressCode && station.name == oldStation.Name);
                     if (newStationCompleteMatch is not null)

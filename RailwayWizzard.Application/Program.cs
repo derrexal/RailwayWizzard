@@ -19,7 +19,7 @@ using RailwayWizzard.Telegram.ApiClient.Services;
 
 namespace RailwayWizzard.Application
 {
-    public class Program
+    public abstract class Program
     {
         public static void Main(string[] args)
         {
@@ -44,9 +44,14 @@ namespace RailwayWizzard.Application
             builder.Services.AddScoped<IMessageOutboxRepository, MessageOutboxRepository>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IStationInfoRepository, StationInfoRepository>();
+            
+            builder.Configuration.AddEnvironmentVariables();
 
+            var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING") 
+                                   ?? throw new InvalidOperationException("DB_CONNECTION_STRING environment variable is not set.");
+            
             builder.Services.AddDbContext<RailwayWizzardAppContext>(options =>
-                options.UseNpgsql(builder.Configuration.GetConnectionString("RailwayWizzardAppContext"),
+                options.UseNpgsql(connectionString,
                 npgsqlOptionsAction: npgsqlOption =>
                     {
                         npgsqlOption.EnableRetryOnFailure(
@@ -61,6 +66,7 @@ namespace RailwayWizzard.Application
             builder.Services.AddHostedService<NotificationTaskWorker>();
             builder.Services.AddHostedService<MessageSenderWorker>();
             builder.Services.AddHostedService<HealthCheckWorker>();
+            builder.Services.AddHostedService<FillStationInfoExtendedWorker>();
 
             builder.Services.AddLogging(options =>
             {

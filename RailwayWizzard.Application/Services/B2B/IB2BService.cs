@@ -6,11 +6,11 @@ namespace RailwayWizzard.Application.Services.B2B
     public interface IB2BService
     {
         /// <summary>
-        /// Проверяет, существует ли такая станция по полному или неполному соответствию.
+        /// Ищет станцию по наименованию по полному или неполному соответствию.
         /// </summary>
-        /// <param name="stationName">Станция введенная пользователем.</param>
-        /// <returns>Список станций.</returns>
-        public Task<IReadOnlyCollection<StationInfo>> StationValidateAsync(string stationName);
+        /// <param name="stationName">Наименование станции введенное пользователем.</param>
+        /// <returns>Список найденных станций.</returns>
+        public Task<IReadOnlyCollection<StationInfoExtended>> StationValidateAsync(string stationName);
 
         /// <summary>
         /// Возвращает актуальное расписание для указанного рейса.

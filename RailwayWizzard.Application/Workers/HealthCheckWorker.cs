@@ -22,8 +22,8 @@ namespace RailwayWizzard.Application.Workers
             IServiceScopeFactory serviceScopeFactory,
             ILogger<HealthCheckWorker> logger)
         {
-            _serviceScopeFactory = serviceScopeFactory;
-            _logger = logger;
+            _serviceScopeFactory = Ensure.NotNull(serviceScopeFactory);
+            _logger = Ensure.NotNull(logger);
         }
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
@@ -47,11 +47,12 @@ namespace RailwayWizzard.Application.Workers
 
         private async Task DoWork()
         {
-            // TODO: Это работает пока у нас имеются записи в базе. Если с нуля разворачивать бота без проиниализированных значений - поверка помрет.
+            // TODO: Это работает пока у нас имеются записи в базе.
+            // Если с нуля разворачивать бота без проиниализированных значений - поверка помрет.
             // Изменить input dto в FindFreeSeatsAsync и передавать туда ExpressCode который статичен
             var testNotificationTask = new NotificationTask
             {
-                DepartureStationId = 5, // Москва
+                DepartureStationId = 4, // Москва
                 ArrivalStationId = 159,   // Орел
                 DepartureDateTime = DateTime.Today.AddDays(30).AddHours(8).AddMinutes(46), // 08:46
                 CarTypes = new List<CarType> { CarType.Sedentary, CarType.SedentaryBusiness}

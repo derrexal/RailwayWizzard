@@ -266,3 +266,4 @@ docker-compose.override.yml
 # App specific
 appsettings.Development.json
 appsettings.Production.json
+postgres-data/

@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>RailwayWizzard.Rzd.DataEngine</RootNamespace>
+  </PropertyGroup>
+	
+  <ItemGroup>
+    <ProjectReference Include="..\RailwayWizzard.Infrastructure\RailwayWizzard.Infrastructure.csproj" />
+    <ProjectReference Include="..\RailwayWizzard.Rzd.ApiClient\RailwayWizzard.Rzd.ApiClient.csproj" />
+    <ProjectReference Include="..\RailwayWizzard.Core\RailwayWizzard.Core.csproj" />
+    <ProjectReference Include="..\RailwayWizzard.Common\RailwayWizzard.Common.csproj" />
+    <ProjectReference Include="..\RailwayWizzard.Telegram.ApiClient\RailwayWizzard.Telegram.ApiClient.csproj" />
+  </ItemGroup>
+	
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+</Project>

@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
 using Microsoft.Extensions.Logging;
+using RailwayWizzard.Common;
 using RailwayWizzard.Telegram.ApiClient.Exceptions;
 using RailwayWizzard.Telegram.ApiClient.Models;
 
@@ -16,8 +17,8 @@ public class BotClient : IBotClient
 
     public BotClient(IHttpClientFactory httpClientFactory, ILogger<BotClient> logger)
     {
-        _httpClientFactory = httpClientFactory;
-        _logger = logger;
+        _httpClientFactory = Ensure.NotNull(httpClientFactory);
+        _logger = Ensure.NotNull(logger);
     }
 
     /// <inheritdoc/>

@@ -28,6 +28,7 @@ async def make_request(method, endpoint, json_data=None, params=None) -> ClientR
     """
     url = f"{API_URL}/{endpoint}"
     try:
+        logger.info(f'Send request to {url}')
         async with aiohttp.ClientSession() as session:
             if method == 'POST':
                 async with session.post(url, json=json_data) as response:

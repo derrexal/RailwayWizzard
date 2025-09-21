@@ -14,6 +14,9 @@ services:
     networks:
       - my-network
     restart: always
+    environment:
+      - DB_CONNECTION_STRING=Host=postgres_db;Port=${POSTGRES_PORT};Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+      - ASPNETCORE_ENVIRONMENT=Production
 
   postgres_db:
     image: postgres:16

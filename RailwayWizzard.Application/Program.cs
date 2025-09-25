@@ -100,12 +100,12 @@ namespace RailwayWizzard.Application
 
             app.Run();
         }
-        //
-        // private static AsyncRetryPolicy<HttpResponseMessage> GetRetryPolicy()
-        // {
-        //     return HttpPolicyExtensions
-        //         .HandleTransientHttpError() // Ловит 5xx и сетевые ошибки
-        //         .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(5, retryAttempt)));
-        // }
+        
+        private static AsyncRetryPolicy<HttpResponseMessage> GetRetryPolicy()
+        {
+            return HttpPolicyExtensions
+                .HandleTransientHttpError() // Ловит 5xx и сетевые ошибки
+                .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(5, retryAttempt)));
+        }
     }
 }

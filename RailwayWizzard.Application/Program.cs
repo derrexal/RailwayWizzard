@@ -1,4 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Polly;
+using Polly.Extensions.Http;
+using Polly.Retry;
 using RailwayWizzard.Application.Services.B2B;
 using RailwayWizzard.Application.Services.NotificationTasks;
 using RailwayWizzard.Application.Services.Users;
@@ -74,7 +77,8 @@ namespace RailwayWizzard.Application
                     c.TimestampFormat = "[yyyy-MM-dd HH:mm:ss] ";
                 });
             });
-
+            
+            builder.Services.AddHttpClient<IGetTrainInformationService, GetTrainInformationService>().AddPolicyHandler(GetRetryPolicy());
             builder.Services.AddHttpClient();
 
             var app = builder.Build();
@@ -96,5 +100,12 @@ namespace RailwayWizzard.Application
 
             app.Run();
         }
+        //
+        // private static AsyncRetryPolicy<HttpResponseMessage> GetRetryPolicy()
+        // {
+        //     return HttpPolicyExtensions
+        //         .HandleTransientHttpError() // Ловит 5xx и сетевые ошибки
+        //         .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(5, retryAttempt)));
+        // }
     }
 }

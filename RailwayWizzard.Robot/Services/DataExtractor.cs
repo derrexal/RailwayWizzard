@@ -117,7 +117,7 @@ namespace RailwayWizzard.Rzd.DataEngine.Services
                 return string.Empty;
             }
 
-            task.TrainNumber ??= GetTrainNumberFromResponse(myDeserializedClass, $"{task.DepartureDateTime:t}");
+            task.TrainNumber ??= GetTrainNumberFromResponse(myDeserializedClass, $"{task.DepartureDateTime:T}");
 
             var currentRoute = ExtractFreeSeatsFromResponse(myDeserializedClass, task);
             if (currentRoute.Count == 0 || currentRoute.Sum(x => x.TotalPlace) < task.NumberSeats) 

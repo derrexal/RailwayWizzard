@@ -116,10 +116,11 @@ namespace RailwayWizzard.Rzd.DataEngine.Services
                     $"Ответ:{trainInfoResponse}");
                 return string.Empty;
             }
+            
+            var taskTimeFrom = $"{task.DepartureDateTime:T}";
+            task.TrainNumber ??= GetTrainNumberFromResponse(myDeserializedClass, taskTimeFrom);
 
-            task.TrainNumber ??= GetTrainNumberFromResponse(myDeserializedClass, $"{task.DepartureDateTime:T}");
-
-            var currentRoute = ExtractFreeSeatsFromResponse(myDeserializedClass, task);
+            var currentRoute = ExtractFreeSeatsFromResponse(myDeserializedClass, task, taskTimeFrom);
             if (currentRoute.Count == 0 || currentRoute.Sum(x => x.TotalPlace) < task.NumberSeats) 
                 return string.Empty;
             
@@ -170,14 +171,15 @@ namespace RailwayWizzard.Rzd.DataEngine.Services
         /// </summary>
         /// <param name="root"></param>
         /// <param name="task"></param>
+        /// <param name="timeFrom"></param>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
         /// <returns></returns>
-        private static HashSet<SearchResult> ExtractFreeSeatsFromResponse(RootShort root, NotificationTask task)
+        private static HashSet<SearchResult> ExtractFreeSeatsFromResponse(RootShort root, NotificationTask task, string timeFrom)
         {
             HashSet<SearchResult> results = new();
 
             var currentTrain = root.Trains.FirstOrDefault(x => 
-                x.LocalDepartureDateTime.ToString()!.Contains($"{task.DepartureDateTime:t}"));
+                x.LocalDepartureDateTime.ToString()!.Contains(timeFrom));
             
             if (currentTrain == null)
                 return results;

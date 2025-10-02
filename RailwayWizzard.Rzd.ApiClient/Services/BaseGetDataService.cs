@@ -5,7 +5,7 @@ namespace RailwayWizzard.Rzd.ApiClient.Services;
 /// <summary>
 /// Базовая имплементация сервиса получения данных.
 /// </summary>
-public class BaseGetDataService
+public abstract class BaseGetDataService
 {
     private readonly IHttpClientFactory _httpClientFactory;
 

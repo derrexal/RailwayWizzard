@@ -117,7 +117,7 @@ namespace RailwayWizzard.Rzd.DataEngine.Services
                 return string.Empty;
             }
             
-            var taskTimeFrom = $"{task.DepartureDateTime:T}";
+            var taskTimeFrom = task.DepartureDateTime.TimeOfDay;
             task.TrainNumber ??= GetTrainNumberFromResponse(myDeserializedClass, taskTimeFrom);
 
             var currentRoute = ExtractFreeSeatsFromResponse(myDeserializedClass, task, taskTimeFrom);
@@ -138,12 +138,12 @@ namespace RailwayWizzard.Rzd.DataEngine.Services
         /// <param name="timeFrom"></param>
         /// <returns></returns>
         /// <exception cref="NullReferenceException"></exception>
-        private static string? GetTrainNumberFromResponse(RootShort root, string timeFrom)
+        private static string? GetTrainNumberFromResponse(RootShort root, TimeSpan timeFrom)
         {
             return (
                 from train in root.Trains 
-                where train.LocalDepartureDateTime.ToString()!.Contains(timeFrom) 
-                      || train.DepartureDateTime.ToString()!.Contains(timeFrom) 
+                where train.LocalDepartureDateTime.Value.TimeOfDay.Equals(timeFrom) 
+                      || train.DepartureDateTime.Value.TimeOfDay.Equals(timeFrom) 
                 select train.DisplayTrainNumber)
                 .FirstOrDefault();
         }
@@ -174,12 +174,12 @@ namespace RailwayWizzard.Rzd.DataEngine.Services
         /// <param name="timeFrom"></param>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
         /// <returns></returns>
-        private static HashSet<SearchResult> ExtractFreeSeatsFromResponse(RootShort root, NotificationTask task, string timeFrom)
+        private static HashSet<SearchResult> ExtractFreeSeatsFromResponse(RootShort root, NotificationTask task, TimeSpan timeFrom)
         {
             HashSet<SearchResult> results = new();
 
-            var currentTrain = root.Trains.FirstOrDefault(x => 
-                x.LocalDepartureDateTime.ToString()!.Contains(timeFrom));
+            var currentTrain = root.Trains.FirstOrDefault(train => 
+                train.LocalDepartureDateTime!.Value.TimeOfDay.Equals(timeFrom));
             
             if (currentTrain == null)
                 return results;

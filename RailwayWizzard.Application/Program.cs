@@ -36,7 +36,6 @@ namespace RailwayWizzard.Application
             builder.Services.AddTransient<IGetFirewallTokenService, GetFirewallTokenService>();
             builder.Services.AddTransient<IGetStationDetailsService, GetStationDetailsService>();
             builder.Services.AddTransient<IGetStationsByNameService, GetStationsByNameService>();
-            builder.Services.AddTransient<IGetTrainInformationService, GetTrainInformationService>();
 
             builder.Services.AddScoped<IB2BService, B2BService>();
             builder.Services.AddScoped<INotificationTaskService, NotificationTaskService>();
@@ -78,7 +77,7 @@ namespace RailwayWizzard.Application
                 });
             });
             
-            // builder.Services.AddHttpClient<IGetTrainInformationService, GetTrainInformationService>().AddPolicyHandler(GetRetryPolicy());
+            builder.Services.AddHttpClient<IGetTrainInformationService, GetTrainInformationService>().AddPolicyHandler(GetRetryPolicy());
             builder.Services.AddHttpClient();
 
             var app = builder.Build();
@@ -101,11 +100,11 @@ namespace RailwayWizzard.Application
             app.Run();
         }
         
-        // private static AsyncRetryPolicy<HttpResponseMessage> GetRetryPolicy()
-        // {
-        //     return HttpPolicyExtensions
-        //         .HandleTransientHttpError() // Ловит 5xx и сетевые ошибки
-        //         .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(5, retryAttempt)));
-        // }
+        private static AsyncRetryPolicy<HttpResponseMessage> GetRetryPolicy()
+        {
+            return HttpPolicyExtensions
+                .HandleTransientHttpError() // Ловит 5xx и сетевые ошибки
+                .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(5, retryAttempt)));
+        }
     }
 }

@@ -104,12 +104,12 @@ namespace RailwayWizzard.Rzd.DataEngine.Services
                 return string.Empty;
             }
 
-            var myDeserializedClass = JsonConvert.DeserializeObject<RootShort>(trainInfoResponse);
-            if (myDeserializedClass?.Id == null)
+            var trainInfo = JsonConvert.DeserializeObject<RootShort>(trainInfoResponse);
+            if (trainInfo?.Id == null)
                 throw new NullReferenceException(
                     $"Task ID: {task.Id} Сервис РЖД при запросе списка свободных мест вернул не стандартный ответ. " +
                     $"Ответ:{trainInfoResponse}");
-            if (myDeserializedClass.Trains.Count == 0)
+            if (trainInfo.Trains.Count == 0)
             {
                 _logger.LogError(
                     $"Task ID: {task.Id} Сервис РЖД при запросе списка свободных мест вернул ответ в котором нет доступных поездок. " +
@@ -118,12 +118,12 @@ namespace RailwayWizzard.Rzd.DataEngine.Services
             }
             
             var taskTimeFrom = task.DepartureDateTime.TimeOfDay;
-            task.TrainNumber ??= GetTrainNumberFromResponse(myDeserializedClass, taskTimeFrom);
+            task.TrainNumber ??= GetTrainNumberFromResponse(trainInfo, taskTimeFrom);
 
-            var currentRoute = ExtractFreeSeatsFromResponse(myDeserializedClass, task, taskTimeFrom);
+            var currentRoute = ExtractFreeSeatsFromResponse(trainInfo, task, taskTimeFrom);
             if (currentRoute.Count == 0 || currentRoute.Sum(x => x.TotalPlace) < task.NumberSeats) 
                 return string.Empty;
-            
+
             var freeSeats = SupportingMethod(currentRoute);
 
             return freeSeats.Count != 0
@@ -212,7 +212,12 @@ namespace RailwayWizzard.Rzd.DataEngine.Services
             {
                 CarType.Sedentary => carGroups.Where(x => !x.HasPlacesForBusinessTravelBooking),
                 CarType.SedentaryBusiness => carGroups.Where(x => 
-                    x.HasPlacesForBusinessTravelBooking || x.ServiceClassNameRu == carType.GetEnumDescription()),
+                    !x.HasPlacesForBusinessTravelBooking
+                    && !x.ServiceClassNameEn.Equals("Business")
+                    && x.ServiceClassNameRu != null && (x.ServiceClassNameRu.Equals("Бизнес класс")
+                                                        || x.ServiceClassName.Equals("Бизнес класс")                    
+                                                        || x.FakeCarType.Equals("Business"))
+                ),
                 _ => carGroups
             };
 

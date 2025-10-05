@@ -130,7 +130,12 @@ namespace RailwayWizzard.Rzd.DataEngine.Core
         public double? MaxPrice { get; set; }
         public string CarType { get; set; } = null!;
         public string CarTypeName { get; set; } = null!;
+
+        public string FakeCarType { get; set; } = null!;
+        public string ServiceClassName { get; set; } = null!;
         public string? ServiceClassNameRu { get; set; }
+        public string ServiceClassNameEn { get; set; } = null!;
+
         public bool HasPlacesForDisabledPersons { get; set; }
         
         public bool HasPlacesForBusinessTravelBooking { get; set; }

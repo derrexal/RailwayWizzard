@@ -81,7 +81,11 @@ namespace RailwayWizzard.Engine.Services
             {
                 var errorMessage = $"Fatal Error. {logMessage} {e.Message}";
                 
-                await CreateMessage(task.Id, errorMessage, BussinesConstants.ADMIN_USER_ID);
+                // Временно отключил отправку ошибок администратору - так как
+                // это приводит к накоплению многочисленных идентичных сообщений об ошибках
+                // из-за этого в очередь попадает куча сообщений
+                // которые нужно "протолкнуть" через узкое горлышко телергам бота (ограничения количество отправленных сообщений)
+                // await CreateMessage(task.Id, errorMessage, BussinesConstants.ADMIN_USER_ID);
                 await CreateNotificationTaskResult(task.Id, NotificationTaskResultStatus.Error, null, errorMessage);
                 await SetIsNotWorkedAsync(task.Id, logMessage, NotificationTaskResultStatus.Error);
                 

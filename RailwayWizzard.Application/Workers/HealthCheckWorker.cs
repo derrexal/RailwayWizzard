@@ -86,14 +86,19 @@ namespace RailwayWizzard.Application.Workers
                 var messageError = baseMessage + $"возникла ошибка: {ex.Message}";
                 _logger.LogError(messageError);
 
-                var message = new MessageOutbox
-                {
-                    NotificationTaskId = 999999,
-                    Message = messageError,
-                    Created = DateTime.Now,
-                    UserId = BussinesConstants.ADMIN_USER_ID
-                };
-                await messageOutboxRepository.CreateAsync(message);
+                // Временно отключил отправку ошибок администратору - так как
+                // это приводит к накоплению многочисленных идентичных сообщений об ошибках
+                // из-за этого в очередь попадает куча сообщений
+                // которые нужно "протолкнуть" через узкое горлышко телергам бота (ограничения количество отправленных сообщений)
+                // await CreateMessage(task.Id, errorMessage, BussinesConstants.ADMIN_USER_ID);
+                // var message = new MessageOutbox
+                // {
+                //     NotificationTaskId = 999999,
+                //     Message = messageError,
+                //     Created = DateTime.Now,
+                //     UserId = BussinesConstants.ADMIN_USER_ID
+                // };
+                // await messageOutboxRepository.CreateAsync(message);
             }
         }
 

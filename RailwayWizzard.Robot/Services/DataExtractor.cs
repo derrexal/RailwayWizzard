@@ -104,7 +104,7 @@ namespace RailwayWizzard.Rzd.DataEngine.Services
                 return string.Empty;
             }
 
-            var trainInfo = JsonConvert.DeserializeObject<RootShort>(trainInfoResponse);
+            var trainInfo = JsonConvert.DeserializeObject<Root>(trainInfoResponse);
             if (trainInfo?.Id == null)
                 throw new NullReferenceException(
                     $"Task ID: {task.Id} Сервис РЖД при запросе списка свободных мест вернул не стандартный ответ. " +
@@ -138,12 +138,12 @@ namespace RailwayWizzard.Rzd.DataEngine.Services
         /// <param name="timeFrom"></param>
         /// <returns></returns>
         /// <exception cref="NullReferenceException"></exception>
-        private static string? GetTrainNumberFromResponse(RootShort root, TimeSpan timeFrom)
+        private static string? GetTrainNumberFromResponse(Root root, TimeSpan timeFrom)
         {
             return (
                 from train in root.Trains 
-                where train.LocalDepartureDateTime.Value.TimeOfDay.Equals(timeFrom) 
-                      || train.DepartureDateTime.Value.TimeOfDay.Equals(timeFrom) 
+                where train.LocalDepartureDateTime != null && train.LocalDepartureDateTime.Value.TimeOfDay.Equals(timeFrom)
+                    || train.DepartureDateTime!.Value.TimeOfDay.Equals(timeFrom) // хотя бы 1 параметр обязательно не равен null
                 select train.DisplayTrainNumber)
                 .FirstOrDefault();
         }
@@ -174,7 +174,7 @@ namespace RailwayWizzard.Rzd.DataEngine.Services
         /// <param name="timeFrom"></param>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
         /// <returns></returns>
-        private static HashSet<SearchResult> ExtractFreeSeatsFromResponse(RootShort root, NotificationTask task, TimeSpan timeFrom)
+        private static HashSet<SearchResult> ExtractFreeSeatsFromResponse(Root root, NotificationTask task, TimeSpan timeFrom)
         {
             HashSet<SearchResult> results = new();
 
@@ -204,20 +204,14 @@ namespace RailwayWizzard.Rzd.DataEngine.Services
             return results;
         }
 
-        private static IReadOnlyCollection<CarGroupShort> FilterCarGroups(IEnumerable<CarGroupShort> carGroups, CarType carType)
+        private static IReadOnlyCollection<CarGroup> FilterCarGroups(IEnumerable<CarGroup> carGroups, CarType carType)
         {
             var carTypeText = GetKeyByCarType(carType);
 
             carGroups = carType switch
             {
-                CarType.Sedentary => carGroups.Where(x => !x.HasPlacesForBusinessTravelBooking),
-                CarType.SedentaryBusiness => carGroups.Where(x => 
-                    !x.HasPlacesForBusinessTravelBooking
-                    && !x.ServiceClassNameEn.Equals("Business")
-                    && x.ServiceClassNameRu != null && (x.ServiceClassNameRu.Equals("Бизнес класс")
-                                                        || x.ServiceClassName.Equals("Бизнес класс")                    
-                                                        || x.FakeCarType.Equals("Business"))
-                ),
+                CarType.Sedentary => carGroups.Where(x => !x.IsBusinessClass),
+                CarType.SedentaryBusiness => carGroups.Where(carGroup => carGroup.IsBusinessClass),
                 _ => carGroups
             };
 
@@ -230,7 +224,7 @@ namespace RailwayWizzard.Rzd.DataEngine.Services
         /// <summary>
         /// Подсчитывает количество свободных мест в зависимости от типа вагона.
         /// </summary>
-        private static int CalculateFreeSeats(IReadOnlyCollection<CarGroupShort> carGroups, CarType carType) =>
+        private static int CalculateFreeSeats(IReadOnlyCollection<CarGroup> carGroups, CarType carType) =>
             carType switch
             {
                 CarType.Sedentary or CarType.SedentaryBusiness or CarType.Luxury => carGroups.Sum(x => x.TotalPlaceQuantity),

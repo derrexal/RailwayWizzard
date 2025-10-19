@@ -1,7 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Polly;
-using Polly.Extensions.Http;
-using Polly.Retry;
 using RailwayWizzard.Application.Services.B2B;
 using RailwayWizzard.Application.Services.NotificationTasks;
 using RailwayWizzard.Application.Services.Users;
@@ -101,6 +98,7 @@ namespace RailwayWizzard.Application
             app.Run();
         }
         
+        // конечно ловит ошибки - у тебя при паре неудачных попыток последняя происходит спустя 5 в степени 3 = 625 секунд...
         // private static AsyncRetryPolicy<HttpResponseMessage> GetRetryPolicy()
         // {
         //     return HttpPolicyExtensions

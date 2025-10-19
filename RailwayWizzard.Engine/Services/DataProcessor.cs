@@ -137,6 +137,7 @@ namespace RailwayWizzard.Engine.Services
         
         private async Task SetIsNotWorkedAsync(int taskId, string message, NotificationTaskResultStatus result)
         {
+            // Выглядит странно :)
             await _taskRepository.SetIsNotWorkedAsync(taskId);
 
             await _taskRepository.SetIsUpdatedAsync(taskId);

@@ -22,6 +22,7 @@ namespace RailwayWizzard.Infrastructure.Repositories.MessagesOutbox
         }
 
         //TODO: Что делать с message которые не могут отправиться из-за того что пользователь заблокировал бота
+        // предлагаю: проверять на актуальность, и если они перестали таковыми быть - считать что отправили или удалять (ну или что ты там делаешь с неактуальными)
         public async Task<IEnumerable<MessageOutbox>> GetNotSendMessagesAsync()
         {
             var hasBlockedUsers = _context.Users.Where(user => user.HasBlockedBot);
@@ -53,14 +54,8 @@ namespace RailwayWizzard.Infrastructure.Repositories.MessagesOutbox
             await _context.SaveChangesAsync();
         }
         
-        private async Task<MessageOutbox> GetByIdAsync(int id)
-        {
-            var message = await _context.Messages.FirstOrDefaultAsync(u => u.Id == id);
-            
-            if(message == null)
-                throw new EntityNotFoundException($"{typeof(MessageOutbox)} with Id: {id} not found");
-
-            return message;
-        }
+        private async Task<MessageOutbox> GetByIdAsync(int id) => 
+            await _context.Messages.FirstOrDefaultAsync(u => u.Id == id) 
+            ?? throw new EntityNotFoundException($"{typeof(MessageOutbox)} with Id: {id} not found");
     }
 }

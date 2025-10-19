@@ -67,6 +67,7 @@ namespace RailwayWizzard.Infrastructure.Repositories.NotificationTasks
         /// <inheritdoc/>
         public async Task SetIsNotWorkedAsync(int taskId)
         {
+            // Мне кажется несколько странным вынесение таких операций на уровень репозитория; попахивает нарушением SRP
             var currentNotificationTask = await GetNotificationTaskFromIdAsync(taskId);
 
             currentNotificationTask.IsProcess = false;
@@ -125,6 +126,8 @@ namespace RailwayWizzard.Infrastructure.Repositories.NotificationTasks
             
             return popularDepartureStation.Union(popularArrivalStation)
                 .DistinctBy(x => x.City)
+                // Зачем вообще сюда доходит UserId, если у тебя до этого везде Where это фильтрует?
+                // Кажется вполне один Union запрос на уровне БД всю эту логику может выполнить без вынесения в память всех станций
                 .GroupBy(city => city.UserId)
                 .SelectMany(group => group
                     .OrderByDescending(city => city.UsageCount)
@@ -143,6 +146,11 @@ namespace RailwayWizzard.Infrastructure.Repositories.NotificationTasks
             var hasBlockedUsers = _context.Users.Where(user => user.HasBlockedBot);
 
             var notWorkedNotificationTasks = _context.NotificationTasks
+                    // Ничего особо против не имею такого стиля,
+                    // но не могу не подметить, что я бы написал так:
+                    // .Where(t => t.IsActual &&
+                    //             !t.IsStopped &&
+                    //             !t.IsProcess...)
                 .Where(t => t.IsActual == true)
                 .Where(t => t.IsStopped == false)
                 .Where(t => t.IsProcess == false)
@@ -157,14 +165,9 @@ namespace RailwayWizzard.Infrastructure.Repositories.NotificationTasks
         /// <param name="id">Идентификатор задачи.</param>
         /// <returns>Задача.</returns>
         /// <exception cref="EntityNotFoundException"></exception>
-        private async Task<NotificationTask> GetNotificationTaskFromIdAsync(int id)
-        {
-            var notificationTask = await _context.NotificationTasks.FirstOrDefaultAsync(t => t.Id == id);
-            if (notificationTask == null)
-                throw new EntityNotFoundException($"Не удалось получить {nameof(NotificationTask)} с ID:{id}");
-
-            return notificationTask;
-        }
+        private async Task<NotificationTask> GetNotificationTaskFromIdAsync(int id) =>
+            await _context.NotificationTasks.FirstOrDefaultAsync(t => t.Id == id) 
+            ?? throw new EntityNotFoundException($"Не удалось получить {nameof(NotificationTask)} с ID:{id}");
 
         /// <summary>
         /// Обновляет состояние таблицы по полю "IsActual" если поездка уже в прошлом

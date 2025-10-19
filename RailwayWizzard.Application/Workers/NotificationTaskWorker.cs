@@ -41,7 +41,6 @@ namespace RailwayWizzard.Application.Workers
         {
             using var scope = _serviceScopeFactory.CreateScope();
             var notificationTaskRepository = scope.ServiceProvider.GetRequiredService<INotificationTaskRepository>();
-            var dataProcessor = scope.ServiceProvider.GetRequiredService<IDataProcessor>();
 
             try
             {
@@ -50,11 +49,16 @@ namespace RailwayWizzard.Application.Workers
                 {
                     _logger.LogInformation($"{nameof(NotificationTaskWorker)} No tasks found for execution. " +
                                            $"Process delay by {RUN_INTERVAL} ms. Today:{DateTimeExtensions.MoscowNow}");
+                    // почему этот Delay оказался здесь, а не в ExecuteAsync?
                     await Task.Delay(RUN_INTERVAL, cancellationToken);
                     return;
                 }
 
-                await dataProcessor.RunProcessTaskAsync(notificationTask);
+                // IDataProcessor можно резолвить перед необходимостью
+                await scope
+                    .ServiceProvider
+                    .GetRequiredService<IDataProcessor>()
+                    .RunProcessTaskAsync(notificationTask);
             }
 
             catch (Exception ex)

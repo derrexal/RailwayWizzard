@@ -18,6 +18,7 @@ public abstract class BaseGetDataService
         _httpClientFactory = httpClientFactory;
     }
 
+    // Ты правильно сделал, что эту штуку вынес в базовый класс,
     protected async Task<string> BaseHttpSenderAsync(HttpRequestMessage request)
     {
         using var client = _httpClientFactory.CreateClient();

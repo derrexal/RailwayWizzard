@@ -35,6 +35,9 @@ namespace RailwayWizzard.Common
             return isDownTime;
         }
 
+        // я бы назвал метод CheckForMoscowTimeAndThrow
+        // Такое название указывает на наличие проверки и выброс исключения в случае, если проверка не пройдена
+        // Существующее название наталкивает на мысль, что метод должен вернуть bool
         public static void IsNotActualMoscowTime(this DateTime dateTime)
         {
             if(dateTime.Date < MoscowNow.Date)

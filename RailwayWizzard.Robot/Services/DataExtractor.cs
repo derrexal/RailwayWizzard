@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RailwayWizzard.Common;
 using RailwayWizzard.Core.NotificationTask;
@@ -62,6 +63,7 @@ namespace RailwayWizzard.Rzd.DataEngine.Services
             //         throw;
             // }
             
+            // Два раза идём в БД? Зачем? Почему бы не сходить с запросом 'where Id in (,)?'
             var departureStation = await _stationInfoRepository.GetByIdAsync(task.DepartureStationId);
             var arrivalStation = await _stationInfoRepository.GetByIdAsync(task.ArrivalStationId);
             
@@ -75,6 +77,9 @@ namespace RailwayWizzard.Rzd.DataEngine.Services
 
             /// Билеты перестают продавать за определенное время. Обрабатываем эти и другие ситуации.
             
+            // Здесь определённо нужно выносить эту обработку в trainInformationService
+            // Вообще по названиям не очень интуитивно понятно - как будто самых верхнеуровневый сервис должен быть 
+            // TrainInformationService, а DataExtractor - это уже какой-то служебный сервис; я бы посоветовал пересмотреть архитектуру классов
             //TODO: вынести в Exceptions
             //TODO: Переделать на определение состояния по Code
             const string noTrainsMessage = "В запрашиваемую дату поездов нет";
@@ -148,22 +153,48 @@ namespace RailwayWizzard.Rzd.DataEngine.Services
                 .FirstOrDefault();
         }
 
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
         private static string GetKeyByCarType(CarType carType)
         {
             // Карта текстов и соответствующих типов
-            var mappings = new Dictionary<string, IEnumerable<CarType>>
-            {
-                ["Sedentary"] = new[] { CarType.Sedentary, CarType.SedentaryBusiness },
-                ["ReservedSeat"] = new[] { CarType.ReservedSeatLower, CarType.ReservedSeatUpper,
-                                            CarType.ReservedSeatLowerSide, CarType.ReservedSeatUpperSide },
-                ["Compartment"] = new[] { CarType.CompartmentLower, CarType.CompartmentUpper },
-                ["Luxury"] = new[] { CarType.Luxury }
-            };
+            // var mappings = new Dictionary<string, IEnumerable<CarType>>
+            // {
+            //     ["Sedentary"] = new[] { CarType.Sedentary, CarType.SedentaryBusiness },
+            //     ["ReservedSeat"] = new[] { CarType.ReservedSeatLower, CarType.ReservedSeatUpper,
+            //                                 CarType.ReservedSeatLowerSide, CarType.ReservedSeatUpperSide },
+            //     ["Compartment"] = new[] { CarType.CompartmentLower, CarType.CompartmentUpper },
+            //     ["Luxury"] = new[] { CarType.Luxury }
+            // };
+            //
+            // var foundedMapKey = mappings
+            //     .FirstOrDefault(pair => pair.Value.Contains(carType))
+            //     .Key;
+            //
+            // return !string.IsNullOrEmpty(foundedMapKey) 
+            //     ? foundedMapKey
+            //     : throw new ArgumentException($"CarTypeEnum '{carType}' не соответствует ни одному ключу.");
 
-            foreach (var mapping in mappings.Where(mapping => mapping.Value.Contains(carType)))
-                return mapping.Key;
+            const string Sedentary = nameof(Sedentary);
+            const string ReservedSeat = nameof(ReservedSeat);
+            const string Compartment = nameof(Compartment);
+            const string Luxury = nameof(Luxury);
             
-            throw new ArgumentException($"CarTypeEnum '{carType}' не соответствует ни одному ключу.");
+            var newMappings = new Dictionary<CarType, string>
+            {
+                {CarType.Sedentary, Sedentary},
+                {CarType.SedentaryBusiness, Sedentary},
+                {CarType.ReservedSeatLower, ReservedSeat},
+                {CarType.ReservedSeatUpper, ReservedSeat},
+                {CarType.ReservedSeatLowerSide, ReservedSeat},
+                {CarType.ReservedSeatUpperSide, ReservedSeat},
+                {CarType.CompartmentLower, Compartment},
+                {CarType.CompartmentUpper, Compartment},
+                {CarType.Luxury, Luxury}
+            };
+            
+            return newMappings.TryGetValue(carType, out var value)
+                ? value
+                : throw new ArgumentException($"CarTypeEnum '{carType}' не соответствует ни одному ключу.");
         }
 
         /// <summary>
@@ -204,6 +235,7 @@ namespace RailwayWizzard.Rzd.DataEngine.Services
             return results;
         }
 
+        // Я бы предложил переделать на итераторы
         private static IReadOnlyCollection<CarGroup> FilterCarGroups(IEnumerable<CarGroup> carGroups, CarType carType)
         {
             var carTypeText = GetKeyByCarType(carType);
@@ -220,10 +252,32 @@ namespace RailwayWizzard.Rzd.DataEngine.Services
                 .Where(x => !x.HasPlacesForDisabledPersons)
                 .ToList();
         }
+        
+        private static IEnumerable<CarGroup> FilterCarGroupsEnumerations(
+            IEnumerable<CarGroup> carGroups,
+            CarType carType)
+        {
+            var carTypeText = GetKeyByCarType(carType);
+
+            carGroups = carType switch
+            {
+                CarType.Sedentary => carGroups.Where(x => !x.IsBusinessClass),
+                CarType.SedentaryBusiness => carGroups.Where(carGroup => carGroup.IsBusinessClass),
+                _ => carGroups
+            };
+
+            foreach (var carGroup in carGroups
+                         .Where(x => x.CarType == carTypeText)
+                         .Where(x => !x.HasPlacesForDisabledPersons))
+            {
+                yield return carGroup;
+            }
+        }
 
         /// <summary>
         /// Подсчитывает количество свободных мест в зависимости от типа вагона.
         /// </summary>
+        /// Я правильно понял, что есть возможность забронировать несколько мест, но они должны быть обязательно одного типа?
         private static int CalculateFreeSeats(IReadOnlyCollection<CarGroup> carGroups, CarType carType) =>
             carType switch
             {

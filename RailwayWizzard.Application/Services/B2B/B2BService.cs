@@ -42,6 +42,7 @@ namespace RailwayWizzard.Application.Services.B2B
         {
             routeDto.DepartureDate.IsNotActualMoscowTime();
             
+            // Зачем-то пошли в БД два раза снова
             var departureStationInfo = await _stationInfoRepository.GetByNameAsync(routeDto.DepartureStationName);
             var arrivalStationInfo = await _stationInfoRepository.GetByNameAsync(routeDto.ArrivalStationName);
 
@@ -52,6 +53,7 @@ namespace RailwayWizzard.Application.Services.B2B
                 routeDto.DepartureDate
             );
 
+            // Вот ещё пример: вроде воркер самый верхнеуровневый - далее вижу dataExtractor, а на самого деле должен быть сервис, который ханимается
             var availableTimes = await _dataExtractor.GetAvailableTimesAsync(request);
 
             return availableTimes;

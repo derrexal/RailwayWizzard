@@ -1,4 +1,4 @@
-﻿namespace RailwayWizzard.Application.Services.B2B
+﻿namespace RailwayWizzard.Rzd.DataEngine
 {
     /// <summary>
     /// Класс станции получаемой путем десериализации из json.

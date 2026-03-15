@@ -35,7 +35,7 @@ namespace RailwayWizzard.Common
             return isDownTime;
         }
 
-        public static void IsNotActualMoscowTime(this DateTime dateTime)
+        public static void CheckForMoscowTimeAndThrow(this DateTime dateTime)
         {
             if(dateTime.Date < MoscowNow.Date)
                 throw new ArgumentException("Invalid route argument. Date is before moscow");

@@ -60,6 +60,7 @@ namespace RailwayWizzard.Application.Services.B2B
         /// <inheritdoc/>
         public async Task<IReadOnlyCollection<StationInfo>> StationValidateAsync(string stationName)
         {
+            stationName = stationName.ToUpper();
             //Ищем станцию по полному соответствию
             var station = await GetStationInfoAsync(stationName);
             if (station is not null) return new List<StationInfo> { station };
@@ -84,7 +85,8 @@ namespace RailwayWizzard.Application.Services.B2B
                 return null;
              
             // Снова смотрим есть ли в БД
-            // Зачем снова идти в БД? GetStationsAsync присылает информацию о нескольких станциях, а мы хотим найти одну.
+            // TODO: Зачем снова идти в БД? GetStationsAsync присылает информацию о нескольких станциях, а мы хотим найти одну.
+            // Так уже сделано в методе получения станций по неполному совпадению.
             stationInfo = await _stationInfoRepository.FindByNameAsync(stationName);
             return stationInfo ?? null;
         }
@@ -124,6 +126,7 @@ namespace RailwayWizzard.Application.Services.B2B
             
             return stations;
         }
+        
         private static List<StationFromJson> DeserializeStationsText(string textResponse)
         {
             var stations = JsonConvert.DeserializeObject<List<StationFromJson>>(textResponse);
@@ -148,7 +151,7 @@ namespace RailwayWizzard.Application.Services.B2B
             {
                 var anyStationInfo = await _stationInfoRepository.AnyByExpressCodeAsync(rootStation.c);
 
-                if (anyStationInfo is false)
+                if (!anyStationInfo)
                 {
                     addedStationInfo.Add(new StationInfo
                     {

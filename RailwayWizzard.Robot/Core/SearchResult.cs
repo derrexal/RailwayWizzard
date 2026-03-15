@@ -11,7 +11,7 @@ namespace RailwayWizzard.Rzd.DataEngine.Core
         {
             return obj is SearchResult result &&
                    CarType == result.CarType &&
-                   Price == result.Price;
+                   Price.Equals(result.Price);
         }
 
         public override int GetHashCode()

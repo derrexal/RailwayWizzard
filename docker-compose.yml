@@ -1,4 +1,10 @@
-version: '3.4'
+networks:
+  train_network:
+    name: train_network
+    driver: bridge
+
+volumes:
+  postgres-data:
 
 
 services:
@@ -8,11 +14,11 @@ services:
       context: .
       dockerfile: RailwayWizzard.Application/Dockerfile
     ports:
-      - ":80"
+      - "80:80"
     depends_on:
       - postgres_db
     networks:
-      - my-network
+      - train_network
     restart: always
     environment:
       - DB_CONNECTION_STRING=Host=postgres_db;Port=${POSTGRES_PORT};Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
@@ -30,28 +36,5 @@ services:
       - ./postgres-data:/var/lib/postgresql/data
     command: -p '${POSTGRES_PORT}'
     networks:
-      - my-network
+      - train_network
     restart: always
-
-  bot_service:
-    image: ${DOCKER_REGISTRY-}bot_service
-    build:
-      context: .
-      dockerfile: RailwayWizzard.Bot/Dockerfile
-    ports:
-      - ":5000"
-    volumes:
-      - ./RailwayWizzard.Bot:/app
-    working_dir: /app
-    depends_on:
-      - railwaywizzardapp
-    networks:
-      - my-network
-    restart: always
-
-networks:
-  my-network:
-    driver: "bridge"
-
-volumes:
-  postgres-data:

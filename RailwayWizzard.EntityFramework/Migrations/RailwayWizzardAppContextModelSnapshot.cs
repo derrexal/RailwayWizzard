@@ -51,6 +51,10 @@ namespace RailwayWizzard.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("NotificationTaskId", "Message")
+                        .IsUnique()
+                        .HasDatabaseName("IX_AppMessageOutbox_NotificationTaskId_Message");
+
                     b.ToTable("AppMessageOutbox");
                 });
 
@@ -134,6 +138,171 @@ namespace RailwayWizzard.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("AppNotificationTaskResult");
+                });
+
+            modelBuilder.Entity("RailwayWizzard.Core.TrainBotOutbox.TrainBotOutboxMessage", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("attempts");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("now()")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTimeOffset?>("LockedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("locked_at");
+
+                    b.Property<string>("LastError")
+                        .HasColumnType("text")
+                        .HasColumnName("last_error");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("payload");
+
+                    b.Property<string>("QueueName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("queue_name");
+
+                    b.Property<DateTimeOffset?>("SentAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("sent_at");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasDefaultValue("NEW")
+                        .HasColumnName("status");
+
+                    b.HasKey("Id");
+
+                    b.HasCheckConstraint("ck_outbox_attempts_nonnegative", "attempts >= 0");
+
+                    b.HasCheckConstraint("ck_outbox_status_allowed", "status IN ('NEW','PROCESSING','SENT','ERROR')");
+
+                    b.HasIndex("Status", "CreatedAt")
+                        .HasDatabaseName("idx_outbox_status_created_at");
+
+                    b.ToTable("outbox");
+                });
+
+            modelBuilder.Entity("RailwayWizzard.Core.TrainBotTasks.TrainBotTaskEntity", b =>
+                {
+                    b.Property<int>("TaskId")
+                        .ValueGeneratedNever()
+                        .HasColumnType("integer")
+                        .HasColumnName("task_id");
+
+                    b.Property<bool>("AccessibleOnly")
+                        .HasColumnType("boolean")
+                        .HasColumnName("accessible_only");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("now()")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date")
+                        .HasColumnName("departure_date");
+
+                    b.Property<string>("From")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("from_station");
+
+                    b.Property<string>("Mode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("mode");
+
+                    b.Property<string>("ModeParams")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("mode_params");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("payload");
+
+                    b.Property<string>("SeatMode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("seat_mode");
+
+                    b.Property<string>("SeatParams")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("seat_params");
+
+                    b.Property<short>("Seats")
+                        .HasColumnType("smallint")
+                        .HasColumnName("seats");
+
+                    b.Property<long?>("TelegramId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("telegram_id");
+
+                    b.Property<string>("To")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("to_station");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("TaskId");
+
+                    b.ToTable("train_bot_tasks");
+                });
+
+            modelBuilder.Entity("RailwayWizzard.Core.TrainBotTasks.TrainBotTaskStatus", b =>
+                {
+                    b.Property<int>("TaskId")
+                        .ValueGeneratedNever()
+                        .HasColumnType("integer")
+                        .HasColumnName("task_id");
+
+                    b.Property<string>("LastError")
+                        .HasColumnType("text")
+                        .HasColumnName("last_error");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("status");
+
+                    b.HasKey("TaskId");
+
+                    b.HasCheckConstraint("ck_train_bot_task_status_status_allowed", "status IN ('processing','error','end')");
+
+                    b.ToTable("train_bot_task_statuses");
+                });
+
+            modelBuilder.Entity("RailwayWizzard.Core.TrainBotTasks.TrainBotTaskStatus", b =>
+                {
+                    b.HasOne("RailwayWizzard.Core.TrainBotTasks.TrainBotTaskEntity", "Task")
+                        .WithOne()
+                        .HasForeignKey("RailwayWizzard.Core.TrainBotTasks.TrainBotTaskStatus", "TaskId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Task");
                 });
 
             modelBuilder.Entity("RailwayWizzard.Core.StationInfo.StationInfo", b =>

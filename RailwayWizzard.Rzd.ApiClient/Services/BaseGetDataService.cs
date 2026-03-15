@@ -23,7 +23,9 @@ public abstract class BaseGetDataService
         using var client = _httpClientFactory.CreateClient();
 
         using var response = await client.SendAsync(request);
-
+        Console.WriteLine("request: " + request.Method + request.RequestUri + request.Headers + request.Content) ;
+        Console.WriteLine("response: " + response + response.Content);
+    
         response.EnsureSuccessStatusCode();
 
         var textResponse = await response.Content.ReadAsStringAsync();

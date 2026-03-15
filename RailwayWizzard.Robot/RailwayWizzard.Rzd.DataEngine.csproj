@@ -12,7 +12,6 @@
     <ProjectReference Include="..\RailwayWizzard.Core\RailwayWizzard.Core.csproj" />
     <ProjectReference Include="..\RailwayWizzard.EntityFramework\RailwayWizzard.Infrastructure.csproj" />
     <ProjectReference Include="..\RailwayWizzard.Common\RailwayWizzard.Common.csproj" />
-    <ProjectReference Include="..\RailwayWizzard.Telegram.ApiClient\RailwayWizzard.Telegram.ApiClient.csproj" />
   </ItemGroup>
 	
   <ItemGroup>

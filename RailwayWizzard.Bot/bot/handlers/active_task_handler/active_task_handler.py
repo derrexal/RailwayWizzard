@@ -1,5 +1,4 @@
-from telegram import InlineKeyboardMarkup
-from telebot.types import InlineKeyboardButton
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 from bot.handlers.notification_handler.base_notification_handler import *
 from bot.handlers.error_handler.base_error_handler import *

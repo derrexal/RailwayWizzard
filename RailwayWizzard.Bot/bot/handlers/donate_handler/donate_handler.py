@@ -1,5 +1,4 @@
-from telegram import InlineKeyboardMarkup
-from telebot.types import InlineKeyboardButton
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 from bot.handlers.error_handler.base_error_handler import base_error_handler
 from bot.setting import CALLBACK_DONATE, DONATE_URL

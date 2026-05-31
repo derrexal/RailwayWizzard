@@ -1,6 +1,7 @@
-from telebot.types import InlineKeyboardButton
-from telegram import InlineKeyboardMarkup
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 import pytz
+
+from app_config import settings
 
 
 NON_SELECT_SMILE = '\U000025FB'
@@ -21,8 +22,8 @@ MOSCOW_TZ = pytz.timezone('Europe/Moscow')
 
 MAX_NUMBER_SEATS = 10  # ни к чему не привязанное значение, в случае чего увеличить
 
-ADMIN_USERNAME = '@derrexal'
-DONATE_URL = 'pay.cloudtips.ru/p/c6b746f7'
+ADMIN_USERNAME = settings.admin_username
+DONATE_URL = settings.donate_url
 
 MESSAGE_FORMAT_ERROR = "Недопустимый ввод."
 MESSAGE_SUCCESS = 'Уведомление о поездке успешно создано.\n\nЗадача №'

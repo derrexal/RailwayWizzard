@@ -5,6 +5,7 @@ from telegram.ext import CallbackContext, ConversationHandler
 from telegram.constants import ChatAction
 
 from bot.bot_message_log import log_user_message
+from bot.data.NotificationConversationState import NOTIFICATION_STATE_KEY
 
 
 async def null_step_notification(update: Update, context: CallbackContext):
@@ -22,6 +23,7 @@ async def check_stop(update, context):
     answer = update.message.text
 
     if answer == '/stop':
+        context.user_data.pop(NOTIFICATION_STATE_KEY, None)
         await update.message.reply_text("Диалог прерван")
         await start_buttons_handler(update, context)
         return True

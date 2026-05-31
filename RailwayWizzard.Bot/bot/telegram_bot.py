@@ -1,16 +1,19 @@
-import os
 import asyncio
-import warnings
-from dotenv import load_dotenv
+
 from telegram.ext import (
-    CommandHandler,
-    MessageHandler,
-    ConversationHandler,
-    CallbackQueryHandler,
     Application,
+    CallbackQueryHandler,
+    CommandHandler,
+    ConversationHandler,
+    MessageHandler,
     filters,
 )
 
+from app_config import settings
+from bot.data.NotificationConversationState import (
+    NOTIFICATION_STATE_KEY,
+    NotificationConversationState,
+)
 from bot.handlers.active_task_handler.active_task_handler import (
     active_task_handler,
     one_step_active_task,
@@ -18,42 +21,42 @@ from bot.handlers.active_task_handler.active_task_handler import (
 from bot.handlers.donate_handler.donate_handler import donate_handler
 from bot.handlers.help_handler.help_handler import help_handler
 from bot.handlers.notification_handler.notification_handler import (
-    notification_handler,
-    first_step_notification,
-    second_step_notification,
-    third_step_notification,
-    fourth_step_notification,
     fifth_step_notification,
-    sixth_step_notification,
+    first_step_notification,
+    fourth_step_notification,
+    notification_handler,
+    second_step_notification,
     seventh_step_notification,
+    sixth_step_notification,
+    third_step_notification,
 )
 from bot.handlers.start_handler.start_handler import start_buttons_handler
 from bot.handlers.unknown_handler.unknown_handler import unknown_handler
-from bot.setting import CALLBACK_NOTIFICATION, CALLBACK_ACTIVE_TASK
+from bot.setting import CALLBACK_ACTIVE_TASK, CALLBACK_NOTIFICATION
 from logger import logger
 
-warnings.filterwarnings(
-    "ignore",
-    message=r"If 'per_message=.*",
-    category=UserWarning,
-)
 
-
-token = os.getenv("TOKEN")
-if not token:
-    load_dotenv()
-    token = os.getenv("TOKEN")
-
+token = settings.token
 if not token:
     raise RuntimeError("Environment variable TOKEN is not set")
-
-token = token.strip()
-if len(token) >= 2 and token[0] == token[-1] and token[0] in {"'", '"'}:
-    token = token[1:-1].strip()
 
 
 _bot_loop = None
 _handlers_are_set = False
+
+
+NOTIFICATION_MESSAGE_HANDLERS = {
+    1: first_step_notification,
+    2: second_step_notification,
+    3: third_step_notification,
+    4: fourth_step_notification,
+    5: fifth_step_notification,
+}
+
+NOTIFICATION_CALLBACK_HANDLERS = {
+    6: sixth_step_notification,
+    7: seventh_step_notification,
+}
 
 
 def get_bot_loop():
@@ -71,33 +74,56 @@ application = (
 )
 
 
-conv_handler_notification = ConversationHandler(
-    entry_points=[
-        CallbackQueryHandler(notification_handler, pattern=str(CALLBACK_NOTIFICATION))
-    ],
-    states={
-        1: [MessageHandler(filters.TEXT, first_step_notification)],
-        2: [MessageHandler(filters.TEXT, second_step_notification)],
-        3: [MessageHandler(filters.TEXT, third_step_notification)],
-        4: [MessageHandler(filters.TEXT, fourth_step_notification)],
-        5: [MessageHandler(filters.TEXT, fifth_step_notification)],
-        6: [CallbackQueryHandler(sixth_step_notification)],
-        7: [CallbackQueryHandler(seventh_step_notification)],
-    },
-    fallbacks=[CommandHandler("start", start_buttons_handler)],
-    allow_reentry=True,
-)
+def _get_notification_state(context) -> NotificationConversationState:
+    state = context.user_data.get(NOTIFICATION_STATE_KEY)
+    if isinstance(state, NotificationConversationState):
+        return state
+    return None
 
-conv_handler_active_task = ConversationHandler(
-    entry_points=[
-        CallbackQueryHandler(active_task_handler, pattern=str(CALLBACK_ACTIVE_TASK))
-    ],
-    states={
-        1: [CallbackQueryHandler(one_step_active_task)],
-    },
-    fallbacks=[CommandHandler("start", start_buttons_handler)],
-    allow_reentry=True,
-)
+
+def _apply_notification_stage(context, result):
+    state = _get_notification_state(context)
+    if state is None:
+        return
+
+    if result == ConversationHandler.END:
+        context.user_data.pop(NOTIFICATION_STATE_KEY, None)
+        return
+
+    if isinstance(result, int):
+        state.stage = result
+
+
+async def callback_query_router(update, context):
+    query_data = update.callback_query.data
+
+    if query_data == str(CALLBACK_NOTIFICATION):
+        result = await notification_handler(update, context)
+        _apply_notification_stage(context, result)
+        return
+
+    if query_data == str(CALLBACK_ACTIVE_TASK):
+        await active_task_handler(update, context)
+        return
+
+    if query_data.startswith("active_task_callback"):
+        await one_step_active_task(update, context)
+        return
+
+    state = _get_notification_state(context)
+    if state and state.stage in NOTIFICATION_CALLBACK_HANDLERS:
+        result = await NOTIFICATION_CALLBACK_HANDLERS[state.stage](update, context)
+        _apply_notification_stage(context, result)
+
+
+async def text_message_router(update, context):
+    state = _get_notification_state(context)
+    if state and state.stage in NOTIFICATION_MESSAGE_HANDLERS:
+        result = await NOTIFICATION_MESSAGE_HANDLERS[state.stage](update, context)
+        _apply_notification_stage(context, result)
+        return
+
+    await unknown_handler(update, context)
 
 
 def setup_handlers():
@@ -109,15 +135,16 @@ def setup_handlers():
     application.add_handler(CommandHandler("start", start_buttons_handler))
     application.add_handler(CommandHandler("help", help_handler))
     application.add_handler(CommandHandler("donate", donate_handler))
-
-    application.add_handler(conv_handler_notification)
-    application.add_handler(conv_handler_active_task)
-
+    application.add_handler(CallbackQueryHandler(callback_query_router))
+    application.add_handler(
+        MessageHandler(filters.TEXT & ~filters.COMMAND, text_message_router)
+    )
     application.add_handler(
         MessageHandler(
-            (filters.TEXT | filters.COMMAND)
+            filters.COMMAND
             & ~filters.Regex("/start")
-            & ~filters.Regex("/help"),
+            & ~filters.Regex("/help")
+            & ~filters.Regex("/donate"),
             unknown_handler,
         )
     )
@@ -125,12 +152,34 @@ def setup_handlers():
     _handlers_are_set = True
 
 
+async def start():
+    global _bot_loop
+
+    setup_handlers()
+    _bot_loop = asyncio.get_running_loop()
+    logger.info("Starting Telegram bot polling")
+    await application.initialize()
+    await application.bot.delete_webhook(drop_pending_updates=True)
+    bot_info = await application.bot.get_me()
+    logger.info("Telegram bot authorized: @%s", bot_info.username)
+    await application.updater.start_polling(drop_pending_updates=True)
+    await application.start()
+
+
+async def stop():
+    if application.updater is not None and getattr(application.updater, "running", False):
+        await application.updater.stop()
+    if getattr(application, "running", False):
+        await application.stop()
+    await application.shutdown()
+    if application.updater is not None:
+        await application.updater.shutdown()
+
+
 def run():
     global _bot_loop
 
     setup_handlers()
-    # `python-telegram-bot==20.0a0` does not support `ApplicationBuilder.post_init`.
-    # Reuse the loop that `run_polling` will run on so cross-thread sends keep working.
     _bot_loop = asyncio.get_event_loop()
     logger.info("Starting Telegram bot polling")
     application.run_polling(drop_pending_updates=True)

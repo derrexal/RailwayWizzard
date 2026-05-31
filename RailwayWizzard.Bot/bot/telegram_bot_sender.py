@@ -15,16 +15,24 @@ async def _send_message_to_user(user_id, message):
 
 async def send_message_to_user(user_id, message):
     bot_loop = get_bot_loop()
+    try:
+        current_loop = asyncio.get_running_loop()
+    except RuntimeError:
+        current_loop = None
 
-    future = asyncio.run_coroutine_threadsafe(
-        _send_message_to_user(user_id, message),
-        bot_loop,
-    )
-
-    await asyncio.wrap_future(future)
+    if current_loop is bot_loop:
+        await _send_message_to_user(user_id, message)
+    else:
+        future = asyncio.run_coroutine_threadsafe(
+            _send_message_to_user(user_id, message),
+            bot_loop,
+        )
+        await asyncio.wrap_future(future)
 
     logger.info(
-        "Пользователю %s отправлено следующее сообщение:\n%s",
-        user_id,
-        message,
+        "Message sent to Telegram user",
+        extra={
+            "component": "telegram_sender",
+            "user_id": user_id,
+        },
     )

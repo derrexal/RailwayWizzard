@@ -9,6 +9,8 @@ async def base_error_handler(update: Update, e: Exception, next_step: int, messa
     """ Базовый обработчик ошибок для step функций"""
     error_uuid = get_unique_uuid_error()
     message_to_log = f"ERROR [{error_uuid}] {e}"
+    if not message_to_user:
+        message_to_user = "Не удалось обработать запрос."
     message_to_user = f"{message_to_user}\nОшибка номер <code>{error_uuid}</code>"
 
     logger.exception(message_to_log)
@@ -21,4 +23,3 @@ async def base_error_handler(update: Update, e: Exception, next_step: int, messa
         return ConversationHandler.END
 
     return next_step - 1
-

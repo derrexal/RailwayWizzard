@@ -17,47 +17,32 @@ namespace RailwayWizzard.Rzd.DataEngine.Services
     {
         private readonly IGetTrainInformationService _trainInformationService;
         private readonly IGetStationDetailsService _stationDetailsService;
+        private readonly IRzdApiService _rzdApiService;
+        
         private readonly IStationInfoRepository _stationInfoRepository;
         private readonly ILogger<DataExtractor> _logger;
-        
+
         /// <summary>
         /// Initializes a new instance of the <see cref="DataExtractor"/> class.
         /// </summary>
         /// <param name="trainInformationService">Сервис получения информации о запрашиваемом рейсе.</param>
         /// <param name="stationDetailsService">Сервис получения информации о станциях по имени.</param>
-        /// <param name="stationInfoRepository"></param>
+        /// <param name="rzdApiService">Сервис для взаимодействия с АПИ РЖД.</param>
+        /// <param name="stationInfoRepository">Репозиторий станций.</param>
         /// <param name="logger">Логер.</param>
         public DataExtractor(
             IGetTrainInformationService trainInformationService, 
             IGetStationDetailsService stationDetailsService,
+            IRzdApiService rzdApiService,
             IStationInfoRepository stationInfoRepository,
             ILogger<DataExtractor> logger)
         {
             _trainInformationService = trainInformationService;
             _stationDetailsService = stationDetailsService;
+            _rzdApiService = rzdApiService;
             _stationInfoRepository = stationInfoRepository;
             _logger = logger;
         }
-        //TODO: Переделать на определение состояния по Code
-        /// Билеты перестают продавать за определенное время. Обрабатываем эти и другие ситуации.
-        private Exception? ProcessTrainInfoResponse(int taskId, string trainInfoResponse)
-        {
-            if (trainInfoResponse.Contains(TrainNotFoundException.noTrainsMessage))
-            {
-                return TrainNotFoundException.New(taskId);
-            }
-            else if (trainInfoResponse.Contains(NoPlaceException.noPlaceMessage))
-            {
-                return NoPlaceException.New(taskId);
-            }
-            else if (trainInfoResponse.Contains(DontRunException.dontRunMessage))
-            {
-                return DontRunException.New(taskId);
-            }
-            
-            return null;
-            
-        } 
         
         // TODO: Переделать на TrainBotTask или иметь собственную удобную денормализованную сущность на уровне этого сервиса?
         private async Task<Root> GetTrainInfoAsync(NotificationTask task)
@@ -72,23 +57,8 @@ namespace RailwayWizzard.Rzd.DataEngine.Services
                 arrivalStation.ExpressCode,
                 task.DepartureDateTime,
                 false);
-            var trainInfoResponse = await _trainInformationService.GetDataAsync(trainInfoRequest);
-            
-            var exception = ProcessTrainInfoResponse(task.Id, trainInfoResponse);
-            if (exception != null)
-            {
-                throw exception;
-            }
-                
-            var trainInfo = JsonConvert.DeserializeObject<Root>(trainInfoResponse);
-            if (trainInfo?.Id == null)
-                throw UnknownResponseException.New(task.Id,trainInfoResponse);
-            if (trainInfo.Trains.Count == 0)
-            {
-                throw TrainNotFoundException.New(task.Id);
-            }
-            
-            return trainInfo;
+
+            return await _rzdApiService.GetTrainInfoAsync(trainInfoRequest);
         }
         
 
@@ -106,23 +76,48 @@ namespace RailwayWizzard.Rzd.DataEngine.Services
                 : "";
         }
         
-        // Карта текстов и соответствующих типов
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
         private static string GetKeyByCarType(CarType carType)
         {
-            // TODO: Инициализируются заново при каждом запуске функции.
-            var mappings = new Dictionary<string, IEnumerable<CarType>>
-            {
-                ["Sedentary"] = new[] { CarType.Sedentary, CarType.SedentaryBusiness },
-                ["ReservedSeat"] = new[] { CarType.ReservedSeatLower, CarType.ReservedSeatUpper,
-                                            CarType.ReservedSeatLowerSide, CarType.ReservedSeatUpperSide },
-                ["Compartment"] = new[] { CarType.CompartmentLower, CarType.CompartmentUpper },
-                ["Luxury"] = new[] { CarType.Luxury }
-            };
+            // Карта текстов и соответствующих типов
+            // var mappings = new Dictionary<string, IEnumerable<CarType>>
+            // {
+            //     ["Sedentary"] = new[] { CarType.Sedentary, CarType.SedentaryBusiness },
+            //     ["ReservedSeat"] = new[] { CarType.ReservedSeatLower, CarType.ReservedSeatUpper,
+            //                                 CarType.ReservedSeatLowerSide, CarType.ReservedSeatUpperSide },
+            //     ["Compartment"] = new[] { CarType.CompartmentLower, CarType.CompartmentUpper },
+            //     ["Luxury"] = new[] { CarType.Luxury }
+            // };
+            //
+            // var foundedMapKey = mappings
+            //     .FirstOrDefault(pair => pair.Value.Contains(carType))
+            //     .Key;
+            //
+            // return !string.IsNullOrEmpty(foundedMapKey) 
+            //     ? foundedMapKey
+            //     : throw new ArgumentException($"CarTypeEnum '{carType}' не соответствует ни одному ключу.");
 
-            foreach (var mapping in mappings.Where(mapping => mapping.Value.Contains(carType)))
-                return mapping.Key;
+            const string Sedentary = nameof(Sedentary);
+            const string ReservedSeat = nameof(ReservedSeat);
+            const string Compartment = nameof(Compartment);
+            const string Luxury = nameof(Luxury);
             
-            throw new ArgumentException($"CarTypeEnum '{carType}' не соответствует ни одному ключу.");
+            var newMappings = new Dictionary<CarType, string>
+            {
+                {CarType.Sedentary, Sedentary},
+                {CarType.SedentaryBusiness, Sedentary},
+                {CarType.ReservedSeatLower, ReservedSeat},
+                {CarType.ReservedSeatUpper, ReservedSeat},
+                {CarType.ReservedSeatLowerSide, ReservedSeat},
+                {CarType.ReservedSeatUpperSide, ReservedSeat},
+                {CarType.CompartmentLower, Compartment},
+                {CarType.CompartmentUpper, Compartment},
+                {CarType.Luxury, Luxury}
+            };
+            
+            return newMappings.TryGetValue(carType, out var value)
+                ? value
+                : throw new ArgumentException($"CarTypeEnum '{carType}' не соответствует ни одному ключу.");
         }
         
         private IReadOnlyCollection<CarType> MapSeatClassCodesToCarTypes(IReadOnlyCollection<string> seatClassCodes)

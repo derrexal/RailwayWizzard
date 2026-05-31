@@ -1,14 +1,13 @@
-FROM python:3.9-slim as base
+FROM python:3.9-slim AS base
 
 WORKDIR /app
 
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
 RUN apt-get update && apt install -y libpq-dev build-essential python3 python3-pip gcc
 
-
-COPY ./RailwayWizzard.Bot/requirements.txt /app/requirements.txt
+COPY ./requirements.txt /app/requirements.txt
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 

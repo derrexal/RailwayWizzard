@@ -1,7 +1,7 @@
 from telegram.constants import ParseMode
 from telegram.ext import ConversationHandler
 
-from bot.queries.robot_queries import create_user
+from bot.queries.robot_queries import create_user_safe
 from bot.handlers.error_handler.base_error_handler import base_error_handler
 from bot.setting import MESSAGE_START, START_INLINE_KEYBOARDS, ADMIN_USERNAME
 
@@ -17,7 +17,7 @@ async def start_buttons_handler(update, context):
             reply_markup=START_INLINE_KEYBOARDS,
             parse_mode=ParseMode.HTML)
 
-        await create_user(user_id, username)
+        await create_user_safe(user_id, username)
 
         return None
 
@@ -38,7 +38,7 @@ async def start_buttons(update, context):
             reply_markup=START_INLINE_KEYBOARDS,
             parse_mode=ParseMode.HTML)
 
-        await create_user(user_id, username)
+        await create_user_safe(user_id, username)
 
         return ConversationHandler.END
 

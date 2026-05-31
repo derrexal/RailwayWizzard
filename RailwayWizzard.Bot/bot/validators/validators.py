@@ -27,20 +27,16 @@ async def date_limits_validate(input_date_text):
     @param input_date_text: Дата введенная пользователем
     @return: Результат валидации
     """
-    try:
-        input_date = datetime.strptime(input_date_text, '%d.%m.%Y').date()
-        today_date = datetime.now().date()
+    input_date = datetime.strptime(input_date_text, '%d.%m.%Y').date()
+    today_date = datetime.now().date()
 
-        if input_date < today_date:
-            return False
+    if input_date < today_date:
+        return False
 
-        if input_date >= today_date + timedelta(120):
-            return False
+    if input_date >= today_date + timedelta(120):
+        return False
 
-        return True
-
-    except Exception as e:
-        raise e
+    return True
 
 
 def date_format_validate(input_date_text):

@@ -9,10 +9,13 @@ def set_logger(__name__):
     global logger
 
     logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)
     ch = logging.StreamHandler()
-    formatter = logging.Formatter('[%(pastime)s] - %(name)s - %(levelness)s - %(message)s')
+    formatter = logging.Formatter('[%(asctime)s] - %(name)s - %(levelname)s - %(message)s')
     ch.setFormatter(formatter)
+    logger.handlers.clear()
     logger.addHandler(ch)
+    logger.propagate = False
 
 
 def get_unique_uuid_error() -> str:

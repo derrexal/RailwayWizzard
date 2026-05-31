@@ -1,0 +1,15 @@
+networks:
+  train_network:
+    name: train_network
+    external: true
+
+services:
+  bot_service:
+    image: bot_service
+    env_file:
+      - .env
+    ports:
+      - ":5000"
+    networks:
+      - train_network
+    restart: always

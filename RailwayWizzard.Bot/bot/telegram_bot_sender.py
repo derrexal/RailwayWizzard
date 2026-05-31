@@ -1,12 +1,30 @@
+import asyncio
 from telegram.constants import ParseMode
 
-from bot.telegram_bot import application
+from bot.telegram_bot import application, get_bot_loop
 from logger import logger
 
 
+async def _send_message_to_user(user_id, message):
+    await application.bot.send_message(
+        chat_id=user_id,
+        text=message,
+        parse_mode=ParseMode.HTML,
+    )
+
+
 async def send_message_to_user(user_id, message):
-    """ Метод отправки сообщения пользователю. """
+    bot_loop = get_bot_loop()
 
-    await application.bot.send_message(user_id, message, parse_mode=ParseMode.HTML)
+    future = asyncio.run_coroutine_threadsafe(
+        _send_message_to_user(user_id, message),
+        bot_loop,
+    )
 
-    logger.info(f'Пользователю {user_id} отправлено следующее сообщение: \n {message}')
+    await asyncio.wrap_future(future)
+
+    logger.info(
+        "Пользователю %s отправлено следующее сообщение:\n%s",
+        user_id,
+        message,
+    )

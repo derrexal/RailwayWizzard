@@ -3,7 +3,7 @@ from telebot.types import InlineKeyboardButton
 
 from bot.handlers.error_handler.base_error_handler import base_error_handler
 from bot.setting import CALLBACK_DONATE, DONATE_URL
-from bot.queries.robot_queries import create_user
+from bot.queries.robot_queries import create_user_safe
 
 
 async def donate_handler(update, context):
@@ -15,7 +15,7 @@ async def donate_handler(update, context):
                     url=DONATE_URL)]])
 
     try:
-        await create_user(
+        await create_user_safe(
             update.message.from_user['id'],
             update.message.from_user['username'])
 
@@ -25,4 +25,3 @@ async def donate_handler(update, context):
 
     except Exception as e:
         return await base_error_handler(update, e, 1)
-

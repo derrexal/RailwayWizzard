@@ -1,3 +1,6 @@
+using RailwayWizzard.Rzd.ApiClient.Services.GetTrainInformationService.Models;
+using RailwayWizzard.Rzd.DataEngine.Core;
+
 namespace RailwayWizzard.Rzd.DataEngine.Services;
 
 /// <summary>
@@ -6,4 +9,6 @@ namespace RailwayWizzard.Rzd.DataEngine.Services;
 public interface IRzdApiService
 {
     public Task<IReadOnlyCollection<StationFromJson>> GetStationsAsync(string inputStation);
+
+    public Task<Root> GetTrainInfoAsync(GetTrainInformationRequest request);
 }

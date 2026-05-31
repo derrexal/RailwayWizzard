@@ -9,19 +9,14 @@ from bot.bot_message_log import log_user_message
 
 async def null_step_notification(update: Update, context: CallbackContext):
     """ Базовый step-класс, собирающий в себя общую функциональность"""
-    try:
-        log_user_message(update)
+    log_user_message(update)
 
-        await update.message.reply_chat_action(ChatAction.TYPING)
+    await update.message.reply_chat_action(ChatAction.TYPING)
 
-        if await check_stop(update, context):
-            return ConversationHandler.END
+    if await check_stop(update, context):
+        return ConversationHandler.END
 
-        return
-
-    except Exception as e:
-        raise e
-
+    return None
 
 async def check_stop(update, context):
     answer = update.message.text

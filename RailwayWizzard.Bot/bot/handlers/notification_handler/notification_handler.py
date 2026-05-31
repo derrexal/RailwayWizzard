@@ -418,11 +418,7 @@ async def send_notification_data_to_robot(context: CallbackContext):
         CarTypes=context.user_data[5],
         NumberSeats=context.user_data[33])
 
-    try:
-        return await create_and_get_id_notification_task(notification_task_data)
-
-    except Exception as e:
-        raise e
+    return await create_and_get_id_notification_task(notification_task_data)
 
 
 # INIT

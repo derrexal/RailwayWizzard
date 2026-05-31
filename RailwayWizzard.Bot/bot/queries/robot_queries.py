@@ -1,3 +1,4 @@
+import os
 from typing import Any
 
 import aiohttp
@@ -6,7 +7,7 @@ from aiohttp import ClientResponse
 from logger import logger
 from bot.data.NotificationTask import NotificationTask
 
-API_URL = "http://railwaywizzardapp:80"
+API_URL = os.getenv("API_URL", "http://railwaywizzardapp:80")
 
 
 async def make_request(method, endpoint, json_data=None, params=None) -> ClientResponse:
@@ -46,7 +47,7 @@ async def make_request(method, endpoint, json_data=None, params=None) -> ClientR
                 raise Exception(f'Invalid method {method}')
     except Exception as e:
         logger.exception(f'Error in {endpoint}: {str(e)}')
-        raise e
+        raise
 
 
 async def station_validate(stationName) -> list:
@@ -74,6 +75,20 @@ async def create_user(id_tg, username):
     endpoint = 'User/CreateOrUpdate'
     json_data = {'IdTg': id_tg, 'Username': username}
     await make_request('POST', endpoint, json_data=json_data)
+
+
+async def create_user_safe(id_tg, username) -> bool:
+    """Пытается зарегистрировать пользователя, не роняя базовые команды бота."""
+    try:
+        await create_user(id_tg, username)
+        return True
+    except Exception:
+        logger.warning(
+            "Could not create or update user %s via %s. Bot will continue without backend sync.",
+            id_tg,
+            API_URL,
+        )
+        return False
 
 
 async def create_and_get_id_notification_task(notification_task_data: NotificationTask):

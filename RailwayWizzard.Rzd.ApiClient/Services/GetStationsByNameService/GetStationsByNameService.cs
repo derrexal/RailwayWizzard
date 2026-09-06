@@ -13,9 +13,9 @@ public class GetStationsByNameService: BaseGetDataService, IGetStationsByNameSer
     /// <inheritdoc/>
     public async Task<string> GetDataAsync(string inputStation)
     {
-        var uriInputStation = Uri.EscapeDataString(inputStation.ToUpper());
+        var uriInputStation = Uri.EscapeDataString(inputStation);
 
-        var url = $"https://pass.rzd.ru/suggester/?stationNamePart={uriInputStation}&lang=ru&lat=0&compactMode=y";
+        var url = $"https://pass.rzd.ru/suggester/?stationNamePart={uriInputStation}&lang=ru";
 
         using var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add("Host", "pass.rzd.ru");

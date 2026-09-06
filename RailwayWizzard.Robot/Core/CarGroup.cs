@@ -36,7 +36,7 @@ public class CarGroup
     public int? EmptyCabinQuantity { get; set; }
         
     public int? MixedCabinQuantity { get; set; }
-            
+        
     public bool IsBusinessClass =>
         HasPlacesForBusinessTravelBooking
         || string.Equals(ServiceClassNameEn, "Business", StringComparison.OrdinalIgnoreCase)

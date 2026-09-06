@@ -46,7 +46,7 @@ namespace RailwayWizzard.Infrastructure.Repositories.StationsInfo
             return await _context.StationsInfo
                 .SingleOrDefaultAsync(s => s.Name == name);
         }
-    
+
         /// <inheritdoc/>
         public async Task<IReadOnlyCollection<StationInfo>> ContainsByStationNameAsync(string name)
         {

@@ -19,6 +19,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RZD", "RZD", "{E0BAFE23-CC4
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RailwayWizzard.Application", "RailwayWizzard.Application\RailwayWizzard.Application.csproj", "{9E761CB9-F52B-4012-867A-8334E166C032}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RailwayWizzard.Telegram.ApiClient", "RailwayWizzard.Telegram.ApiClient\RailwayWizzard.Telegram.ApiClient.csproj", "{510C6194-2E1D-4912-A120-5CBDC9B5C4A3}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RailwayWizzard.Engine", "RailwayWizzard.Engine\RailwayWizzard.Engine.csproj", "{F01656B5-02BC-4287-8ECB-C8A50DC72641}"
 EndProject
 Global
@@ -55,6 +57,10 @@ Global
 		{9E761CB9-F52B-4012-867A-8334E166C032}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9E761CB9-F52B-4012-867A-8334E166C032}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9E761CB9-F52B-4012-867A-8334E166C032}.Release|Any CPU.Build.0 = Release|Any CPU
+		{510C6194-2E1D-4912-A120-5CBDC9B5C4A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{510C6194-2E1D-4912-A120-5CBDC9B5C4A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{510C6194-2E1D-4912-A120-5CBDC9B5C4A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{510C6194-2E1D-4912-A120-5CBDC9B5C4A3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F01656B5-02BC-4287-8ECB-C8A50DC72641}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F01656B5-02BC-4287-8ECB-C8A50DC72641}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F01656B5-02BC-4287-8ECB-C8A50DC72641}.Release|Any CPU.ActiveCfg = Release|Any CPU

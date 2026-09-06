@@ -5,7 +5,6 @@ using RailwayWizzard.Common;
 using RailwayWizzard.Core.StationInfo;
 using RailwayWizzard.Infrastructure.Repositories.StationsInfo;
 using RailwayWizzard.Rzd.ApiClient.Services.GetTrainInformationService.Models;
-using RailwayWizzard.Rzd.DataEngine;
 using RailwayWizzard.Rzd.DataEngine.Services;
 
 namespace RailwayWizzard.Application.Services.B2B
@@ -13,7 +12,7 @@ namespace RailwayWizzard.Application.Services.B2B
     /// <inheritdoc/>
     public class B2BService : IB2BService
     {
-        private readonly IRzdApiService _rzdApiService;
+        private readonly IGetStationsByNameService _stationsByNameService;
         private readonly IStationInfoRepository _stationInfoRepository;
         private readonly IDataExtractor _dataExtractor;
         
@@ -22,17 +21,17 @@ namespace RailwayWizzard.Application.Services.B2B
         /// <summary>
         /// Initializes a new instance of the <see cref="B2BService" class./>
         /// </summary>
-        /// <param name="rzdApiService">Сервис получения информации о станциях по имени.</param>
+        /// <param name="stationsByNameService">Сервис получения информации о станциях по имени.</param>
         /// <param name="stationInfoRepository"></param>
         /// <param name="dataExtractor"></param>
         /// <param name="logger"></param>
         public B2BService(
-            IRzdApiService rzdApiService,
+            IGetStationsByNameService stationsByNameService,
             IStationInfoRepository stationInfoRepository,
             IDataExtractor dataExtractor,
             ILogger<B2BService> logger)
         {
-            _rzdApiService = rzdApiService;
+            _stationsByNameService = stationsByNameService;
             _stationInfoRepository = stationInfoRepository;
             _dataExtractor = dataExtractor;
             _logger = logger;
@@ -41,7 +40,7 @@ namespace RailwayWizzard.Application.Services.B2B
         /// <inheritdoc/>
         public async Task<IReadOnlyCollection<string>> GetAvailableTimesAsync(RouteDto routeDto)
         {
-            routeDto.DepartureDate.CheckForMoscowTimeAndThrow();
+            routeDto.DepartureDate.IsNotActualMoscowTime();
             
             var departureStationInfo = await _stationInfoRepository.GetByNameAsync(routeDto.DepartureStationName);
             var arrivalStationInfo = await _stationInfoRepository.GetByNameAsync(routeDto.ArrivalStationName);
@@ -61,7 +60,6 @@ namespace RailwayWizzard.Application.Services.B2B
         /// <inheritdoc/>
         public async Task<IReadOnlyCollection<StationInfo>> StationValidateAsync(string stationName)
         {
-            stationName = stationName.ToUpper();
             //Ищем станцию по полному соответствию
             var station = await GetStationInfoAsync(stationName);
             if (station is not null) return new List<StationInfo> { station };
@@ -81,15 +79,12 @@ namespace RailwayWizzard.Application.Services.B2B
                 return stationInfo;
 
             // Идем к АПИ чтобы наполнить базу
-            var stations = await _rzdApiService.GetStationsAsync(stationName);
+            var stations = await GetStationsAsync(stationName);
             if (stations.Count == 0) 
                 return null;
              
-            await CreateStationsInfoAsync(stations);
-
             // Снова смотрим есть ли в БД
-            // TODO: Зачем снова идти в БД? GetStationsAsync присылает информацию о нескольких станциях, а мы хотим найти одну.
-            // Так уже сделано в методе получения станций по неполному совпадению.
+            // Зачем снова идти в БД? GetStationsAsync присылает информацию о нескольких станциях, а мы хотим найти одну.
             stationInfo = await _stationInfoRepository.FindByNameAsync(stationName);
             return stationInfo ?? null;
         }
@@ -107,18 +102,39 @@ namespace RailwayWizzard.Application.Services.B2B
                 return stationsInfo;
 
             //Ищем в данных полученных по АПИ
-            var stations = await _rzdApiService.GetStationsAsync(stationName);
+            var stations = await GetStationsAsync(stationName);
             if (stations.Count == 0) 
                 return new List<StationInfo>();
-            
-            await CreateStationsInfoAsync(stations);
-            
+
             return stations
                 .Where(s => s.n.ToUpper().Contains(stationName.ToUpper()))
                 .Select(s => new StationInfo { ExpressCode = s.c, Name = s.n })
                 .ToList();
         }
-        
+
+        private async Task<IReadOnlyCollection<StationFromJson>> GetStationsAsync(string inputStation)
+        {
+            var textResponse = await _stationsByNameService.GetDataAsync(inputStation);
+            if (string.IsNullOrEmpty(textResponse)) 
+                return new List<StationFromJson>();
+            
+            var stations = DeserializeStationsText(textResponse);
+            if (stations.Count > 0) 
+                await CreateStationsInfoAsync(stations);
+            
+            return stations;
+        }
+        private static List<StationFromJson> DeserializeStationsText(string textResponse)
+        {
+            var stations = JsonConvert.DeserializeObject<List<StationFromJson>>(textResponse);
+            
+            if (stations!.Count == 0)
+                throw new NullReferenceException(
+                    $"Сервис РЖД при запросе списка свободных мест вернул ответ в котором нет поездок. Ответ:{textResponse}");
+
+            return stations;
+        }
+
         /// <summary>
         /// Добавляет в таблицу AppStationInfo новые записи
         /// </summary>
@@ -132,7 +148,7 @@ namespace RailwayWizzard.Application.Services.B2B
             {
                 var anyStationInfo = await _stationInfoRepository.AnyByExpressCodeAsync(rootStation.c);
 
-                if (!anyStationInfo)
+                if (anyStationInfo is false)
                 {
                     addedStationInfo.Add(new StationInfo
                     {

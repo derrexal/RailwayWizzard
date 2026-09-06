@@ -13,7 +13,8 @@ namespace RailwayWizzard.Application.Controllers
 
         public B2BController(IB2BService b2BService) =>
             _b2BService = b2BService;
-        
+
+
         [HttpGet("GetAvailableTimes")]
         public async Task<IActionResult> GetAvailableTimes(RouteDto scheduleDto)
         {

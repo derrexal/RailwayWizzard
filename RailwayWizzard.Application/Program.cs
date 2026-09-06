@@ -1,6 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using RailwayWizzard.Application.Options;
+using Polly;
+using Polly.Extensions.Http;
+using Polly.Retry;
 using RailwayWizzard.Application.Services.B2B;
+using RailwayWizzard.Application.Services.NotificationTasks;
+using RailwayWizzard.Application.Services.Users;
 using RailwayWizzard.Application.Workers;
 using RailwayWizzard.Engine.Services;
 using RailwayWizzard.Rzd.ApiClient.Services.GetFirewallTokenService;
@@ -12,9 +16,9 @@ using RailwayWizzard.Infrastructure.Repositories.MessagesOutbox;
 using RailwayWizzard.Infrastructure.Repositories.NotificationTaskResults;
 using RailwayWizzard.Infrastructure.Repositories.NotificationTasks;
 using RailwayWizzard.Infrastructure.Repositories.StationsInfo;
-using RailwayWizzard.Infrastructure.Repositories.TrainBotOutbox;
-using RailwayWizzard.Infrastructure.Repositories.TrainBotTasks;
+using RailwayWizzard.Infrastructure.Repositories.Users;
 using RailwayWizzard.Rzd.DataEngine.Services;
+using RailwayWizzard.Telegram.ApiClient.Services;
 
 namespace RailwayWizzard.Application
 {
@@ -27,23 +31,24 @@ namespace RailwayWizzard.Application
             builder.Services.AddScoped<IDataProcessor, DataProcessor>();
             builder.Services.AddScoped<IDataExtractor, DataExtractor>();
 
+            builder.Services.AddTransient<IBotClient, BotClient>();
+
             builder.Services.AddTransient<IGetFirewallTokenService, GetFirewallTokenService>();
             builder.Services.AddTransient<IGetStationDetailsService, GetStationDetailsService>();
             builder.Services.AddTransient<IGetStationsByNameService, GetStationsByNameService>();
             builder.Services.AddTransient<IGetTrainInformationService, GetTrainInformationService>();
 
             builder.Services.AddScoped<IB2BService, B2BService>();
-            
+            builder.Services.AddScoped<INotificationTaskService, NotificationTaskService>();
+            builder.Services.AddScoped<IUserService, UserService>();
+
             builder.Services.AddScoped<INotificationTaskRepository, NotificationTaskRepository>();
             builder.Services.AddScoped<INotificationTaskResultRepository, NotificationTaskResultRepository>();
             builder.Services.AddScoped<IMessageOutboxRepository, MessageOutboxRepository>();
-            builder.Services.AddScoped<ITrainBotOutboxRepository, TrainBotOutboxRepository>();
-            builder.Services.AddScoped<ITrainBotTaskRepository, TrainBotTaskRepository>();
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IStationInfoRepository, StationInfoRepository>();
             
             builder.Configuration.AddEnvironmentVariables();
-            builder.Services.Configure<RabbitMqOptions>(
-                builder.Configuration.GetSection(RabbitMqOptions.SectionName));
 
             var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING") 
                                    ?? throw new InvalidOperationException("DB_CONNECTION_STRING environment variable is not set.");
@@ -61,11 +66,9 @@ namespace RailwayWizzard.Application
             
             builder.Services.AddControllers();
 
-            builder.Services.AddHostedService<TaskReadWorker>();
-            builder.Services.AddHostedService<TrainBotOutboxProcessor>();
-            // builder.Services.AddHostedService<NotificationTaskWorker>();
-            // builder.Services.AddHostedService<MessageSenderWorker>();
-            // builder.Services.AddHostedService<HealthCheckWorker>();
+            builder.Services.AddHostedService<NotificationTaskWorker>();
+            builder.Services.AddHostedService<MessageSenderWorker>();
+            builder.Services.AddHostedService<HealthCheckWorker>();
 
             builder.Services.AddLogging(options =>
             {

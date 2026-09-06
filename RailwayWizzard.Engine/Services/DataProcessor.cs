@@ -51,9 +51,9 @@ namespace RailwayWizzard.Engine.Services
 
             try
             {
-                await _taskRepository.SetIsProcessAsync(task.Id);
-                
                 // Получаем ответ от РЖД
+                await _taskRepository.SetIsProcessAsync(task.Id);
+
                 var freeSeatsResult = await _dataExtractor.FindFreeSeatsAsync(task);
                 
                 var hashResult = freeSeatsResult.ToSha256Hash();

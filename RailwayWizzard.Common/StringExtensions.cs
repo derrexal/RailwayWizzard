@@ -3,7 +3,7 @@ using System.Text;
 
 namespace RailwayWizzard.Common;
 
-public static class  StringExtensions
+public static class StringExtensions
 {
     public static byte[] ToSha256Hash(this string input)
     {

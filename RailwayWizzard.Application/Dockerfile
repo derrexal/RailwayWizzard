@@ -5,7 +5,7 @@ WORKDIR /app
 EXPOSE 80
 EXPOSE 5178
 
-FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["RailwayWizzard.Application/RailwayWizzard.Application.csproj", "RailwayWizzard.Application/"]
@@ -14,14 +14,14 @@ COPY ["RailwayWizzard.Core/RailwayWizzard.Core.csproj", "RailwayWizzard.Core/"]
 COPY ["RailwayWizzard.EntityFramework/RailwayWizzard.Infrastructure.csproj", "RailwayWizzard.EntityFramework/"]
 COPY ["RailwayWizzard.Robot/RailwayWizzard.Rzd.DataEngine.csproj", "RailwayWizzard.Robot/"]
 COPY ["RailwayWizzard.Common/RailwayWizzard.Common.csproj", "RailwayWizzard.Common/"]
-RUN dotnet restore "./RailwayWizzard.Application/./RailwayWizzard.Application.csproj"
+RUN dotnet restore "./RailwayWizzard.Application/./RailwayWizzard.Application.csproj" -r linux-x64
 COPY . .
 WORKDIR "/src/RailwayWizzard.Application"
-RUN dotnet build "./RailwayWizzard.Application.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "./RailwayWizzard.Application.csproj" -c $BUILD_CONFIGURATION -r linux-x64 --self-contained false -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./RailwayWizzard.Application.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./RailwayWizzard.Application.csproj" -c $BUILD_CONFIGURATION -r linux-x64 --self-contained false -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app

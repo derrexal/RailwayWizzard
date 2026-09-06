@@ -2,13 +2,12 @@
 using Newtonsoft.Json;
 using RailwayWizzard.Common;
 using RailwayWizzard.Core.NotificationTask;
-using RailwayWizzard.Core.TrainBotTasks;
 using RailwayWizzard.Infrastructure.Repositories.StationsInfo;
+// using RailwayWizzard.Rzd.ApiClient.Services.GetFirewallTokenService;
 using RailwayWizzard.Rzd.ApiClient.Services.GetStationDetailsService;
 using RailwayWizzard.Rzd.ApiClient.Services.GetTrainInformationService;
 using RailwayWizzard.Rzd.ApiClient.Services.GetTrainInformationService.Models;
 using RailwayWizzard.Rzd.DataEngine.Core;
-using RailwayWizzard.Rzd.DataEngine.Exceptions;
 
 namespace RailwayWizzard.Rzd.DataEngine.Services
 {
@@ -17,38 +16,52 @@ namespace RailwayWizzard.Rzd.DataEngine.Services
     {
         private readonly IGetTrainInformationService _trainInformationService;
         private readonly IGetStationDetailsService _stationDetailsService;
-        private readonly IRzdApiService _rzdApiService;
-        
+        // private readonly IGetFirewallTokenService _tokenService;
+
         private readonly IStationInfoRepository _stationInfoRepository;
+        
         private readonly ILogger<DataExtractor> _logger;
 
+        // private static string _prevToken = string.Empty;
+        
         /// <summary>
         /// Initializes a new instance of the <see cref="DataExtractor"/> class.
         /// </summary>
         /// <param name="trainInformationService">Сервис получения информации о запрашиваемом рейсе.</param>
         /// <param name="stationDetailsService">Сервис получения информации о станциях по имени.</param>
-        /// <param name="rzdApiService">Сервис для взаимодействия с АПИ РЖД.</param>
-        /// <param name="stationInfoRepository">Репозиторий станций.</param>
+        /// <param name="stationInfoRepository"></param>
         /// <param name="logger">Логер.</param>
         public DataExtractor(
             IGetTrainInformationService trainInformationService, 
             IGetStationDetailsService stationDetailsService,
-            IRzdApiService rzdApiService,
+            // IGetFirewallTokenService tokenService,
             IStationInfoRepository stationInfoRepository,
             ILogger<DataExtractor> logger)
         {
             _trainInformationService = trainInformationService;
             _stationDetailsService = stationDetailsService;
-            _rzdApiService = rzdApiService;
+            // _tokenService = tokenService;
             _stationInfoRepository = stationInfoRepository;
             _logger = logger;
         }
-        
-        // TODO: Переделать на TrainBotTask или иметь собственную удобную денормализованную сущность на уровне этого сервиса?
-        private async Task<Root> GetTrainInfoAsync(NotificationTask task)
+
+        /// <inheritdoc/>
+        public async Task<string> FindFreeSeatsAsync(NotificationTask task)
         {
-            // TODO: Предлагаю денормализовывать задачу в воркере (в отдельном или в том который читает очередь и пишет в таблицу)
-            // До такой степени, чтобы процесс поиска свободных мест не отвлекался на лишние запросы к БД.
+            // string token;
+            // try
+            // {
+            //     token = await _tokenService.GetDataAsync();
+            //     _prevToken = token;
+            // }
+            // catch (TaskCanceledException)
+            // {
+            //     if(!_prevToken.Equals(string.Empty))
+            //         token = _prevToken;
+            //     else
+            //         throw;
+            // }
+            
             var departureStation = await _stationInfoRepository.GetByIdAsync(task.DepartureStationId);
             var arrivalStation = await _stationInfoRepository.GetByIdAsync(task.ArrivalStationId);
             
@@ -56,230 +69,139 @@ namespace RailwayWizzard.Rzd.DataEngine.Services
                 departureStation.ExpressCode,
                 arrivalStation.ExpressCode,
                 task.DepartureDateTime,
+                // token,
                 false);
+            var trainInfoResponse = await _trainInformationService.GetDataAsync(trainInfoRequest);
 
-            return await _rzdApiService.GetTrainInfoAsync(trainInfoRequest);
-        }
-        
+            /// Билеты перестают продавать за определенное время. Обрабатываем эти и другие ситуации.
+            
+            //TODO: вынести в Exceptions
+            //TODO: Переделать на определение состояния по Code
+            const string noTrainsMessage = "В запрашиваемую дату поездов нет";
+            if (trainInfoResponse.Contains(noTrainsMessage))
+            {
+                _logger.LogWarning(
+                    $"Task ID: {task.Id} Сервис РЖД при запросе списка свободных мест вернул ошибку: {noTrainsMessage}. " +
+                    $"Ответ:{trainInfoResponse}");
+                return string.Empty;
+            }
+            
+            const string noPlaceMessage = "МЕСТ НЕТ";
+            if (trainInfoResponse.Contains(noPlaceMessage))
+            {
+                _logger.LogWarning(
+                    $"Task ID: {task.Id} Сервис РЖД при запросе списка свободных мест вернул ошибку: {noPlaceMessage}. " +
+                    $"Ответ:{trainInfoResponse}");
+                return string.Empty;
+            }
 
-        /// <inheritdoc/>
-        public async Task<string> FindFreeSeatsAsync(TrainBotTask task)
-        {
-            var trainInfo = await GetTrainInfoAsync(task);             
+            const string trainNotRunMessage = "В УКАЗАННУЮ ДАТУ ПОЕЗД НЕ ХОДИТ";
+            if (trainInfoResponse.Contains(trainNotRunMessage))
+            {
+                _logger.LogWarning(
+                    $"Task ID: {task.Id} Сервис РЖД при запросе списка свободных мест вернул ошибку: {trainNotRunMessage}. " +
+                    $"Ответ:{trainInfoResponse}");
+                return string.Empty;
+            }
+
+            var trainInfo = JsonConvert.DeserializeObject<Root>(trainInfoResponse);
+            if (trainInfo?.Id == null)
+                throw new NullReferenceException(
+                    $"Task ID: {task.Id} Сервис РЖД при запросе списка свободных мест вернул не стандартный ответ. " +
+                    $"Ответ:{trainInfoResponse}");
+            if (trainInfo.Trains.Count == 0)
+            {
+                _logger.LogError(
+                    $"Task ID: {task.Id} Сервис РЖД при запросе списка свободных мест вернул ответ в котором нет доступных поездок. " +
+                    $"Ответ:{trainInfoResponse}");
+                return string.Empty;
+            }
             
-            var currentRoute = ExtractFreeSeatsFromResponse(trainInfo, task);
-            
+            var taskTimeFrom = task.DepartureDateTime.TimeOfDay;
+            task.TrainNumber ??= GetTrainNumberFromResponse(trainInfo, taskTimeFrom);
+
+            var currentRoute = ExtractFreeSeatsFromResponse(trainInfo, task, taskTimeFrom);
+            if (currentRoute.Count == 0 || currentRoute.Sum(x => x.TotalPlace) < task.NumberSeats) 
+                return string.Empty;
+
             var freeSeats = SupportingMethod(currentRoute);
-            
+
             return freeSeats.Count != 0
                 ? string.Join("\n", freeSeats.ToArray())
                 : "";
         }
-        
-        [SuppressMessage("ReSharper", "InconsistentNaming")]
+
+        /// <summary>
+        /// Возвращает номер поезда.
+        /// </summary>
+        /// <param name="root"></param>
+        /// <param name="timeFrom"></param>
+        /// <returns></returns>
+        /// <exception cref="NullReferenceException"></exception>
+        private static string? GetTrainNumberFromResponse(Root root, TimeSpan timeFrom)
+        {
+            return (
+                from train in root.Trains 
+                where train.LocalDepartureDateTime != null && train.LocalDepartureDateTime.Value.TimeOfDay.Equals(timeFrom)
+                    || train.DepartureDateTime!.Value.TimeOfDay.Equals(timeFrom) // хотя бы 1 параметр обязательно не равен null
+                select train.DisplayTrainNumber)
+                .FirstOrDefault();
+        }
+
         private static string GetKeyByCarType(CarType carType)
         {
             // Карта текстов и соответствующих типов
-            // var mappings = new Dictionary<string, IEnumerable<CarType>>
-            // {
-            //     ["Sedentary"] = new[] { CarType.Sedentary, CarType.SedentaryBusiness },
-            //     ["ReservedSeat"] = new[] { CarType.ReservedSeatLower, CarType.ReservedSeatUpper,
-            //                                 CarType.ReservedSeatLowerSide, CarType.ReservedSeatUpperSide },
-            //     ["Compartment"] = new[] { CarType.CompartmentLower, CarType.CompartmentUpper },
-            //     ["Luxury"] = new[] { CarType.Luxury }
-            // };
-            //
-            // var foundedMapKey = mappings
-            //     .FirstOrDefault(pair => pair.Value.Contains(carType))
-            //     .Key;
-            //
-            // return !string.IsNullOrEmpty(foundedMapKey) 
-            //     ? foundedMapKey
-            //     : throw new ArgumentException($"CarTypeEnum '{carType}' не соответствует ни одному ключу.");
-
-            const string Sedentary = nameof(Sedentary);
-            const string ReservedSeat = nameof(ReservedSeat);
-            const string Compartment = nameof(Compartment);
-            const string Luxury = nameof(Luxury);
-            
-            var newMappings = new Dictionary<CarType, string>
+            var mappings = new Dictionary<string, IEnumerable<CarType>>
             {
-                {CarType.Sedentary, Sedentary},
-                {CarType.SedentaryBusiness, Sedentary},
-                {CarType.ReservedSeatLower, ReservedSeat},
-                {CarType.ReservedSeatUpper, ReservedSeat},
-                {CarType.ReservedSeatLowerSide, ReservedSeat},
-                {CarType.ReservedSeatUpperSide, ReservedSeat},
-                {CarType.CompartmentLower, Compartment},
-                {CarType.CompartmentUpper, Compartment},
-                {CarType.Luxury, Luxury}
+                ["Sedentary"] = new[] { CarType.Sedentary, CarType.SedentaryBusiness },
+                ["ReservedSeat"] = new[] { CarType.ReservedSeatLower, CarType.ReservedSeatUpper,
+                                            CarType.ReservedSeatLowerSide, CarType.ReservedSeatUpperSide },
+                ["Compartment"] = new[] { CarType.CompartmentLower, CarType.CompartmentUpper },
+                ["Luxury"] = new[] { CarType.Luxury }
             };
+
+            foreach (var mapping in mappings.Where(mapping => mapping.Value.Contains(carType)))
+                return mapping.Key;
             
-            return newMappings.TryGetValue(carType, out var value)
-                ? value
-                : throw new ArgumentException($"CarTypeEnum '{carType}' не соответствует ни одному ключу.");
-        }
-        
-        private IReadOnlyCollection<CarType> MapSeatClassCodesToCarTypes(IReadOnlyCollection<string> seatClassCodes)
-        {
-            var result = new HashSet<CarType>();
-            if (seatClassCodes.Count == 0)
-                return result;
-
-            foreach (var code in seatClassCodes)
-            {
-                if (string.IsNullOrWhiteSpace(code))
-                    continue;
-
-                switch (code.Trim().ToLowerInvariant())
-                {
-                    case "seat":
-                        result.Add(CarType.Sedentary);
-                        break;
-                    case "seat_biz":
-                        result.Add(CarType.SedentaryBusiness);
-                        break;
-                    case "platz_up":
-                        result.Add(CarType.ReservedSeatUpper);
-                        break;
-                    case "platz_down":
-                        result.Add(CarType.ReservedSeatLower);
-                        break;
-                    case "platz_up_side":
-                        result.Add(CarType.ReservedSeatUpperSide);
-                        break;
-                    case "platz_down_side":
-                        result.Add(CarType.ReservedSeatLowerSide);
-                        break;
-                    case "kupe_up":
-                        result.Add(CarType.CompartmentUpper);
-                        break;
-                    case "kupe_down":
-                        result.Add(CarType.CompartmentLower);
-                        break;
-                    case "sv":
-                        result.Add(CarType.Luxury);
-                        break;
-                    default:
-                        _logger.LogWarning("Unknown seat class code '{Code}' in seat_params.", code);
-                        break;
-                }
-            }
-
-            return result;
+            throw new ArgumentException($"CarTypeEnum '{carType}' не соответствует ни одному ключу.");
         }
 
-        private List<CarGroup> ExtractCurrentCarGroups(TrainBotTask task, List<TrainInfo> trains)
-        {
-            var carGroups = new List<CarGroup>();
-
-            // SeatMode
-            if (task.SeatMode == TrainBotSeatMode.ByServiceClass)
-            {
-                var classes = ((ByServiceClassParams)task.SeatParams).Classes;
-                var carTypes = MapSeatClassCodesToCarTypes(classes);
-
-                foreach (var train in trains)
-                {
-                    foreach (var carType in carTypes)
-                    {
-                        var currentCarGroups = FilterCarGroups(train.CarGroups, carType);
-                        carGroups.AddRange(currentCarGroups);
-                    }
-                }
-            }
-            
-            // ПОКА НЕ УМЕЕМ ФИЛЬТР ПО НОМЕРУ ВАГОНА, текущий запрос не возвращает информацию о номере вагона.
-            
-            // Disables Person
-            if (task.AccessibleOnly)
-            {
-                return carGroups
-                    .Where(x => x.HasPlacesForDisabledPersons)
-                    .ToList();
-            }
-
-            return carGroups
-                .Where(x => !x.HasPlacesForDisabledPersons)
-                .ToList();
-        }
-        
-        private List<TrainInfo> ExtractCurrentTrains(TrainBotTask task, Root root)
-        {
-            var trains = new List<TrainInfo>();
-
-            switch (task.Mode)
-            {
-                // Mode
-                case TrainBotModeType.SpecificTrain:
-                {
-                    var mode = (SpecificTrainModeParams)task.ModeParams;
-                    var departureTime = mode.Time.ToTimeSpan();
-                
-                    var currentTrain = root.Trains.FirstOrDefault(train =>
-                        train.LocalDepartureDateTime!.Value.TimeOfDay.Equals(departureTime));
- 
-                    if (currentTrain != null)
-                        trains.Add(currentTrain);
-                
-                    break;
-                }
-                case TrainBotModeType.TimeInterval:
-                {
-                    var (_, _, arrFrom, arrTo) = (TimeIntervalModeParams)task.ModeParams;
-                    if (arrFrom == null || arrTo == null)
-                    {
-                        _logger.LogError("TimeIntervalModeParams not set.");
-                    }
-
-                    var currentTrains = root.Trains.Where(train =>
-                        train.LocalArrivalDateTime!.Value.TimeOfDay >= arrFrom!.Value.ToTimeSpan() &&
-                        train.LocalArrivalDateTime!.Value.TimeOfDay <= arrTo!.Value.ToTimeSpan());
-                
-                    trains.AddRange(currentTrains);
-                    break;
-                }
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(task.Mode), task.Mode, "Некорректный параметр");
-            }
-            
-            return trains;
-        }
-        
         /// <summary>
         /// Получение информации о свободных местах в запрашиваемый день по запрашиваемому рейсу
         /// </summary>
         /// <param name="root"></param>
         /// <param name="task"></param>
+        /// <param name="timeFrom"></param>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
         /// <returns></returns>
-        private HashSet<SearchResult> ExtractFreeSeatsFromResponse(Root root, TrainBotTask task)
+        private static HashSet<SearchResult> ExtractFreeSeatsFromResponse(Root root, NotificationTask task, TimeSpan timeFrom)
         {
-            var results = new HashSet<SearchResult>();
+            HashSet<SearchResult> results = new();
+
+            var currentTrain = root.Trains.FirstOrDefault(train => 
+                train.LocalDepartureDateTime!.Value.TimeOfDay.Equals(timeFrom));
             
-            var trains = ExtractCurrentTrains(task, root);
-            var carGroups =  ExtractCurrentCarGroups(task, trains);
-            
-            // Собираем предварительные результаты.
-            var classes = ((ByServiceClassParams)task.SeatParams).Classes;
-            var carTypes = MapSeatClassCodesToCarTypes(classes);
-            foreach (var carType in carTypes)
+            if (currentTrain == null)
+                return results;
+
+            foreach (var carType in task.CarTypes)
             {
-                var sumFreeSeats = CalculateFreeSeats(carGroups, carType);
+                var currentCarGroups = FilterCarGroups(currentTrain.CarGroups, carType);
+
+                var sumFreeSeats = CalculateFreeSeats(currentCarGroups, carType);
+
                 if (sumFreeSeats == 0)
                     continue;
-
+                
                 AddOrUpdateSearchResults(results, new SearchResult
                 {
                     CarType = carType.GetEnumDescription(),
-                    Price = carGroups.Min(x => x.MinPrice),
+                    Price = currentCarGroups.Min(x => x.MinPrice),
                     TotalPlace = sumFreeSeats,
                 });
             }
             
-            // Seats count
-            var totalPlaces = results.Sum(x => x.TotalPlace); 
-            return totalPlaces < task.Seats ? new HashSet<SearchResult>() : results;
+            return results;
         }
 
         private static IReadOnlyCollection<CarGroup> FilterCarGroups(IEnumerable<CarGroup> carGroups, CarType carType)
@@ -295,6 +217,7 @@ namespace RailwayWizzard.Rzd.DataEngine.Services
 
             return carGroups
                 .Where(x => x.CarType == carTypeText)
+                .Where(x => !x.HasPlacesForDisabledPersons)
                 .ToList();
         }
 
@@ -345,7 +268,6 @@ namespace RailwayWizzard.Rzd.DataEngine.Services
             return result;
         }
 
-        // TODO: Тоже зачем то ходим и в БД и в АПИ РЖД именно здесь, хотя можем делать это исключительно в воркере денормализации.
         public async Task<string?> GetLinkToBuyTicketAsync(NotificationTask task)
         {
             const string baseLink = "https://ticket.rzd.ru/searchresults/v/1";
@@ -399,6 +321,9 @@ namespace RailwayWizzard.Rzd.DataEngine.Services
         /// <inheritdoc/>
         public async Task<IReadOnlyCollection<string>> GetAvailableTimesAsync(GetTrainInformationRequest request)
         {
+            // var token = await _tokenService.GetDataAsync();
+            // request = request with { FirewallToken = token };
+
             var trainInfoResponse = await _trainInformationService.GetDataAsync(request);
 
             var trainInfo = JsonConvert.DeserializeObject<RootDepartureTime>(trainInfoResponse);
@@ -424,11 +349,11 @@ namespace RailwayWizzard.Rzd.DataEngine.Services
                                     $"вернул ответ в котором не у каждой поездки есть время. Ответ:{trainInfoResponse}");
 
             // Если требуется информация не на сегодня - просто отдаем
-            if (request.DepartureDateTime > DateTimeExtensions.MoscowNow.Date)
+            if (request.DepartureDateTime.Date > DateTimeExtensions.MoscowNow.Date)
                 return dateTimes
                     .Select(x => x.ToString("HH:mm"))
                     .ToList();
- 
+
             // Иначе определяем актуальное для пользователя и отдаем
             return dateTimes
                 .Where(dateTime => dateTime > DateTimeExtensions.MoscowNow)

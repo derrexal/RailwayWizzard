@@ -48,35 +48,37 @@ public class RzdApiService
     public async Task<Root> GetTrainInfoAsync(GetTrainInformationRequest request)
     {
         var trainInfoResponse = await _trainInformationService.GetDataAsync(request);
-            
-        CheckTrainInfoResponseAndThrow(task.Id, trainInfoResponse);
-                
+
+        CheckTrainInfoResponseAndThrow(trainInfoResponse);
+
         var trainInfo = JsonConvert.DeserializeObject<Root>(trainInfoResponse);
         if (trainInfo?.Id == null)
-            throw UnknownResponseException.New(task.Id,trainInfoResponse);
+            throw new UnknownResponseException(
+                $"Сервис РЖД при запросе списка свободных мест вернул не стандартный ответ. Ответ:{trainInfoResponse}",
+                null);
         if (trainInfo.Trains.Count == 0)
         {
-            throw TrainNotFoundException.New(task.Id);
+            throw new TrainNotFoundException(TrainNotFoundException.noTrainsMessage, null);
         }
-            
+
         return trainInfo;
     }
-    
+
     //TODO: Переделать на определение состояния по Code
     /// Билеты перестают продавать за определенное время. Обрабатываем эти и другие ситуации.
-    private static void CheckTrainInfoResponseAndThrow(int taskId, string trainInfoResponse)
+    private static void CheckTrainInfoResponseAndThrow(string trainInfoResponse)
     {
         if (trainInfoResponse.Contains(TrainNotFoundException.noTrainsMessage))
         {
-            throw TrainNotFoundException.New(taskId);
+            throw new TrainNotFoundException(TrainNotFoundException.noTrainsMessage, null);
         }
         if (trainInfoResponse.Contains(NoPlaceException.noPlaceMessage))
         {
-            throw NoPlaceException.New(taskId);
+            throw new NoPlaceException(NoPlaceException.noPlaceMessage, null);
         }
         if (trainInfoResponse.Contains(DontRunException.dontRunMessage))
         {
-            throw DontRunException.New(taskId);
+            throw new DontRunException(DontRunException.dontRunMessage, null);
         }
-    } 
+    }
 }

@@ -267,3 +267,5 @@ docker-compose.override.yml
 appsettings.Development.json
 appsettings.Production.json
 postgres-data/
+
+.DS_Store

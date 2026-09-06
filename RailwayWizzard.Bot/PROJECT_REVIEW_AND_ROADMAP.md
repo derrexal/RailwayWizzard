@@ -1,60 +1,175 @@
-# Project Review And Roadmap
+# Актуальный обзор проекта и план доработок
 
-## Findings
+Этот файл отражает только текущее состояние проекта.
 
-1. `10/10` Global state in notification dialogs can leak between users and break parallel conversations.
-2. `9/10` `/api/sendMessageForUser` has no authentication and can be abused by anyone who can reach it.
-3. `9/10` `robot_queries.py` returns `aiohttp.ClientResponse` objects after leaving `async with`, which is fragile.
-4. `8/10` The project mixes multiple Telegram SDKs: `python-telegram-bot`, `telebot`, `pyTelegramBotAPI`, and `telegram`.
-5. `8/10` `404` handling in `robot_queries.py` is effectively unreachable because `raise_for_status()` already raises earlier.
-6. `8/10` There is a race between HTTP server startup and Telegram bot loop initialization.
-7. `8/10` `python-telegram-bot==20.0a0` is an old alpha dependency and already caused API compatibility issues.
-8. `7/10` Conversation state is stored under magic numeric keys in `context.user_data`.
-9. `7/10` `ConversationHandler` warnings were suppressed instead of resolved structurally.
-10. `7/10` External HTTP calls have no explicit timeouts or retry policy.
-11. `6/10` Some conversation handlers do not consistently return state transitions in error paths.
-12. `6/10` The HTTP server is published on a random host port in Docker Compose.
-13. `6/10` FastAPI request bodies are untyped and skip Pydantic validation.
-14. `5/10` Broad `except Exception` blocks hide the difference between transport, validation, and logic errors.
-15. `5/10` Several config values are hardcoded in source instead of a single config layer.
-16. `4/10` `NotificationTask.CarTypes` is typed as `List[str]` while integer enum codes are actually passed.
-17. `4/10` Some user-facing URLs miss an explicit `https://` scheme.
-18. `3/10` Date parsing is rigid and may surprise users around year boundaries.
+Важно:
+- сюда не включены задачи, которые уже были выполнены;
+- приоритеты пересчитаны с учетом того, что проект будет закрыт примерно через месяц;
+- в фокусе только то, что может создать инцидент, помешать сопровождению или сломать рабочий функционал в оставшийся срок.
 
-## Roadmap
+## Актуальные недостатки и доработки
 
-### Session 1
+### 10/10
 
-1. Remove global shared state from notification flows.
-   - Move `popular_cities`, `car_types`, and `car_type_markup` to per-user state.
-2. Replace numeric keys in `context.user_data`.
-   - Use named fields or a state object instead of `0`, `1`, `22`, `33`, etc.
-3. Make `ConversationHandler` state returns consistent.
-   - Ensure handlers always return a valid next state or `ConversationHandler.END`.
+#### Утечка лишних данных в логах и HTTP-ошибках
 
-### Session 2
+Сейчас в логах сохраняются полные ответы backend и payload некоторых запросов, а в части HTTP-ошибок наружу уходит слишком подробный внутренний текст исключения.
 
-1. Rewrite `robot_queries.py` into a proper HTTP client layer.
-   - Return parsed data instead of raw `ClientResponse`.
-   - Add timeouts and explicit `404/409/5xx` handling.
-2. Centralize runtime configuration.
-   - `TOKEN`, `API_URL`, `ADMIN_USERNAME`, `DONATE_URL`, ports, and similar values.
-3. Protect `/api/sendMessageForUser`.
-   - Add authentication and typed request models.
+Почему это важно:
+- это реальный operational/security риск, а не косметика;
+- при проблемах можно случайно светить пользовательские данные или внутренние детали интеграции.
 
-### Session 3
+Затронутые места:
+- `bot/queries/robot_queries.py`
+- `server.py`
 
-1. Standardize on a single Telegram SDK.
-   - Remove `telebot`/`pyTelegramBotAPI`/extra `telegram` usage and keep one library.
-2. Normalize bot + server lifecycle.
-   - Replace the current thread-based startup with a clearer orchestration model.
-3. Fix `ConversationHandler` structure instead of suppressing warnings.
+### 9/10
 
-## Suggested Execution Order
+#### Хрупкий lifecycle запуска приложения
 
-1. Global notification state.
-2. `robot_queries.py`.
-3. One Telegram SDK.
-4. HTTP endpoint authentication.
-5. App lifecycle cleanup.
-6. Config cleanup and follow-up refactors.
+HTTP-сервер запускается в отдельном `daemon`-потоке, а Telegram-бот живет отдельно. Схема сейчас рабочая, но остается уязвимой к проблемам старта, остановки и повторных рестартов.
+
+Почему это важно:
+- если поведение снова станет нестабильным, диагностировать это будет дорого даже для проекта с коротким сроком жизни;
+- `daemon`-thread сам по себе не дает аккуратного shutdown.
+
+Затронутые места:
+- `main.py`
+- `bot/telegram_bot.py`
+- `server.py`
+
+### 8/10
+
+#### Новый `aiohttp.ClientSession` создается на каждый backend-запрос
+
+Сейчас backend-клиент открывает отдельную HTTP-сессию на каждый вызов.
+
+Почему это важно:
+- лишняя нагрузка на сеть и соединения;
+- под нагрузкой и при нестабильном backend это повышает шанс деградации.
+
+Затронутые места:
+- `bot/queries/robot_queries.py`
+
+### 7/10
+
+#### Нестандартный `GET` с JSON body
+
+Один из backend-запросов выполняется методом `GET`, но с передачей JSON body.
+
+Почему это важно:
+- это плохо переносится через прокси, ingress, балансировщики и часть HTTP-стеков;
+- такая интеграция может сломаться неочевидно и внезапно.
+
+Затронутые места:
+- `bot/queries/robot_queries.py`
+
+### 6/10
+
+#### Слишком широкие `except Exception` и общий rollback логики диалога
+
+В проекте по-прежнему много широких обработчиков исключений, а базовый error-handler в ряде случаев просто переводит пользователя на предыдущий шаг.
+
+Почему это важно:
+- реальные причины ошибок труднее понять по логам;
+- диалог может продолжить жить в не совсем корректном состоянии.
+
+Затронутые места:
+- `bot/handlers/error_handler/base_error_handler.py`
+- `bot/handlers/notification_handler/notification_handler.py`
+- `server.py`
+- `bot/handlers/active_task_handler/active_task_handler.py`
+
+### 5/10
+
+#### Мост между HTTP и Telegram держится на глобальном loop
+
+Связка отправки сообщения из HTTP endpoint в Telegram строится через глобальный `_bot_loop` и `run_coroutine_threadsafe`.
+
+Почему это важно:
+- схема рабочая, но чувствительна к будущим изменениям lifecycle;
+- если снова всплывут проблемы доставки сообщений, это будет одной из первых точек проверки.
+
+Затронутые места:
+- `bot/telegram_bot.py`
+- `bot/telegram_bot_sender.py`
+
+### 4/10
+
+#### Alpha-версия `python-telegram-bot`
+
+Проект по-прежнему использует `python-telegram-bot==20.0a0`.
+
+Почему это важно:
+- это потенциальный источник нестабильности;
+- но на горизонте в один месяц обновление библиотеки может быть опаснее, чем оставление как есть.
+
+Затронутые места:
+- `requirements.txt`
+
+### 3/10
+
+#### Остаточная сложность state machine после перехода с `ConversationHandler`
+
+Сценарий уведомлений теперь работает через собственную маршрутизацию по `stage`, но в коде еще остаются артефакты старой модели и дублирующиеся lifecycle-path.
+
+Почему это важно:
+- это увеличивает стоимость локальных правок;
+- но если не трогать сценарий, риск умеренный.
+
+Затронутые места:
+- `bot/telegram_bot.py`
+- `bot/handlers/notification_handler/notification_handler.py`
+
+### 2/10
+
+#### Типовые и конфигурационные шероховатости
+
+Есть несколько небольших технических несоответствий, которые не критичны для короткой жизни проекта.
+
+Примеры:
+- `NotificationTask.CarTypes` типизирован как `List[str]`, хотя фактически используются числовые значения;
+- `load_dotenv()` вызывается на import-time;
+- есть мелкие пользовательские и presentation-шероховатости.
+
+Затронутые места:
+- `bot/data/NotificationTask.py`
+- `app_config.py`
+- `bot/handlers/help_handler/help_handler.py`
+- `bot/bot_message_log.py`
+
+### 1/10
+
+#### То, что сейчас не стоит делать
+
+С учетом оставшегося срока жизни проекта нецелесообразно вкладываться в:
+- полноценный test suite;
+- большой архитектурный рефакторинг;
+- глубокую чистку abstractions;
+- широкую косметическую полировку кода без прямого влияния на стабильность.
+
+## Практический план на оставшийся срок
+
+### Если делать только самое нужное
+
+1. Убрать из логов и HTTP-ответов лишние чувствительные детали.
+2. Минимизировать риски вокруг lifecycle запуска, только если будут повторные симптомы нестабильности.
+3. По возможности стабилизировать backend HTTP-client без большого рефакторинга.
+4. Не трогать библиотеку Telegram и state machine без явной необходимости.
+
+### Что можно спокойно не делать
+
+- тесты;
+- обновление Telegram SDK;
+- крупный пересмотр архитектуры запуска;
+- полную типизацию и глубокую чистку слоев проекта;
+- переделку пользовательских текстов и мелкую косметику.
+
+### Как принимать решения по правкам
+
+Каждую новую задачу стоит проверять по простому правилу:
+
+1. Может ли это уронить бота или сервер в ближайший месяц.
+2. Может ли это сломать интеграцию с backend.
+3. Может ли это привести к утечке данных или неудобной эксплуатации.
+4. Если нет, скорее всего это уже не стоит делать в этом проекте.
